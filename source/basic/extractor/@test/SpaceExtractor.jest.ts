@@ -1,11 +1,11 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
-import { EntityId, Range  } from 'basic';
+import { describe, it, expect } from '@jest/globals';
+import { EntityId, Range } from 'basic';
 
-import Extractor from '../Extractor';
-import SpaceExtractor from '../SpaceExtractor';
-import {DONE_SEGMENT, PseudoSpace, Segment} from '../Segment';
+import { Extractor } from '../Extractor';
+import { DONE_SEGMENT, PseudoSpace, Segment } from '../Segment';
+import { SpaceExtractor } from '../SpaceExtractor';
 
 describe('SpaceExtractor', () => {
    let extractor: Extractor;
@@ -18,7 +18,6 @@ describe('SpaceExtractor', () => {
    });
 
    describe('basic behavior', () => {
-
       it('reports success when it has found a complete run of spaces', () => {
          extractor.process(new Segment(' x', segmentRange));
 
@@ -37,18 +36,19 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: ' \t',
             original: ' \t',
-            segments: [ {
-               chars: 2,
-               rows: 0,
-               columns: 2,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 2,
+                  rows: 0,
+                  columns: 2,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            } ],
+            ],
          });
       });
-
 
       it('delivers a pseudo space', () => {
          extractor.process(new PseudoSpace());
@@ -56,20 +56,21 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: ' ',
             original: '',
-            segments: [ {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: {
-                  type: DONE_SEGMENT,
+            segments: [
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: {
+                     type: DONE_SEGMENT,
+                  },
                },
-            } ],
+            ],
          });
       });
    });
 
    describe('finish()', () => {
-
       it('returns whatever has been found when it is called', () => {
          const segment = new Segment(' ', segmentRange);
          extractor.process(segment);
@@ -77,22 +78,22 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: ' ',
             original: ' ',
-            segments: [ {
-               chars: 1,
-               rows: 0,
-               columns: 1,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 1,
+                  rows: 0,
+                  columns: 1,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            } ],
+            ],
          });
       });
-
    });
 
    describe('segment treatment', () => {
-
       it('correctly changes segment index after processing', () => {
          const segment = new Segment('  xy', segmentRange);
          extractor.process(segment);
@@ -108,11 +109,9 @@ describe('SpaceExtractor', () => {
 
          expect(segment.index).toEqual(0);
       });
-
    });
 
    describe('segment spanning', () => {
-
       it('reports failure state if no segments provided', () => {
          extractor.finish();
 
@@ -132,26 +131,28 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '  \t\t',
             original: '  \t\t',
-            segments: [ {
-               chars: 2,
-               rows: 0,
-               columns: 2,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 2,
+                  rows: 0,
+                  columns: 2,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            }, {
-               chars: 2,
-               rows: 0,
-               columns: 2,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+               {
+                  chars: 2,
+                  rows: 0,
+                  columns: 2,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            } ],
+            ],
          });
       });
-
 
       it('returns all spaces and ranges across multiple segments including pseudo spaces', () => {
          extractor.process(new Segment('  ', segmentRange));
@@ -161,53 +162,60 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '   \t\t',
             original: '  \t\t',
-            segments: [ {
-               chars: 2,
-               rows: 0,
-               columns: 2,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 2,
+                  rows: 0,
+                  columns: 2,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            }, {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: {
-                  type: DONE_SEGMENT,
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: {
+                     type: DONE_SEGMENT,
+                  },
                },
-            }, {
-               chars: 2,
-               rows: 0,
-               columns: 2,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+               {
+                  chars: 2,
+                  rows: 0,
+                  columns: 2,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            } ],
+            ],
          });
       });
-            it('returns all spaces and ranges across multiple segments when spaces end on a segment boundary', () => {
+      it('returns all spaces and ranges across multiple segments when spaces end on a segment boundary', () => {
          extractor.process(new Segment(' ', segmentRange));
          extractor.process(new Segment('"'));
 
          expect(extractor.finish()).toEqual({
             text: ' ',
             original: ' ',
-            segments: [ {
-               chars: 1,
-               rows: 0,
-               columns: 1,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 1,
+                  rows: 0,
+                  columns: 1,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            }, {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: new Segment('"'),
-            } ],
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: new Segment('"'),
+               },
+            ],
          });
       });
 
@@ -219,20 +227,23 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '  \t\t',
             original: '  \t\t',
-            segments: [ {
-               chars: 2,
-               rows: 0,
-               columns: 2,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 2,
+                  rows: 0,
+                  columns: 2,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            }, {
-               chars: 2,
-               rows: 0,
-               columns: 2,
-               segment: segment,
-            } ],
+               {
+                  chars: 2,
+                  rows: 0,
+                  columns: 2,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -252,22 +263,22 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: ' ',
             original: ' ',
-            segments: [ {
-               chars: 1,
-               rows: 0,
-               columns: 1,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 1,
+                  rows: 0,
+                  columns: 1,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            } ],
+            ],
          });
       });
-
    });
 
    describe('space types', () => {
-
       it('returns a mixture of space and tabs', () => {
          const segment = new Segment(' \t \t x');
          extractor.process(segment);
@@ -275,12 +286,14 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: ' \t \t ',
             original: ' \t \t ',
-            segments: [ {
-               chars: 5,
-               rows: 0,
-               columns: 5,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 5,
+                  rows: 0,
+                  columns: 5,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -291,12 +304,14 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: ' \n ',
             original: ' \n ',
-            segments: [ {
-               chars: 3,
-               rows: 1,
-               columns: 1,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 3,
+                  rows: 1,
+                  columns: 1,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -307,12 +322,14 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\n',
-            segments: [ {
-               chars: 1,
-               rows: 1,
-               columns: 0,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 1,
+                  rows: 1,
+                  columns: 0,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -323,12 +340,14 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r',
-            segments: [ {
-               chars: 1,
-               rows: 1,
-               columns: 0,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 1,
+                  rows: 1,
+                  columns: 0,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -339,12 +358,14 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r\n',
-            segments: [ {
-               chars: 2,
-               rows: 1,
-               columns: 0,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 2,
+                  rows: 1,
+                  columns: 0,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -355,12 +376,14 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r\n',
-            segments: [ {
-               chars: 2,
-               rows: 1,
-               columns: 0,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 2,
+                  rows: 1,
+                  columns: 0,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -371,12 +394,14 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '',
             original: '',
-            segments: [ {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -387,12 +412,14 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '',
             original: '',
-            segments: [ {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -404,12 +431,14 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\u0085',
-            segments: [ {
-               chars: 1,
-               rows: 1,
-               columns: 0,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 1,
+                  rows: 1,
+                  columns: 0,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -421,12 +450,14 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\u2028',
-            segments: [ {
-               chars: 1,
-               rows: 1,
-               columns: 0,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 1,
+                  rows: 1,
+                  columns: 0,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -438,15 +469,16 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r\u0085',
-            segments: [ {
-               chars: 2,
-               rows: 1,
-               columns: 0,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 2,
+                  rows: 1,
+                  columns: 0,
+                  segment: segment,
+               },
+            ],
          });
       });
-
 
       it('extracts a \\r\\n as a \\r\n when processLineEndings is false', () => {
          extractor = new SpaceExtractor(1.0, false);
@@ -457,15 +489,15 @@ describe('SpaceExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\r\n',
             original: '\r\n',
-            segments: [ {
-               chars: 2,
-               rows: 1,
-               columns: 0,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 2,
+                  rows: 1,
+                  columns: 0,
+                  segment: segment,
+               },
+            ],
          });
       });
-
    });
-
 });

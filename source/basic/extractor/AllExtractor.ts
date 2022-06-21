@@ -1,10 +1,10 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
 import { Extractor, SegmentInfo } from './Extractor';
-import MatchExtractor from './MatchExtractor';
-import MultiMatchExtractor from './MultiMatchExtractor';
-import PeekExtractor from './PeekExtractor';
-import {DONE_SEGMENT, PSEUDO_SPACE, PseudoSpace, Segment} from './Segment';
+import { MatchExtractor } from './MatchExtractor';
+import { MultiMatchExtractor } from './MultiMatchExtractor';
+import { PeekExtractor } from './PeekExtractor';
+import { DONE_SEGMENT, PSEUDO_SPACE, PseudoSpace, Segment } from './Segment';
 
 const regexMemo: { [terminators: string]: RegExp } = {};
 
@@ -19,7 +19,9 @@ const regexMemo: { [terminators: string]: RegExp } = {};
 
 class AllExtractor extends Extractor {
    private terminatorRegEx: RegExp;
+
    private terminatorArray: Array<string>;
+
    private _terminatorMatcher?: PeekExtractor;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
@@ -55,7 +57,7 @@ class AllExtractor extends Extractor {
          result = this.terminatorRegEx.exec(' ');
 
          if (result && result[0].length > 0) {
-            this.processPseudoText()
+            this.processPseudoText();
             info.segment = { type: DONE_SEGMENT };
          } else {
             this.setupTerminatorMatcher(' ', segment);
@@ -110,7 +112,6 @@ class AllExtractor extends Extractor {
       return this.innerFinish();
    }
 
-
    private setupTerminatorMatcher(start: string, segment: Segment | PseudoSpace): void {
       // The space WAS a terminator
       // Lots of duplicate code here....
@@ -135,6 +136,7 @@ class AllExtractor extends Extractor {
 
       this._processTerminatorMatcher(segment);
    }
+
    private addRemainderOfSegment(info: SegmentInfo): void {
       const segment: Segment = info.segment as Segment;
       const remainderOfSegment = segment.text.substr(segment.index);
@@ -147,15 +149,15 @@ class AllExtractor extends Extractor {
    // Remember, the terminator might span multiple segments, so it may take a couple
    // iterations to do this.
    _processTerminatorMatcher(segment: Segment | PseudoSpace) {
-      this._terminatorMatcher!.process(segment); // typeHack
+      this._terminatorMatcher?.process(segment); // typeHack
 
-      switch (this._terminatorMatcher!.state) {
+      switch (this._terminatorMatcher?.state) {
          case Extractor.STATE.WORKING:
             // Not done (and evidently reached the end of the segment)
             break;
          case Extractor.STATE.SUCCESS:
             // Or we matched the terminator, in which case we're done.
-            const result = this._terminatorMatcher!.finish();
+            const result = this._terminatorMatcher?.finish();
             // Skip the first we passed in, as we already have it.
             result.segments.shift();
             // Add each of the remaining segments in a pristine state back to our list
@@ -175,7 +177,7 @@ class AllExtractor extends Extractor {
    }
 
    _cleanupTerminatorMatcher() {
-      const result = this._terminatorMatcher!.finish(); // typeHack
+      const result = this._terminatorMatcher?.finish(); // typeHack
       delete this._terminatorMatcher;
       const lastInfo = this.segInfo.pop();
 
@@ -196,9 +198,9 @@ class AllExtractor extends Extractor {
       }
 
       // Now reprocess all the segments that might have been passed to the terminatorMatcher
-      result.segments.shift();
-      result.segments.forEach((info) => {
-         this.process(info!.segment as Segment); // typeHack
+      result?.segments.shift();
+      result?.segments.forEach((info) => {
+         this.process(info.segment as Segment); // typeHack
       });
    }
 
@@ -206,7 +208,6 @@ class AllExtractor extends Extractor {
       this.processText(origSegment.text[origSegment.index], info);
       origSegment.index++;
    }
-
 }
 
-export default AllExtractor;
+export { AllExtractor };

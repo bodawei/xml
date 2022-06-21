@@ -56,7 +56,7 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
    const container: { sToken?: SToken } = {};
 
    source.extractToObject('all', terminators, container, 'sToken');
-   source.extractNoParams('peekChar', (charSToken) => {
+   source.extract('peekChar', (charSToken) => {
       let currentValue: LiteralValuePToken = [];
 
       if (container.sToken) {

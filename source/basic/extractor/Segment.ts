@@ -13,7 +13,7 @@ class PseudoSpace {
 
    public index: 0;
 
-   public range?: Range;
+   public range: Range;
 
    constructor() {
       this.type = PSEUDO_SPACE;

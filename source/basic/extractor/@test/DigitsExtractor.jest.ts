@@ -1,11 +1,11 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
+import { describe, it, expect } from '@jest/globals';
 import { EntityId, Range } from 'basic';
 
-import Extractor from '../Extractor';
-import DigitExtractor from '../DigitExtractor';
-import {DONE_SEGMENT, PseudoSpace, Segment} from '../Segment';
+import { DigitExtractor } from '../DigitExtractor';
+import { Extractor } from '../Extractor';
+import { DONE_SEGMENT, PseudoSpace, Segment } from '../Segment';
 
 describe('DigitExtractor', () => {
    let extractor: Extractor;
@@ -18,7 +18,6 @@ describe('DigitExtractor', () => {
    });
 
    describe('basic behavior', () => {
-
       it('reports success when it has found a complete run of digits', () => {
          extractor.process(new Segment('012345x', segmentRange));
 
@@ -43,15 +42,17 @@ describe('DigitExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '012345',
             original: '012345',
-            segments: [ {
-               chars: 6,
-               rows: 0,
-               columns: 6,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 6,
+                  rows: 0,
+                  columns: 6,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            } ],
+            ],
          });
       });
 
@@ -62,20 +63,23 @@ describe('DigitExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '012345',
             original: '012345',
-            segments: [ {
-               chars: 6,
-               rows: 0,
-               columns: 6,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 6,
+                  rows: 0,
+                  columns: 6,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            }, {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: new PseudoSpace(),
-            } ]
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: new PseudoSpace(),
+               },
+            ],
          });
       });
 
@@ -86,15 +90,17 @@ describe('DigitExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '012345ABcdef',
             original: '012345ABcdef',
-            segments: [ {
-               chars: 12,
-               rows: 0,
-               columns: 12,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 12,
+                  rows: 0,
+                  columns: 12,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            } ],
+            ],
          });
       });
 
@@ -108,19 +114,19 @@ describe('DigitExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '012345',
             original: '012345',
-            segments: [ {
-               chars: 6,
-               rows: 0,
-               columns: 6,
-               segment: expected,
-            } ],
+            segments: [
+               {
+                  chars: 6,
+                  rows: 0,
+                  columns: 6,
+                  segment: expected,
+               },
+            ],
          });
       });
-
    });
 
    describe('finish()', () => {
-
       it('returns whatever has been found when called at end', () => {
          const segment = new Segment('123', segmentRange);
          extractor.process(segment);
@@ -128,22 +134,22 @@ describe('DigitExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '123',
             original: '123',
-            segments: [ {
-               chars: 3,
-               rows: 0,
-               columns: 3,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 3,
+                  rows: 0,
+                  columns: 3,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            } ],
+            ],
          });
       });
-
    });
 
    describe('segment treatment', () => {
-
       it('correctly changes segment index after processing', () => {
          const segment = new Segment('123xy', segmentRange);
          extractor.process(segment);
@@ -159,11 +165,9 @@ describe('DigitExtractor', () => {
 
          expect(segment.index).toEqual(0);
       });
-
    });
 
    describe('segment spanning', () => {
-
       it('reports failure state if no segments provided', () => {
          extractor.finish();
 
@@ -183,23 +187,26 @@ describe('DigitExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '1239876',
             original: '1239876',
-            segments: [ {
-               chars: 3,
-               rows: 0,
-               columns: 3,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 3,
+                  rows: 0,
+                  columns: 3,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            }, {
-               chars: 4,
-               rows: 0,
-               columns: 4,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+               {
+                  chars: 4,
+                  rows: 0,
+                  columns: 4,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            } ],
+            ],
          });
       });
 
@@ -211,28 +218,32 @@ describe('DigitExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '1239876',
             original: '1239876',
-            segments: [ {
-               chars: 3,
-               rows: 0,
-               columns: 3,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 3,
+                  rows: 0,
+                  columns: 3,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            }, {
-               chars: 4,
-               rows: 0,
-               columns: 4,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+               {
+                  chars: 4,
+                  rows: 0,
+                  columns: 4,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            }, {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: new Segment('x'),
-            } ],
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: new Segment('x'),
+               },
+            ],
          });
       });
 
@@ -251,12 +262,14 @@ describe('DigitExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '123',
             original: '123',
-            segments: [ {
-               chars: 3,
-               rows: 0,
-               columns: 3,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 3,
+                  rows: 0,
+                  columns: 3,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -268,18 +281,18 @@ describe('DigitExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '123',
             original: '123',
-            segments: [ {
-               chars: 3,
-               rows: 0,
-               columns: 3,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 3,
+                  rows: 0,
+                  columns: 3,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            } ],
+            ],
          });
       });
-
    });
-
 });

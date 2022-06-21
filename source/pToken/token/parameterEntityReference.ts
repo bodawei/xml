@@ -15,7 +15,8 @@ interface MutableParameterEntityReference {
 }
 
 class ParameterEntityReferencePToken {
-   public readonly type: typeof PARAMETER_ENTITY_REFERENCE_PTOKEN = PARAMETER_ENTITY_REFERENCE_PTOKEN;
+   public readonly type: typeof PARAMETER_ENTITY_REFERENCE_PTOKEN =
+      PARAMETER_ENTITY_REFERENCE_PTOKEN;
 
    public readonly open: SToken;
 
@@ -64,9 +65,9 @@ function parseParameterEntityReference(source: STokenSource, deliverPToken: Deli
          open: result,
       };
 
-      source.extractToObjectNoParams('space', props, 'openSpace');
+      source.extractToObject('space', props, 'openSpace');
       source.extractToObject('word', [';'], props, 'name');
-      source.extractToObjectNoParams('space', props, 'nameSpace');
+      source.extractToObject('space', props, 'nameSpace');
       source.extract('match', ';', (sToken) => {
          props.close = sToken;
          deliverPToken(new ParameterEntityReferencePToken(props));

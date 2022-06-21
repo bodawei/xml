@@ -49,10 +49,10 @@ function parseDeclaration(source: STokenSource, openSToken: SToken, deliverPToke
    const start: DeclarationStart = { open: openSToken };
    start.open = openSToken;
 
-   source.extractToObjectNoParams('space', start, 'openSpace');
+   source.extractToObject('space', start, 'openSpace');
    source.extractToObject('word', [ '>', '%' ], start, 'declType');
 
-   source.extractNoParams('space', (sToken) => {
+   source.extract('space', (sToken) => {
       start.declTypeSpace = sToken;
 
       switch (strOrBlank(start.declType).toUpperCase()) {

@@ -1,11 +1,11 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
+import { describe, it, expect } from '@jest/globals';
 import { EntityId, Range } from 'basic';
 
-import CharExtractor from '../CharExtractor';
-import Extractor from '../Extractor';
-import {DONE_SEGMENT, PseudoSpace, Segment, SEGMENT_TYPE} from '../Segment';
+import { CharExtractor } from '../CharExtractor';
+import { Extractor } from '../Extractor';
+import { DONE_SEGMENT, PseudoSpace, Segment } from '../Segment';
 
 describe('CharExtractor', () => {
    let extractor: Extractor;
@@ -18,7 +18,6 @@ describe('CharExtractor', () => {
    });
 
    describe('basic behavior', () => {
-
       it('reports success when it has found a character', () => {
          extractor.process(new Segment('a'));
 
@@ -37,15 +36,17 @@ describe('CharExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'b',
             original: 'b',
-            segments: [ {
-               chars: 1,
-               rows: 0,
-               columns: 1,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 1,
+                  rows: 0,
+                  columns: 1,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            } ],
+            ],
          });
       });
 
@@ -56,21 +57,21 @@ describe('CharExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: ' ',
             original: '',
-            segments: [ {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: {
-                  type: DONE_SEGMENT,
+            segments: [
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: {
+                     type: DONE_SEGMENT,
+                  },
                },
-            } ],
+            ],
          });
       });
-
    });
 
    describe('process()', () => {
-
       it('remains in WORKING when there are no characters left in the segment', () => {
          const segment = new Segment('a');
          segment.index = 1;
@@ -93,11 +94,9 @@ describe('CharExtractor', () => {
 
          expect(segment.index).toEqual(1);
       });
-
    });
 
    describe('finish()', () => {
-
       it('reports a failure state when asked to read beyond the end of the input', () => {
          const segment = new Segment('a');
          segment.index = 1;
@@ -106,15 +105,17 @@ describe('CharExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '',
             original: '',
-            segments: [ {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+            segments: [
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            } ],
+            ],
          });
       });
 
@@ -133,33 +134,31 @@ describe('CharExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r',
-            segments: [ {
-               chars: 1,
-               rows: 1,
-               columns: 0,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+            segments: [
+               {
+                  chars: 1,
+                  rows: 1,
+                  columns: 0,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            } ],
+            ],
          });
       });
-
    });
 
    describe('segment treatment', () => {
-
       it('correctly changes segment index after processing', () => {
          const segment = new Segment('c');
          extractor.process(segment);
 
          expect(segment.index).toEqual(1);
       });
-
    });
 
    describe('segment spanning', () => {
-
       it('reports failure state if no segments provided', () => {
          extractor.finish();
 
@@ -174,19 +173,19 @@ describe('CharExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'y',
             original: 'y',
-            segments: [ {
-               chars: 1,
-               rows: 0,
-               columns: 1,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 1,
+                  rows: 0,
+                  columns: 1,
+                  segment: segment,
+               },
+            ],
          });
       });
-
    });
 
    describe('newlines', () => {
-
       it('extracts a newline as a newline', () => {
          const segment = new Segment('\nx');
          extractor.process(segment);
@@ -194,12 +193,14 @@ describe('CharExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\n',
-            segments: [ {
-               chars: 1,
-               rows: 1,
-               columns: 0,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 1,
+                  rows: 1,
+                  columns: 0,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -210,15 +211,17 @@ describe('CharExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r\n',
-            segments: [ {
-               chars: 2,
-               rows: 1,
-               columns: 0,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segment.range,
+            segments: [
+               {
+                  chars: 2,
+                  rows: 1,
+                  columns: 0,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segment.range,
+                  },
                },
-            } ],
+            ],
          });
       });
 
@@ -229,23 +232,26 @@ describe('CharExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r\n',
-            segments: [ {
-               chars: 1,
-               rows: 1,
-               columns: 0,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+            segments: [
+               {
+                  chars: 1,
+                  rows: 1,
+                  columns: 0,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            }, {
-               chars: 1,
-               rows: 0,
-               columns: 0,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+               {
+                  chars: 1,
+                  rows: 0,
+                  columns: 0,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            } ],
+            ],
          });
       });
 
@@ -257,20 +263,23 @@ describe('CharExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r',
-            segments: [ {
-               chars: 1,
-               rows: 1,
-               columns: 0,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+            segments: [
+               {
+                  chars: 1,
+                  rows: 1,
+                  columns: 0,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            }, {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: segment,
-            } ],
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: segment,
+               },
+            ],
          });
          expect(segment.index).toEqual(0);
       });
@@ -283,20 +292,23 @@ describe('CharExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r',
-            segments: [ {
-               chars: 1,
-               rows: 1,
-               columns: 0,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+            segments: [
+               {
+                  chars: 1,
+                  rows: 1,
+                  columns: 0,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            }, {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: segment,
-            } ],
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: segment,
+               },
+            ],
          });
          expect(segment.index).toEqual(0);
       });
@@ -308,12 +320,14 @@ describe('CharExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\u0085',
             original: '\u0085',
-            segments: [ {
-               chars: 1,
-               rows: 0,
-               columns: 1,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 1,
+                  rows: 0,
+                  columns: 1,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -324,12 +338,14 @@ describe('CharExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\u2028',
             original: '\u2028',
-            segments: [ {
-               chars: 1,
-               rows: 0,
-               columns: 1,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 1,
+                  rows: 0,
+                  columns: 1,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -341,12 +357,14 @@ describe('CharExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\u0085',
-            segments: [ {
-               chars: 1,
-               rows: 1,
-               columns: 0,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 1,
+                  rows: 1,
+                  columns: 0,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -358,12 +376,14 @@ describe('CharExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\u2028',
-            segments: [ {
-               chars: 1,
-               rows: 1,
-               columns: 0,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 1,
+                  rows: 1,
+                  columns: 0,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -375,12 +395,14 @@ describe('CharExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\n',
             original: '\r\u0085',
-            segments: [ {
-               chars: 2,
-               rows: 1,
-               columns: 0,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 2,
+                  rows: 1,
+                  columns: 0,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -394,15 +416,15 @@ describe('CharExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '\r',
             original: '\r',
-            segments: [ {
-               chars: 1,
-               rows: 1,
-               columns: 0,
-               segment: processedSegment,
-            } ],
+            segments: [
+               {
+                  chars: 1,
+                  rows: 1,
+                  columns: 0,
+                  segment: processedSegment,
+               },
+            ],
          });
       });
-
    });
-
 });

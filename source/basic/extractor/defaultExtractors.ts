@@ -2,15 +2,15 @@
 
 import { Extractor } from '../Extractor';
 
-import AllExtractor from './AllExtractor';
-import CharExtractor from './CharExtractor';
-import DigitExtractor from './DigitExtractor';
-import MatchExtractor from './MatchExtractor';
-import MultiMatchExtractor from './MultiMatchExtractor';
-import PeekDecl from './PeekDecl';
-import PeekExtractor from './PeekExtractor';
-import SpaceExtractor from './SpaceExtractor';
-import WordExtractor from './WordExtractor';
+import { AllExtractor } from './AllExtractor';
+import { CharExtractor } from './CharExtractor';
+import { DigitExtractor } from './DigitExtractor';
+import { MatchExtractor } from './MatchExtractor';
+import { MultiMatchExtractor } from './MultiMatchExtractor';
+import { PeekDecl } from './PeekDecl';
+import { PeekExtractor } from './PeekExtractor';
+import { SpaceExtractor } from './SpaceExtractor';
+import { WordExtractor } from './WordExtractor';
 
 type ExtractorParams = Array<string | undefined> | string | undefined | number;
 type ExtractorConstructor = { new (...args: any[]): Extractor };

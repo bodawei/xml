@@ -89,15 +89,15 @@ function addAttribute(source: STokenSource, attrs: Array<AttributePToken>, optio
    };
    attrs.push(attr);
 
-   source.extractToObjectNoParams('space', attr, 'postNameSpace');
+   source.extractToObject('space', attr, 'postNameSpace');
    source.extractToObject('match', '=', attr, 'equal');
-   source.extractToObjectNoParams('space', attr, 'postEqualSpace');
+   source.extractToObject('space', attr, 'postEqualSpace');
    literal.parse(source, {
       pToken: attr,
       geRef: options.geRef || false,
    }, (modifiedPToken) => {
       if (modifiedPToken) {
-         source.extractToObjectNoParams('space', attr, 'trailingSpace');
+         source.extractToObject('space', attr, 'trailingSpace');
       }
 
       getNextAttribute(source, options, attrs, deliverPToken);

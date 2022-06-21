@@ -24,9 +24,6 @@
          "expand": [
             "./source/expand"
          ],
-         "extractor": [
-            "./source/extractor"
-         ],
          "flat": [
             "./source/flat"
          ],
@@ -38,9 +35,6 @@
          ],
          "pTokenStream": [
             "./source/pTokenStream"
-         ],
-         "sToken": [
-            "./source/sToken"
          ],
          "pToken-test": [
             "./source/pToken/@test/helper"

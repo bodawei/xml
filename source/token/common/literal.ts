@@ -42,13 +42,13 @@ interface LiteralPToken {
 function parse(source: STokenSource, options: ParseOptions | undefined, done: DeliverPToken): void {
    const pToken = options?.pToken || {};
 
-   source.extractNoParams('peekChar', (quoteSToken) => {
+   source.extract('peekChar', (quoteSToken) => {
       if (!quoteSToken || (quoteSToken.str !== '"' && quoteSToken.str !== '\'')) {
          done();
          return;
       }
 
-      source.extractToObjectNoParams('char', pToken, 'openQuote');
+      source.extractToObject('char', pToken, 'openQuote');
 
       const terminators: LiteralValueTerminators = [ quoteSToken.str ];
 

@@ -120,7 +120,7 @@ function parseSimpleContentSpec(
    tokens: RawElementDeclaration,
    deliver: (result: RawElementDeclaration | undefined) => void,
 ): void {
-   source.extractNoParams('peekChar', (charSToken) => {
+   source.extract('peekChar', (charSToken) => {
       if (!charSToken) {
          deliver(undefined);
          return;

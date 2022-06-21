@@ -12,6 +12,8 @@ const ANY = '___ANY___';
 
 type DeliverSToken = (stoken?: SToken) => void;
 
+type Params = string | ReadonlyArray<string | undefined> | undefined | number;
+
 /**********************************************************************\
   Miscellaneous utilities for use in testing.
 \**********************************************************************/
@@ -234,30 +236,31 @@ class MockSTokenSource extends STokenSource {
       }
    }
 
-   extractToObjectNoParams(type: string, obj: Object, name: string): void {
-      this.extractToObject(type, undefined, obj, name);
-   }
-
-   extractToObject(type: string, obj: Record<string, any>, name: string): void;
-   extractToObject(type: string, params: any, obj: Record<string, any>, name: string): void;
-   extractToObject(
+   public extractToObject<Obj extends object>(type: string, obj: Obj, name: keyof Obj): void;
+   public extractToObject<Obj extends object>(
       type: string,
-      paramsOrObj: any | Record<string, any>,
-      objOrName: Record<string, any> | string,
-      nameOnly?: string,
+      params: Params,
+      obj: Obj,
+      name: keyof Obj,
+   ): void;
+   public extractToObject<Obj extends object>(
+      type: string,
+      paramsOrObj: Params | Obj,
+      objOrName: Obj | keyof Obj,
+      nameOnly?: keyof Obj,
    ): void {
       let params: any;
-      let obj: Record<string, any>;
-      let name: string;
+      let obj: Obj;
+      let name: keyof Obj;
 
       if (nameOnly !== undefined) {
          params = paramsOrObj;
-         obj = objOrName as Record<string, any>;
+         obj = objOrName as Obj;
          name = nameOnly;
       } else {
          params = undefined;
-         obj = paramsOrObj;
-         name = objOrName as string;
+         obj = paramsOrObj as Obj;
+         name = objOrName as keyof Obj;
       }
 
       this.queuedCalls.push({
@@ -266,10 +269,6 @@ class MockSTokenSource extends STokenSource {
          obj,
          name,
       });
-   }
-
-   extractNoParams(type: string, deliverSToken: DeliverSToken): void {
-      this.extract(type, undefined, deliverSToken);
    }
 
    extract(type: string, deliverSToken: DeliverSToken): void;

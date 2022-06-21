@@ -34,7 +34,7 @@ describe('STokenSource (integration)', () => {
          source.addText('ne');
          source.endText();
 
-         source.extractNoParams('all', (sToken) => {
+         source.extract('all', (sToken) => {
             expect(sToken).toEqual(
                new SToken('one', 'one', new Range(new EntityId(), 0, 0, 0, 3, 0, 3)),
             );
@@ -43,7 +43,7 @@ describe('STokenSource (integration)', () => {
       });
 
       it('delivers no SToken if there are no characters', (done) => {
-         source.extractNoParams('all', (sToken) => {
+         source.extract('all', (sToken) => {
             expect(sToken).toBeUndefined();
             done();
          });
@@ -55,7 +55,7 @@ describe('STokenSource (integration)', () => {
       it('delivers the next character from a segment', (done) => {
          source.addText('b', new Range(new EntityId()));
 
-         source.extractNoParams('char', (sToken) => {
+         source.extract('char', (sToken) => {
             expect(sToken).toEqual(
                new SToken('b', 'b', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
             );
@@ -67,7 +67,7 @@ describe('STokenSource (integration)', () => {
          source.addText('\r', new Range(new EntityId()));
          source.addText('\nx');
 
-         source.extractNoParams('char', (sToken) => {
+         source.extract('char', (sToken) => {
             expect(sToken).toEqual(
                new SToken('\n', '\r\n', new Range(new EntityId(), 0, 0, 0, 2, 1, 0)),
             );
@@ -76,7 +76,7 @@ describe('STokenSource (integration)', () => {
       });
 
       it('delivers no SToken if there are no characters', (done) => {
-         source.extractNoParams('char', (sToken) => {
+         source.extract('char', (sToken) => {
             expect(sToken).toBeUndefined();
             done();
          });
@@ -88,7 +88,7 @@ describe('STokenSource (integration)', () => {
       it('identifies ]]> as a close', (done) => {
          source.addText(']]>sdf', new Range(new EntityId()));
 
-         source.extractNoParams('close', (sToken) => {
+         source.extract('close', (sToken) => {
             expect(sToken).toEqual(
                new SToken(']]>', ']]>', new Range(new EntityId(), 0, 0, 0, 3, 0, 3)),
             );
@@ -99,7 +99,7 @@ describe('STokenSource (integration)', () => {
       it('identifies ]] as a close', (done) => {
          source.addText(']foo', new Range(new EntityId()));
 
-         source.extractNoParams('close', (sToken) => {
+         source.extract('close', (sToken) => {
             expect(sToken).toEqual(
                new SToken(']', ']', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
             );
@@ -112,7 +112,7 @@ describe('STokenSource (integration)', () => {
       it('delivers the next digit from a segment', (done) => {
          source.addText('123x', new Range(new EntityId()));
 
-         source.extractNoParams('digit', (sToken) => {
+         source.extract('digit', (sToken) => {
             expect(sToken).toEqual(
                new SToken('123', '123', new Range(new EntityId(), 0, 0, 0, 3, 0, 3)),
             );
@@ -121,7 +121,7 @@ describe('STokenSource (integration)', () => {
       });
 
       it('delivers no SToken if there are no digits', (done) => {
-         source.extractNoParams('digit', (sToken) => {
+         source.extract('digit', (sToken) => {
             expect(sToken).toBeUndefined();
             done();
          });
@@ -133,7 +133,7 @@ describe('STokenSource (integration)', () => {
       it('delivers the next character from a segment', (done) => {
          source.addText('<foo', new Range(new EntityId()));
 
-         source.extractNoParams('markup', (sToken) => {
+         source.extract('markup', (sToken) => {
             expect(sToken).toEqual(
                new SToken('<', '<', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
             );
@@ -144,7 +144,7 @@ describe('STokenSource (integration)', () => {
       it('identifies <!-- as markup', (done) => {
          source.addText('<!--foo', new Range(new EntityId()));
 
-         source.extractNoParams('markup', (sToken) => {
+         source.extract('markup', (sToken) => {
             expect(sToken).toEqual(
                new SToken('<!--', '<!--', new Range(new EntityId(), 0, 0, 0, 4, 0, 4)),
             );
@@ -155,7 +155,7 @@ describe('STokenSource (integration)', () => {
       it('identifies <! as markup', (done) => {
          source.addText('<!-foo', new Range(new EntityId()));
 
-         source.extractNoParams('markup', (sToken) => {
+         source.extract('markup', (sToken) => {
             expect(sToken).toEqual(
                new SToken('<!', '<!', new Range(new EntityId(), 0, 0, 0, 2, 0, 2)),
             );
@@ -166,7 +166,7 @@ describe('STokenSource (integration)', () => {
       it('identifies <? as markup', (done) => {
          source.addText('<?-foo', new Range(new EntityId()));
 
-         source.extractNoParams('markup', (sToken) => {
+         source.extract('markup', (sToken) => {
             expect(sToken).toEqual(
                new SToken('<?', '<?', new Range(new EntityId(), 0, 0, 0, 2, 0, 2)),
             );
@@ -177,7 +177,7 @@ describe('STokenSource (integration)', () => {
       it('identifies & as markup', (done) => {
          source.addText('&foo', new Range(new EntityId()));
 
-         source.extractNoParams('markup', (sToken) => {
+         source.extract('markup', (sToken) => {
             expect(sToken).toEqual(
                new SToken('&', '&', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
             );
@@ -188,7 +188,7 @@ describe('STokenSource (integration)', () => {
       it('identifies &# as markup', (done) => {
          source.addText('&#123', new Range(new EntityId()));
 
-         source.extractNoParams('markup', (sToken) => {
+         source.extract('markup', (sToken) => {
             expect(sToken).toEqual(
                new SToken('&#', '&#', new Range(new EntityId(), 0, 0, 0, 2, 0, 2)),
             );
@@ -199,7 +199,7 @@ describe('STokenSource (integration)', () => {
       it('identifies </ as markup', (done) => {
          source.addText('</foo', new Range(new EntityId()));
 
-         source.extractNoParams('markup', (sToken) => {
+         source.extract('markup', (sToken) => {
             expect(sToken).toEqual(
                new SToken('</', '</', new Range(new EntityId(), 0, 0, 0, 2, 0, 2)),
             );
@@ -210,7 +210,7 @@ describe('STokenSource (integration)', () => {
       it('delivers no SToken if the next chars do not form markup', (done) => {
          source.addText('foo', new Range(new EntityId()));
 
-         source.extractNoParams('markup', (sToken) => {
+         source.extract('markup', (sToken) => {
             expect(sToken).toBeUndefined();
             done();
          });
@@ -251,8 +251,8 @@ describe('STokenSource (integration)', () => {
          let first: SToken | undefined;
          source.addText('b', new Range(new EntityId()));
 
-         source.extractNoParams('peekChar', (sToken) => (first = sToken));
-         source.extractNoParams('char', (sToken) => {
+         source.extract('peekChar', (sToken) => (first = sToken));
+         source.extract('char', (sToken) => {
             const expected = new SToken('b', 'b', new Range(new EntityId(), 0, 0, 0, 1, 0, 1));
             expect(first).toEqual(expected);
             expect(sToken).toEqual(expected);
@@ -267,8 +267,8 @@ describe('STokenSource (integration)', () => {
          source.addText(' \t', new Range(new EntityId()));
          source.endText();
 
-         source.extractNoParams('peekSpace', (sToken) => (first = sToken));
-         source.extractNoParams('space', (sToken) => {
+         source.extract('peekSpace', (sToken) => (first = sToken));
+         source.extract('space', (sToken) => {
             const expected = new SToken(' \t', ' \t', new Range(new EntityId(), 0, 0, 0, 2, 0, 2));
             expect(first).toEqual(expected);
             expect(sToken).toEqual(expected);
@@ -281,7 +281,7 @@ describe('STokenSource (integration)', () => {
       it('delivers the a range of space characters', (done) => {
          source.addText(' \t\n\r\n\rx', new Range(new EntityId()));
 
-         source.extractNoParams('space', (sToken) => {
+         source.extract('space', (sToken) => {
             expect(sToken).toEqual(
                new SToken(' \t\n\n\n', ' \t\n\r\n\r', new Range(new EntityId(), 0, 0, 0, 6, 3, 0)),
             );
@@ -293,7 +293,7 @@ describe('STokenSource (integration)', () => {
          source.addText(' \t\n\r\n\r', new Range(new EntityId()));
          source.endText();
 
-         source.extractNoParams('space', (sToken) => {
+         source.extract('space', (sToken) => {
             expect(sToken).toEqual(
                new SToken(' \t\n\n\n', ' \t\n\r\n\r', new Range(new EntityId(), 0, 0, 0, 6, 3, 0)),
             );
@@ -302,7 +302,7 @@ describe('STokenSource (integration)', () => {
       });
 
       it('delivers no SToken if there is no space', (done) => {
-         source.extractNoParams('space', (sToken) => {
+         source.extract('space', (sToken) => {
             expect(sToken).toBeUndefined();
             done();
          });
@@ -314,7 +314,7 @@ describe('STokenSource (integration)', () => {
       it('delivers a word terminated by a whitespace', (done) => {
          source.addText('word1\nx', new Range(new EntityId()));
 
-         source.extractNoParams('word', (sToken) => {
+         source.extract('word', (sToken) => {
             expect(sToken).toEqual(
                new SToken('word1', 'word1', new Range(new EntityId(), 0, 0, 0, 5, 0, 5)),
             );
@@ -323,7 +323,7 @@ describe('STokenSource (integration)', () => {
       });
 
       it('delivers no SToken if there are no characters', (done) => {
-         source.extractNoParams('word', (sToken) => {
+         source.extract('word', (sToken) => {
             expect(sToken).toBeUndefined();
             done();
          });
@@ -337,7 +337,7 @@ describe('STokenSource (integration)', () => {
 
          source.extract('word', ['>', '/>'], (sToken) => {
             expect(sToken.str).toEqual('foo');
-            expect(source._segments as any).toEqualRangeless([
+            expect(source.segments as any).toEqualRangeless([
                {
                   type: SEGMENT_TYPE,
                   text: 'foo/',
@@ -361,9 +361,9 @@ describe('STokenSource (integration)', () => {
          source.addText('word1\n12');
          source.addText('3 And this is\n until <things');
 
-         source.extractNoParams('word', (wordToken) => {
-            source.extractNoParams('char', (charToken) => {
-               source.extractNoParams('digit', (digitToken) => {
+         source.extract('word', (wordToken) => {
+            source.extract('char', (charToken) => {
+               source.extract('digit', (digitToken) => {
                   source.extract('all', ['<'], (allToken) => {
                      expect(wordToken).toEqual(
                         new SToken('word1', 'word1', new Range(new EntityId(), 0, 0, 0, 5, 0, 5)),

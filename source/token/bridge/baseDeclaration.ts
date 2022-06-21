@@ -49,10 +49,10 @@ function parse(source: STokenSource, openSToken: SToken, deliverPToken: (value: 
    const results = new DeclarationPToken();
    results.open = openSToken;
 
-   source.extractToObjectNoParams('space', results, 'postOpenSpace');
+   source.extractToObject('space', results, 'postOpenSpace');
    source.extractToObject('word', [ '>' ], results, 'declType');
 
-   source.extractNoParams('space', (sToken) => {
+   source.extract('space', (sToken) => {
       results.postDeclTypeSpace = sToken;
 
       deliverPToken(results);

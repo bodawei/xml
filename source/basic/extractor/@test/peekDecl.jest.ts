@@ -1,10 +1,10 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
-
+import { describe, it, expect } from '@jest/globals';
 import { EntityId, Range } from 'basic';
 
-import PeekDecl from '../PeekDecl';
-import Extractor from '../Extractor';
-import {DONE_SEGMENT, PseudoSpace, Segment} from '../Segment';
+import { Extractor } from '../Extractor';
+import { PeekDecl } from '../PeekDecl';
+import { PseudoSpace, Segment } from '../Segment';
 
 describe('PeekDecl', () => {
    let segmentRange: Range;
@@ -14,7 +14,6 @@ describe('PeekDecl', () => {
    });
 
    describe('process()', () => {
-
       it('reports success when it has found the declaration', () => {
          const extractor = new PeekDecl(1.1, true);
          extractor.process(new Segment('<?xml version="1.1" ?>', segmentRange));
@@ -74,7 +73,9 @@ describe('PeekDecl', () => {
    describe('finish()', () => {
       it('delivers the desired string and the segment when data fits in a single segment', () => {
          const extractor = new PeekDecl(1.1, true);
-         extractor.process(new Segment('<?xml version="1.1" ?>', new Range(new EntityId(), 0, 0, 0, 0, 22, 0)));
+         extractor.process(
+            new Segment('<?xml version="1.1" ?>', new Range(new EntityId(), 0, 0, 0, 0, 22, 0)),
+         );
 
          expect(extractor.finish()).toEqual({
             text: '<?xml version="1.1" ?>',
@@ -84,7 +85,10 @@ describe('PeekDecl', () => {
                   chars: 0,
                   rows: 0,
                   columns: 0,
-                  segment: new Segment('<?xml version="1.1" ?>', new Range(new EntityId(), 0, 0, 0, 0, 22, 0)),
+                  segment: new Segment(
+                     '<?xml version="1.1" ?>',
+                     new Range(new EntityId(), 0, 0, 0, 0, 22, 0),
+                  ),
                },
             ],
          });
@@ -92,7 +96,9 @@ describe('PeekDecl', () => {
 
       it('delivers the desired string and no more and the segment when data fits in a single segment', () => {
          const extractor = new PeekDecl(1.1, true);
-         extractor.process(new Segment('<?xml version="1.1" ?>x', new Range(new EntityId(), 0, 0, 0, 0, 23, 0)));
+         extractor.process(
+            new Segment('<?xml version="1.1" ?>x', new Range(new EntityId(), 0, 0, 0, 0, 23, 0)),
+         );
 
          expect(extractor.finish()).toEqual({
             text: '<?xml version="1.1" ?>',
@@ -102,7 +108,10 @@ describe('PeekDecl', () => {
                   chars: 0,
                   rows: 0,
                   columns: 0,
-                  segment: new Segment('<?xml version="1.1" ?>x', new Range(new EntityId(), 0, 0, 0, 0, 23, 0)),
+                  segment: new Segment(
+                     '<?xml version="1.1" ?>x',
+                     new Range(new EntityId(), 0, 0, 0, 0, 23, 0),
+                  ),
                },
             ],
          });
@@ -110,7 +119,12 @@ describe('PeekDecl', () => {
 
       it('delivers nothing and unchanged segments on failure', () => {
          const extractor = new PeekDecl(1.1, true);
-         extractor.process(new Segment('         <?xml version="1.1" ?>', new Range(new EntityId(), 0, 0, 0, 0, 30, 0)));
+         extractor.process(
+            new Segment(
+               '         <?xml version="1.1" ?>',
+               new Range(new EntityId(), 0, 0, 0, 0, 30, 0),
+            ),
+         );
 
          expect(extractor.finish()).toEqual({
             text: '',
@@ -120,7 +134,10 @@ describe('PeekDecl', () => {
                   chars: 0,
                   rows: 0,
                   columns: 0,
-                  segment: new Segment('         <?xml version="1.1" ?>', new Range(new EntityId(), 0, 0, 0, 0, 30, 0)),
+                  segment: new Segment(
+                     '         <?xml version="1.1" ?>',
+                     new Range(new EntityId(), 0, 0, 0, 0, 30, 0),
+                  ),
                },
             ],
          });
@@ -129,8 +146,12 @@ describe('PeekDecl', () => {
       describe('segment spanning', () => {
          it('delivers the desired string and all segments, unchanged, on success', () => {
             const extractor = new PeekDecl(1.1, true);
-            extractor.process(new Segment('<?xml vers', new Range(new EntityId(), 0, 0, 0, 0, 10, 0)));
-            extractor.process(new Segment('ion="1.1" ?>', new Range(new EntityId(), 0, 10, 0, 0, 22, 0)));
+            extractor.process(
+               new Segment('<?xml vers', new Range(new EntityId(), 0, 0, 0, 0, 10, 0)),
+            );
+            extractor.process(
+               new Segment('ion="1.1" ?>', new Range(new EntityId(), 0, 10, 0, 0, 22, 0)),
+            );
 
             expect(extractor.finish()).toEqual({
                text: '<?xml version="1.1" ?>',
@@ -140,22 +161,32 @@ describe('PeekDecl', () => {
                      chars: 0,
                      rows: 0,
                      columns: 0,
-                     segment: new Segment('<?xml vers', new Range(new EntityId(), 0, 0, 0, 0, 10, 0)),
+                     segment: new Segment(
+                        '<?xml vers',
+                        new Range(new EntityId(), 0, 0, 0, 0, 10, 0),
+                     ),
                   },
                   {
                      chars: 0,
                      rows: 0,
                      columns: 0,
-                     segment: new Segment('ion="1.1" ?>', new Range(new EntityId(), 0, 10, 0, 0, 22, 0)),
-                  },               
+                     segment: new Segment(
+                        'ion="1.1" ?>',
+                        new Range(new EntityId(), 0, 10, 0, 0, 22, 0),
+                     ),
+                  },
                ],
             });
          });
 
          it('delivers only the declaration, and no text that comes after it', () => {
             const extractor = new PeekDecl(1.1, true);
-            extractor.process(new Segment('<?xml vers', new Range(new EntityId(), 0, 0, 0, 0, 10, 0)));
-            extractor.process(new Segment('ion="1.1" ?> Hello', new Range(new EntityId(), 0, 10, 0, 0, 28, 0)));
+            extractor.process(
+               new Segment('<?xml vers', new Range(new EntityId(), 0, 0, 0, 0, 10, 0)),
+            );
+            extractor.process(
+               new Segment('ion="1.1" ?> Hello', new Range(new EntityId(), 0, 10, 0, 0, 28, 0)),
+            );
 
             expect(extractor.finish()).toEqual({
                text: '<?xml version="1.1" ?>',
@@ -165,21 +196,26 @@ describe('PeekDecl', () => {
                      chars: 0,
                      rows: 0,
                      columns: 0,
-                     segment: new Segment('<?xml vers', new Range(new EntityId(), 0, 0, 0, 0, 10, 0)),
+                     segment: new Segment(
+                        '<?xml vers',
+                        new Range(new EntityId(), 0, 0, 0, 0, 10, 0),
+                     ),
                   },
                   {
                      chars: 0,
                      rows: 0,
                      columns: 0,
-                     segment: new Segment('ion="1.1" ?> Hello', new Range(new EntityId(), 0, 10, 0, 0, 28, 0)),
-                  },               
+                     segment: new Segment(
+                        'ion="1.1" ?> Hello',
+                        new Range(new EntityId(), 0, 10, 0, 0, 28, 0),
+                     ),
+                  },
                ],
             });
          });
       });
 
       describe('newlines', () => {
-
          it('adjusts line breaks and counts', () => {
             const extractor = new PeekDecl(1.1, true);
             const segment = new Segment('<?xml\n \rversion="1.1"\r\n ?>');
@@ -188,12 +224,14 @@ describe('PeekDecl', () => {
             expect(extractor.finish()).toEqual({
                text: '<?xml\n \nversion="1.1"\n ?>',
                original: '<?xml\n \rversion="1.1"\r\n ?>',
-               segments: [ {
-                  chars: 0,
-                  rows: 0,
-                  columns: 0,
-                  segment: segment,
-               } ],
+               segments: [
+                  {
+                     chars: 0,
+                     rows: 0,
+                     columns: 0,
+                     segment: segment,
+                  },
+               ],
             });
          });
 
@@ -207,17 +245,20 @@ describe('PeekDecl', () => {
             expect(extractor.finish()).toEqual({
                text: '<?xml\n \nversion="1.1"\n ?>',
                original: '<?xml\n \rversion="1.1"\r\n ?>',
-               segments: [ {
-                  chars: 0,
-                  rows: 0,
-                  columns: 0,
-                  segment: segment1,
-               }, {
-                  chars: 0,
-                  rows: 0,
-                  columns: 0,
-                  segment: segment2,
-               } ],
+               segments: [
+                  {
+                     chars: 0,
+                     rows: 0,
+                     columns: 0,
+                     segment: segment1,
+                  },
+                  {
+                     chars: 0,
+                     rows: 0,
+                     columns: 0,
+                     segment: segment2,
+                  },
+               ],
             });
          });
 
@@ -231,17 +272,20 @@ describe('PeekDecl', () => {
             expect(extractor.finish()).toEqual({
                text: '<?xml\n \nversion="1.1"\n ?>',
                original: '<?xml\n \rversion="1.1"\r\u0085 ?>',
-               segments: [ {
-                  chars: 0,
-                  rows: 0,
-                  columns: 0,
-                  segment: segment1,
-               }, {
-                  chars: 0,
-                  rows: 0,
-                  columns: 0,
-                  segment: segment2,
-               } ],
+               segments: [
+                  {
+                     chars: 0,
+                     rows: 0,
+                     columns: 0,
+                     segment: segment1,
+                  },
+                  {
+                     chars: 0,
+                     rows: 0,
+                     columns: 0,
+                     segment: segment2,
+                  },
+               ],
             });
          });
 
@@ -255,17 +299,20 @@ describe('PeekDecl', () => {
             expect(extractor.finish()).toEqual({
                text: '<?xml\n \nversion="1.1"\n\u0085 ?>',
                original: '<?xml\n \rversion="1.1"\r\u0085 ?>',
-               segments: [ {
-                  chars: 0,
-                  rows: 0,
-                  columns: 0,
-                  segment: segment1,
-               }, {
-                  chars: 0,
-                  rows: 0,
-                  columns: 0,
-                  segment: segment2,
-               } ],
+               segments: [
+                  {
+                     chars: 0,
+                     rows: 0,
+                     columns: 0,
+                     segment: segment1,
+                  },
+                  {
+                     chars: 0,
+                     rows: 0,
+                     columns: 0,
+                     segment: segment2,
+                  },
+               ],
             });
          });
       });

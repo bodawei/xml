@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import Extractor from './Extractor';
-import {PseudoSpace, Segment} from './Segment';
+import { Extractor } from './Extractor';
+import { PseudoSpace, Segment } from './Segment';
 
 /**********************************************************************\
  A PeekExtractor "wraps" another extractor so it can do its work, but
@@ -15,6 +15,7 @@ import {PseudoSpace, Segment} from './Segment';
 
 class PeekExtractor extends Extractor {
    private _subExtractor: Extractor;
+
    private _firstIndex: number;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
@@ -61,7 +62,6 @@ class PeekExtractor extends Extractor {
       result.segments = this.segInfo;
       return result;
    }
-
 }
 
-export default PeekExtractor;
+export { PeekExtractor };

@@ -111,7 +111,8 @@ describe('STokenSource (unit)', () => {
             chars: str.length,
             rows: 0,
             columns: str.length,
-         } as any; // typeHack
+            segment: new Segment(''),
+         };
 
          segment.index = str.length;
 
@@ -179,7 +180,7 @@ describe('STokenSource (unit)', () => {
 
    describe('extractor definitions', () => {
       it('calls an extractor with a pre-defined parameter', () => {
-         const testExtractors = {
+         testExtractors = {
             toy: {
                extractorConstructor: ToXExtractor,
                params: 'y',
@@ -188,13 +189,13 @@ describe('STokenSource (unit)', () => {
 
          source = new STokenSource(undefined, undefined, testExtractors);
          source.addText('this is yours');
-         source.extractNoParams('toy', (sToken) => {
+         source.extract('toy', (sToken) => {
             expect(sToken!.str).toEqual('this is ');
          });
       });
 
       it('calls an extractor that wraps another', () => {
-         const testExtractors = {
+         testExtractors = {
             pass: {
                extractorConstructor: PassThrough,
                params: {
@@ -205,7 +206,7 @@ describe('STokenSource (unit)', () => {
 
          source = new STokenSource(undefined, undefined, testExtractors);
          source.addText('the lorax');
-         source.extractNoParams('pass', (sToken) => {
+         source.extract('pass', (sToken) => {
             expect(sToken!.str).toEqual('the lora');
          });
       });
@@ -215,20 +216,22 @@ describe('STokenSource (unit)', () => {
       it('passes a version to the extractors', () => {
          let version: number;
          testExtractors = {
-            test: class testExtractor extends Extractor {
-               public _infos: Array<any>;
+            test: class TestExtractor extends Extractor {
+               public infos: Array<SegmentInfo>;
 
                constructor(constructedVersion: number, processLineEndings: boolean) {
                   super(constructedVersion, processLineEndings);
-                  this._infos = [];
+                  this.infos = [];
                   version = constructedVersion;
                   this.state = Extractor.STATE.SUCCESS;
                   this.process = (segment) => {
-                     this._infos.push({ segment });
+                     this.infos.push({ chars: 0, rows: 0, columns: 0, segment });
                   };
+
+                  this.process = () => {};
                   this.finish = () => {
                      return {
-                        segments: this._infos,
+                        segments: this.infos,
                         text: '',
                         original: '',
                      };
@@ -239,7 +242,7 @@ describe('STokenSource (unit)', () => {
 
          source = new STokenSource(undefined, undefined, testExtractors);
          source.addText('1');
-         source.extractNoParams('test', () => {});
+         source.extract('test', () => {});
 
          expect(version!).toEqual(1.0);
       });
@@ -247,21 +250,21 @@ describe('STokenSource (unit)', () => {
       it('passes a version and parameters through a "peek"-like extractor', () => {
          let version: number;
          let params: string;
-         class testExtractor extends Extractor {
-            public _infos: Array<any> = [];
+         class TestExtractor extends Extractor {
+            public infos: Array<SegmentInfo> = [];
 
-            constructor(version: number, processLineEndings: boolean) {
-               super(version, processLineEndings);
+            constructor(ver: number, processLineEndings: boolean) {
+               super(ver, processLineEndings);
                this.state = Extractor.STATE.SUCCESS;
             }
 
             process(segment: Segment) {
-               this._infos.push({ segment });
+               this.infos.push({ segment, rows: 0, columns: 0, chars: 0 });
             }
 
             finish() {
                return {
-                  segments: this._infos,
+                  segments: this.infos,
                   text: '',
                   original: '',
                };
@@ -269,7 +272,7 @@ describe('STokenSource (unit)', () => {
          }
 
          class SubExtractor extends ToXExtractor {
-            public _infos: Array<any> = [];
+            public infos: Array<SegmentInfo> = [];
 
             constructor(theVersion: number, processLineEndings: boolean, theParam: string) {
                super(version, processLineEndings, theParam);
@@ -280,7 +283,7 @@ describe('STokenSource (unit)', () => {
 
          testExtractors = {
             peek: {
-               extractorConstructor: testExtractor,
+               extractorConstructor: TestExtractor,
                params: {
                   extractorConstructor: SubExtractor,
                },
@@ -310,7 +313,7 @@ describe('STokenSource (unit)', () => {
          source.addText('');
          source.addText('333');
 
-         expect(source._segments.length).toEqual(2);
+         expect(source.segments.length).toEqual(2);
       });
 
       it('throws an error if called after endText()', () => {
@@ -328,7 +331,7 @@ describe('STokenSource (unit)', () => {
          source.addText('', testRange);
          source.addText('333');
 
-         expect(source._segments[1].range).toEqual(testRange);
+         expect(source.segments[1].range).toEqual(testRange);
       });
 
       it('ignores the range on an empty value if the next has a range (whitebox)', () => {
@@ -338,7 +341,7 @@ describe('STokenSource (unit)', () => {
          source.addText('', testRange1);
          source.addText('333', testRange2);
 
-         expect(source._segments[1].range).toEqual(testRange2);
+         expect(source.segments[1].range).toEqual(testRange2);
       });
    });
 
@@ -357,7 +360,7 @@ describe('STokenSource (unit)', () => {
          source.endText();
 
          source.extractToObject('all', [], obj, 'propName');
-         source.extractNoParams('all', () => {
+         source.extract('all', () => {
             expect(obj.propName.str).toEqual('1');
             done();
          });
@@ -368,8 +371,8 @@ describe('STokenSource (unit)', () => {
          source.addText('1');
          source.endText();
 
-         source.extractToObjectNoParams('all', obj, 'propName');
-         source.extractNoParams('all', () => {
+         source.extractToObject('all', obj, 'propName');
+         source.extract('all', () => {
             expect(obj.propName.str).toEqual('1');
             done();
          });
@@ -379,7 +382,7 @@ describe('STokenSource (unit)', () => {
    describe('extract()', () => {
       it('throws an error if type is not known', () => {
          expect(() => {
-            source.extractNoParams('bogus', () => {});
+            source.extract('bogus', () => {});
          }).toThrowError('"bogus" is not a known extractor type.');
       });
 
@@ -398,9 +401,9 @@ describe('STokenSource (unit)', () => {
 
       it('enqueues the specified extractors (whitebox)', () => {
          class FooExtractor extends Extractor {
-            public params: any;
+            public params: number;
 
-            constructor(version: number, processLineEndings: boolean, params: any) {
+            constructor(version: number, processLineEndings: boolean, params: number) {
                super(version, processLineEndings);
                this.params = params;
             }
@@ -410,15 +413,15 @@ describe('STokenSource (unit)', () => {
          source.extract('foo', 1, () => {});
          source.extract('foo', 2, () => {});
 
-         expect((source._extractors[0].extractor as any).params).toEqual(1);
-         expect((source._extractors[1].extractor as any).params).toEqual(2);
+         expect((source.extractors[0].extractor as FooExtractor).params).toEqual(1);
+         expect((source.extractors[1].extractor as FooExtractor).params).toEqual(2);
       });
 
       it('can be called multiple times before any text added', (done) => {
          let first: SToken | undefined;
-         source.extractNoParams('tox', (sToken) => (first = sToken));
-         source.extractNoParams('all', (sToken) => {
-            expect([first.str, sToken!.str]).toEqual([' 123', 'xTest']); // EXPECT
+         source.extract('tox', (sToken) => (first = sToken));
+         source.extract('all', (sToken) => {
+            expect([first?.str, sToken!.str]).toEqual([' 123', 'xTest']); // EXPECT
             done();
          });
 
@@ -431,9 +434,9 @@ describe('STokenSource (unit)', () => {
          source.addText(' 456xTest');
          source.endText();
 
-         source.extractNoParams('tox', (sToken) => (first = sToken));
-         source.extractNoParams('all', (sToken) => {
-            expect([first.str, sToken!.str]).toEqual([' 456', 'xTest']); // EXPECT
+         source.extract('tox', (sToken) => (first = sToken));
+         source.extract('all', (sToken) => {
+            expect([first?.str, sToken!.str]).toEqual([' 456', 'xTest']); // EXPECT
             done();
          });
       });
@@ -471,7 +474,7 @@ describe('STokenSource (unit)', () => {
          source.addText('22');
          source.addText('333');
          source.endText();
-         source.extractNoParams('all', (sToken) => {
+         source.extract('all', (sToken) => {
             expect(sToken).toEqual(
                new SToken('122333', '122333', new Range(new EntityId(), 0, 0, 0, 6, 0, 6)),
             );
@@ -481,7 +484,7 @@ describe('STokenSource (unit)', () => {
 
       it('returns undefined when nothing was retrieved', (done) => {
          source.endText();
-         source.extractNoParams('all', (sToken) => {
+         source.extract('all', (sToken) => {
             expect(sToken).toBeUndefined();
             done();
          });
@@ -489,14 +492,14 @@ describe('STokenSource (unit)', () => {
 
       it('returns no STokens when the finish criteria for the specified extractor has not been met', () => {
          source.addText('these are letters without the terminating one');
-         source.extractNoParams('tox', sTokenSpy);
+         source.extract('tox', sTokenSpy);
 
          expect(sTokenSpy).not.toHaveBeenCalled();
       });
 
       it('returns a STokens as soon as the finish criteria for the specified extractor has not been met', (done) => {
          source.addText('these are letters with an x');
-         source.extractNoParams('tox', () => {
+         source.extract('tox', () => {
             done();
          }); // EXPECTATION (simply that it calls back)
       });
@@ -508,7 +511,7 @@ describe('STokenSource (unit)', () => {
             source.addText('333');
             source.endText();
 
-            source.extractNoParams('all', (sToken) => {
+            source.extract('all', (sToken) => {
                expect(sToken!.ranges).toEqual([new Range(new EntityId(), 0, 0, 0, 6, 0, 6)]);
                done();
             });
@@ -522,7 +525,7 @@ describe('STokenSource (unit)', () => {
             source.addText('77777', new Range(loc3, 200, 200, 200, 9, 9, 9));
             source.endText();
 
-            source.extractNoParams('all', (sToken) => {
+            source.extract('all', (sToken) => {
                expect(sToken!.ranges).toEqual([
                   new Range(new EntityId(), 3, 2, 1, 4, 2, 2),
                   new Range(loc2, 100, 100, 100, 102, 100, 102),
@@ -540,7 +543,7 @@ describe('STokenSource (unit)', () => {
             source.addText('77777');
             source.endText();
 
-            source.extractNoParams('all', (sToken) => {
+            source.extract('all', (sToken) => {
                expect(sToken!.ranges).toEqual([
                   new Range(new EntityId(), 3, 2, 1, 4, 2, 2),
                   new Range(loc2, 100, 100, 100, 107, 100, 107),
@@ -557,7 +560,7 @@ describe('STokenSource (unit)', () => {
             source.addText('77777');
             source.endText();
 
-            source.extractNoParams('all', (sToken) => {
+            source.extract('all', (sToken) => {
                expect(sToken!.ranges).toEqual([new Range(new EntityId(), 3, 2, 1, 11, 2, 9)]);
                done();
             });
@@ -569,6 +572,7 @@ describe('STokenSource (unit)', () => {
 
             source.extract('tox', ']', sTokenSpy);
             source.extract('tox', 'b', (sToken) => {
+               // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                expect(sTokenSpy.mock.calls[0][0].ranges[0]).toEqual(
                   new Range(new EntityId(), 3, 2, 1, 4, 2, 2),
                );
@@ -581,7 +585,7 @@ describe('STokenSource (unit)', () => {
             source.addPseudoSpace();
             source.endText();
 
-            source.extractNoParams('all', (sToken) => {
+            source.extract('all', (sToken) => {
                const expected = new SToken(' ', '', [
                   new Range(new EntityId(PSEUDO_SYSTEMID), 0, 0, 0, 0, 0, 0),
                ]);
@@ -596,7 +600,7 @@ describe('STokenSource (unit)', () => {
             source.addText('123', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
             source.endText();
 
-            source.extractNoParams('all', (sToken) => {
+            source.extract('all', (sToken) => {
                const expected = new SToken(' 123', '123', [
                   new Range(new EntityId(PSEUDO_SYSTEMID), 0, 0, 0, 0, 0, 0),
                   new Range(new EntityId(), 3, 2, 1, 6, 2, 4),
@@ -612,7 +616,7 @@ describe('STokenSource (unit)', () => {
             source.addPseudoSpace();
             source.endText();
 
-            source.extractNoParams('all', (sToken) => {
+            source.extract('all', (sToken) => {
                const expected = new SToken('123 ', '123', [
                   new Range(new EntityId(), 3, 2, 1, 6, 2, 4),
                   new Range(new EntityId(PSEUDO_SYSTEMID), 0, 0, 0, 0, 0, 0),
@@ -629,7 +633,7 @@ describe('STokenSource (unit)', () => {
             source.addText('123', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
             source.endText();
 
-            source.extractNoParams('all', (sToken) => {
+            source.extract('all', (sToken) => {
                const expected = new SToken('123 123', '123123', [
                   new Range(new EntityId(), 3, 2, 1, 6, 2, 4),
                   new Range(new EntityId(PSEUDO_SYSTEMID), 0, 0, 0, 0, 0, 0),

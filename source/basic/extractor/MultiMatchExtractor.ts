@@ -1,8 +1,8 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
-import Extractor from './Extractor';
-import MatchExtractor from './MatchExtractor';
-import {DONE_SEGMENT, PSEUDO_SPACE, PseudoSpace, Segment} from './Segment';
+import { Extractor } from './Extractor';
+import { MatchExtractor } from './MatchExtractor';
+import { PSEUDO_SPACE, PseudoSpace, Segment } from './Segment';
 
 type MatcherMap = {
    [candidate: string]: Extractor;
@@ -21,11 +21,17 @@ type MatcherMap = {
 
 class MultiMatchExtractor extends Extractor {
    private _match: Extractor | void;
+
    private _matchLength: number;
+
    private _matchers: MatcherMap;
+
    private _firstSegment?: Segment | PseudoSpace;
+
    private _firstIndex = 0;
+
    private _lastSegment?: Segment | PseudoSpace;
+
    private _lastIndex = 0;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
@@ -80,7 +86,6 @@ class MultiMatchExtractor extends Extractor {
          segment.index = startIndex;
       }
 
-
       if (workingCount !== 0) {
          if (segment.type !== PSEUDO_SPACE) {
             segment.index = segment.text.length;
@@ -110,7 +115,9 @@ class MultiMatchExtractor extends Extractor {
 
    _finishWithFailure() {
       this.state = Extractor.STATE.FAILURE;
-      this.segInfo.forEach((info) => { (info.segment as Segment).index = 0; }); // typeHack
+      this.segInfo.forEach((info) => {
+         (info.segment as Segment).index = 0;
+      }); // typeHack
 
       if (this._firstSegment) {
          this._firstSegment.index = this._firstIndex;
@@ -144,7 +151,6 @@ class MultiMatchExtractor extends Extractor {
 
       return result;
    }
-
 }
 
-export default MultiMatchExtractor;
+export { MultiMatchExtractor };

@@ -106,7 +106,7 @@ function parseRepeat(
    deliver: (result: NameOrModelProps) => void,
 ) {
    source.extractToObject('multi', ['?', '*', '+'], base, 'repeat');
-   source.extractNoParams('space', (repeatSpace) => {
+   source.extract('space', (repeatSpace) => {
       base.repeatSpace = repeatSpace;
 
       deliver(base);
@@ -126,7 +126,7 @@ function parseName(
    }
 
    source.extractToObject('word', wordDelims, name, 'name');
-   source.extractToObjectNoParams('space', name, 'nameSpace');
+   source.extractToObject('space', name, 'nameSpace');
    parseRepeat(source, name, (withRepeat) => {
       deliverName(withRepeat);
    });
@@ -138,7 +138,7 @@ function parseDelimiter(
    deliverDelimited: (result: ContentDelimitedParticleProps) => void,
 ): void {
    source.extractToObject('multi', ['|', ','], delimitedParticle, 'delimiter');
-   source.extractNoParams('space', (delimiterSpace) => {
+   source.extract('space', (delimiterSpace) => {
       delimitedParticle.delimiterSpace = delimiterSpace;
 
       deliverDelimited(delimitedParticle);
@@ -150,7 +150,7 @@ function parseDelimitedParticle(
    inResume: boolean,
    deliverDelimited: (result: ContentDelimitedParticleProps | undefined) => void,
 ): void {
-   source.extractNoParams('peekChar', (charSToken) => {
+   source.extract('peekChar', (charSToken) => {
       if (
          !charSToken ||
          charSToken.str === '>' ||
@@ -201,7 +201,7 @@ function parseContentModelClose(
    deliverDelimiteds: DeliverContentModel,
 ): void {
    source.extractToObject('match', ')', props, 'close');
-   source.extractToObjectNoParams('space', props, 'closeSpace');
+   source.extractToObject('space', props, 'closeSpace');
    parseRepeat(source, props, (withRepeat) => {
       deliverDelimiteds(new ContentModelP(withRepeat));
    });
@@ -237,7 +237,7 @@ function parseContentModel(source: STokenSource, deliverDelimiteds: DeliverConte
       }
 
       props.open = charSToken;
-      source.extractToObjectNoParams('space', props, 'openSpace');
+      source.extractToObject('space', props, 'openSpace');
 
       parseDelimitedParticles(source, false, (delimiteds) => {
          parseContentModelClose(

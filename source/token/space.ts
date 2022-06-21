@@ -30,7 +30,7 @@ class SpacePToken {
 \**********************************************************************/
 
 function parseSpace(source: STokenSource, deliverPToken: (result: SpacePToken|undefined) => void) {
-   source.extractNoParams('space', (sToken) => {
+   source.extract('space', (sToken) => {
       if (!sToken) {
          deliverPToken(undefined);
          return;

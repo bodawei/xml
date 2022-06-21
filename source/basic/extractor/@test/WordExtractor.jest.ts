@@ -1,9 +1,10 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
+import { describe, it, expect } from '@jest/globals';
 import { Range, EntityId } from 'basic';
 
-import WordExtractor from '../WordExtractor';
-import {DONE_SEGMENT, PseudoSpace, Segment} from '../Segment';
+import { DONE_SEGMENT, Segment } from '../Segment';
+import { WordExtractor } from '../WordExtractor';
 
 describe('WordExtractor', () => {
    let segmentRange: Range;
@@ -13,7 +14,6 @@ describe('WordExtractor', () => {
    });
 
    describe('basic behavior', () => {
-
       it('extracts to end of last segment if no other terminators', () => {
          const extractor = new WordExtractor(1.0, true, []);
          extractor.process(new Segment('onetwothree', segmentRange));
@@ -21,15 +21,17 @@ describe('WordExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'onetwothree',
             original: 'onetwothree',
-            segments: [ {
-               chars: 11,
-               rows: 0,
-               columns: 11,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 11,
+                  rows: 0,
+                  columns: 11,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            } ],
+            ],
          });
       });
 
@@ -40,39 +42,41 @@ describe('WordExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'noterm',
             original: 'noterm',
-            segments: [ {
-               chars: 6,
-               rows: 0,
-               columns: 6,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 6,
+                  rows: 0,
+                  columns: 6,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            } ],
+            ],
          });
       });
 
       it('will stop at a provided terminator', () => {
-         const extractor = new WordExtractor(1.0, true, [ 'xyzzy' ]);
+         const extractor = new WordExtractor(1.0, true, ['xyzzy']);
          const segment = new Segment('txtxyzzy', segmentRange);
          extractor.process(segment);
 
          expect(extractor.finish()).toEqual({
             text: 'txt',
             original: 'txt',
-            segments: [ {
-               chars: 3,
-               rows: 0,
-               columns: 3,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 3,
+                  rows: 0,
+                  columns: 3,
+                  segment: segment,
+               },
+            ],
          });
       });
-
    });
 
    describe('whitspace terminator', () => {
-
       it('extracts to the first space', () => {
          const extractor = new WordExtractor(1.0, true, []);
          const segment = new Segment('space    ', segmentRange);
@@ -81,12 +85,14 @@ describe('WordExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'space',
             original: 'space',
-            segments: [ {
-               chars: 5,
-               rows: 0,
-               columns: 5,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 5,
+                  rows: 0,
+                  columns: 5,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -98,12 +104,14 @@ describe('WordExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'tab',
             original: 'tab',
-            segments: [ {
-               chars: 3,
-               rows: 0,
-               columns: 3,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 3,
+                  rows: 0,
+                  columns: 3,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -115,12 +123,14 @@ describe('WordExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'newline',
             original: 'newline',
-            segments: [ {
-               chars: 7,
-               rows: 0,
-               columns: 7,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 7,
+                  rows: 0,
+                  columns: 7,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -132,12 +142,14 @@ describe('WordExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'cr',
             original: 'cr',
-            segments: [ {
-               chars: 2,
-               rows: 0,
-               columns: 2,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 2,
+                  rows: 0,
+                  columns: 2,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -149,12 +161,14 @@ describe('WordExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '85\u0085foo',
             original: '85\u0085foo',
-            segments: [ {
-               chars: 6,
-               rows: 0,
-               columns: 6,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 6,
+                  rows: 0,
+                  columns: 6,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -166,12 +180,14 @@ describe('WordExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '85',
             original: '85',
-            segments: [ {
-               chars: 2,
-               rows: 0,
-               columns: 2,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 2,
+                  rows: 0,
+                  columns: 2,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -183,12 +199,14 @@ describe('WordExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '22\u2028foo',
             original: '22\u2028foo',
-            segments: [ {
-               chars: 6,
-               rows: 0,
-               columns: 6,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 6,
+                  rows: 0,
+                  columns: 6,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -200,15 +218,15 @@ describe('WordExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '22',
             original: '22',
-            segments: [ {
-               chars: 2,
-               rows: 0,
-               columns: 2,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 2,
+                  rows: 0,
+                  columns: 2,
+                  segment: segment,
+               },
+            ],
          });
       });
-
    });
-
 });

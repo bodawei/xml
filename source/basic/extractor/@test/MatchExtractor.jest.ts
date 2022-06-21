@@ -1,11 +1,11 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
+import { describe, it, expect } from '@jest/globals';
 import { EntityId, Range } from 'basic';
 
-import Extractor from '../Extractor';
-import MatchExtractor from '../MatchExtractor';
-import {DONE_SEGMENT, PseudoSpace, Segment} from '../Segment';
+import { Extractor } from '../Extractor';
+import { MatchExtractor } from '../MatchExtractor';
+import { DONE_SEGMENT, PseudoSpace, Segment } from '../Segment';
 
 describe('MatchExtractor', () => {
    let extractor: Extractor;
@@ -16,7 +16,6 @@ describe('MatchExtractor', () => {
    });
 
    describe('basic behavior', () => {
-
       it('reports success when it has found the requested match', () => {
          extractor = new MatchExtractor(1.0, true, 'x');
          extractor.process(new Segment('xy '));
@@ -52,15 +51,17 @@ describe('MatchExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'xyzzy',
             original: 'xyzzy',
-            segments: [ {
-               chars: 5,
-               rows: 0,
-               columns: 5,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 5,
+                  rows: 0,
+                  columns: 5,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            } ],
+            ],
          });
       });
 
@@ -74,17 +75,20 @@ describe('MatchExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '  ',
             original: ' ',
-            segments: [ {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: { type: DONE_SEGMENT },
-            }, {
-               chars: 1,
-               rows: 0,
-               columns: 1,
-               segment,
-            } ],
+            segments: [
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: { type: DONE_SEGMENT },
+               },
+               {
+                  chars: 1,
+                  rows: 0,
+                  columns: 1,
+                  segment,
+               },
+            ],
          });
       });
 
@@ -98,23 +102,25 @@ describe('MatchExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '  ',
             original: ' ',
-            segments: [ {
-               chars: 1,
-               rows: 0,
-               columns: 1,
-               segment: { type: DONE_SEGMENT, range: segmentRange },
-            }, {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: { type: DONE_SEGMENT },
-            } ],
+            segments: [
+               {
+                  chars: 1,
+                  rows: 0,
+                  columns: 1,
+                  segment: { type: DONE_SEGMENT, range: segmentRange },
+               },
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: { type: DONE_SEGMENT },
+               },
+            ],
          });
       });
    });
 
    describe('finish()', () => {
-
       it('returns the match, if fully found, while not yet done)', () => {
          extractor = new MatchExtractor(1.0, true, 'w');
          extractor.process(new Segment('w'));
@@ -122,22 +128,22 @@ describe('MatchExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'w',
             original: 'w',
-            segments: [ {
-               chars: 1,
-               rows: 0,
-               columns: 1,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+            segments: [
+               {
+                  chars: 1,
+                  rows: 0,
+                  columns: 1,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            } ],
+            ],
          });
       });
-
    });
 
    describe('segment treatment', () => {
-
       it('correctly changes segment index after processing', () => {
          extractor = new MatchExtractor(1.0, true, 'one');
          const segment = new Segment('onetwo');
@@ -161,11 +167,9 @@ describe('MatchExtractor', () => {
 
          expect(segment.index).toEqual(0);
       });
-
    });
 
    describe('segment spanning', () => {
-
       it('reports failure state if no segments provided', () => {
          extractor = new MatchExtractor(1.0, true, 'one');
          extractor.finish();
@@ -199,31 +203,35 @@ describe('MatchExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'abcdef',
             original: 'abcdef',
-            segments: [ {
-               chars: 2,
-               rows: 0,
-               columns: 2,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 2,
+                  rows: 0,
+                  columns: 2,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            }, {
-               chars: 2,
-               rows: 0,
-               columns: 2,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+               {
+                  chars: 2,
+                  rows: 0,
+                  columns: 2,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            }, {
-               chars: 2,
-               rows: 0,
-               columns: 2,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+               {
+                  chars: 2,
+                  rows: 0,
+                  columns: 2,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            } ],
+            ],
          });
       });
 
@@ -236,20 +244,23 @@ describe('MatchExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'lukesky',
             original: 'lukesky',
-            segments: [ {
-               chars: 4,
-               rows: 0,
-               columns: 4,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 4,
+                  rows: 0,
+                  columns: 4,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            }, {
-               chars: 3,
-               rows: 0,
-               columns: 3,
-               segment: segment,
-            } ],
+               {
+                  chars: 3,
+                  rows: 0,
+                  columns: 3,
+                  segment: segment,
+               },
+            ],
          });
       });
 
@@ -263,17 +274,20 @@ describe('MatchExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '',
             original: '',
-            segments: [ {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: segment1,
-            }, {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: segment2,
-            } ],
+            segments: [
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: segment1,
+               },
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: segment2,
+               },
+            ],
          });
       });
 
@@ -286,15 +300,15 @@ describe('MatchExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'xy',
             original: 'xy',
-            segments: [ {
-               chars: 2,
-               rows: 0,
-               columns: 2,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 2,
+                  rows: 0,
+                  columns: 2,
+                  segment: segment,
+               },
+            ],
          });
       });
-
    });
-
 });

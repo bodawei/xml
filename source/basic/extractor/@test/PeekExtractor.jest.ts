@@ -1,31 +1,31 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
+import { describe, it, expect } from '@jest/globals';
 
-import Extractor, { ExtractResult, SegmentInfo } from '../Extractor';
-import PeekExtractor from '../PeekExtractor';
-import {DONE_SEGMENT, PseudoSpace, PSEUDO_SPACE, Segment} from '../Segment';
+import { Extractor, ExtractResult, SegmentInfo } from '../Extractor';
+import { PeekExtractor } from '../PeekExtractor';
+import { DONE_SEGMENT, PseudoSpace, PSEUDO_SPACE, Segment } from '../Segment';
 
 describe('PeekExtractor', () => {
    let extractor: Extractor;
    let sub: Extractor;
 
    beforeEach(() => {
-      sub = jasmine.createSpyObj('subSpy', [ 'process', 'finish' ]);
+      sub = {
+         process: jest.fn(),
+         finish: jest.fn(),
+      };
       sub.state = Extractor.STATE.WORKING;
 
       extractor = new PeekExtractor(1.0, true, sub);
    });
 
    describe('constructor', () => {
-
       it('has a state of working by default', () => {
          expect(extractor.state).toEqual(Extractor.STATE.WORKING);
       });
-
    });
 
    describe('process', () => {
-
       it('calls process in subExtractor when called', () => {
          const segment = new Segment('xy');
          extractor.process(segment);
@@ -46,13 +46,11 @@ describe('PeekExtractor', () => {
 
          expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
       });
-
    });
 
    describe('finish()', () => {
-
       it('calls done() in subExtractor when called', () => {
-         (sub.finish as jasmine.Spy).and.returnValue({
+         (sub.finish as jest.Mock).mockReturnValue({
             segments: [],
          });
          extractor.finish();
@@ -61,7 +59,7 @@ describe('PeekExtractor', () => {
       });
 
       it('sets state to success if sub is success', () => {
-         (sub.finish as jasmine.Spy).and.returnValue({
+         (sub.finish as jest.Mock).mockReturnValue({
             segments: [],
          });
          sub.state = Extractor.STATE.SUCCESS;
@@ -71,7 +69,7 @@ describe('PeekExtractor', () => {
       });
 
       it('sets state to failure if sub is failure', () => {
-         (sub.finish as jasmine.Spy).and.returnValue({
+         (sub.finish as jest.Mock).mockReturnValue({
             segments: [],
          });
          sub.state = Extractor.STATE.FAILURE;
@@ -79,14 +77,12 @@ describe('PeekExtractor', () => {
 
          expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
       });
-
    });
 
    describe('extraction', () => {
-
       it('returns the text from the subExtractor', () => {
          const dummySegInfo: SegmentInfo = {
-            chars: 0,   // just giving some dummy data so it doesn't get sick
+            chars: 0, // just giving some dummy data so it doesn't get sick
             rows: 0,
             columns: 0,
             segment: new Segment('foo'),
@@ -95,18 +91,19 @@ describe('PeekExtractor', () => {
             process(segment: Segment) {
                this.text = this.text || [];
                this.text.push(segment.text + 'normal');
-            };
+            }
+
             finish(): ExtractResult {
                return {
                   text: this.text.join(''),
                   original: '',
-                  segments: [ dummySegInfo, dummySegInfo ],
+                  segments: [dummySegInfo, dummySegInfo],
                };
-            };
+            }
          }
          const testExtractor = new TestExtractor(1);
-         testExtractor.state = Extractor.STATE.SUCCESS
-         extractor = new PeekExtractor(1.0, true,  testExtractor);
+         testExtractor.state = Extractor.STATE.SUCCESS;
+         extractor = new PeekExtractor(1.0, true, testExtractor);
 
          extractor.process(new Segment('one'));
          extractor.process(new Segment('two'));
@@ -116,7 +113,7 @@ describe('PeekExtractor', () => {
 
       it('returns the original text from the subExtractor', () => {
          const dummySegInfo: SegmentInfo = {
-            chars: 0,   // just giving some dummy data so it doesn't get sick
+            chars: 0, // just giving some dummy data so it doesn't get sick
             rows: 0,
             columns: 0,
             segment: new Segment('foo'),
@@ -125,18 +122,19 @@ describe('PeekExtractor', () => {
             process(segment: Segment) {
                this.text = this.text || [];
                this.text.push(segment.text + 'xx');
-            };
+            }
+
             finish(): ExtractResult {
                return {
                   text: '',
                   original: this.text.join(''),
-                  segments: [ dummySegInfo, dummySegInfo ],
+                  segments: [dummySegInfo, dummySegInfo],
                };
-            };
+            }
          }
          const testExtractor = new TestExtractor(1);
-         testExtractor.state = Extractor.STATE.SUCCESS
-         extractor = new PeekExtractor(1.0, true,  testExtractor);
+         testExtractor.state = Extractor.STATE.SUCCESS;
+         extractor = new PeekExtractor(1.0, true, testExtractor);
 
          extractor.process(new Segment('one'));
          extractor.process(new Segment('two'));
@@ -149,7 +147,7 @@ describe('PeekExtractor', () => {
             return {
                text: 'done',
                original: 'done',
-               segments: []
+               segments: [],
             };
          };
          sub.state = Extractor.STATE.FAILURE;
@@ -163,7 +161,7 @@ describe('PeekExtractor', () => {
          const segment2 = new Segment('bb');
          const segment3 = new Segment('cc');
          segment1.index = 1;
-         const segments: Array<Segment | PseudoSpace > = [];
+         const segments: Array<Segment | PseudoSpace> = [];
          sub.process = function process(segment) {
             segments.push(segment);
          };
@@ -177,7 +175,7 @@ describe('PeekExtractor', () => {
                      rows: 1,
                      columns: 1,
                      segment: seg,
-                  }
+                  };
                }),
             };
          };
@@ -204,25 +202,28 @@ describe('PeekExtractor', () => {
          };
          sub.finish = function finish() {
             return {
-               text:  text.join(''),
+               text: text.join(''),
                original: text.join(''),
-               segments: [ {
-                  chars: 3,
-                  rows: 0,
-                  columns: 3,
-                  segment: {
-                     type: DONE_SEGMENT,
-                     range: undefined,
+               segments: [
+                  {
+                     chars: 3,
+                     rows: 0,
+                     columns: 3,
+                     segment: {
+                        type: DONE_SEGMENT,
+                        range: undefined,
+                     },
                   },
-               }, {
-                  chars: 5,
-                  rows: 0,
-                  columns: 5,
-                  segment: {
-                     type: DONE_SEGMENT,
-                     range: undefined,
+                  {
+                     chars: 5,
+                     rows: 0,
+                     columns: 5,
+                     segment: {
+                        type: DONE_SEGMENT,
+                        range: undefined,
+                     },
                   },
-               } ],
+               ],
             };
          };
          sub.state = Extractor.STATE.SUCCESS;
@@ -234,20 +235,21 @@ describe('PeekExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'onexxthreexx',
             original: 'onexxthreexx',
-            segments: [ {
-               chars: 3,
-               rows: 0,
-               columns: 3,
-               segment: new Segment('one'),
-            }, {
-               chars: 5,
-               rows: 0,
-               columns: 5,
-               segment: new Segment('three'),
-            } ],
+            segments: [
+               {
+                  chars: 3,
+                  rows: 0,
+                  columns: 3,
+                  segment: new Segment('one'),
+               },
+               {
+                  chars: 5,
+                  rows: 0,
+                  columns: 5,
+                  segment: new Segment('three'),
+               },
+            ],
          });
       });
-
    });
-
 });

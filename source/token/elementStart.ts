@@ -70,9 +70,9 @@ function parseElementStart(source: STokenSource, open: SToken, deliverPToken: De
       open,
    };
 
-   source.extractToObjectNoParams('space', protoToken, 'openSpace');
+   source.extractToObject('space', protoToken, 'openSpace');
    source.extractToObject('word', [ '>', '/>' ], protoToken, 'name');
-   source.extractToObjectNoParams('space', protoToken, 'nameSpace');
+   source.extractToObject('space', protoToken, 'nameSpace');
 
    attribute.parse(source, {
       geRef: true,

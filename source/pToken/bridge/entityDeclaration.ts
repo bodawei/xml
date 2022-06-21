@@ -15,7 +15,6 @@ import {
    ParameterEntityDeclarationProps,
    ParameterEntityDeclarationPToken,
 } from '../token/parameterEntityDeclaration';
-import { EntityValuePToken } from 'token';
 
 type AnyEntityDeclaration = GeneralEntityDeclarationProps & ParameterEntityDeclarationProps;
 
@@ -25,7 +24,7 @@ function parseParameter(
    done: (result: AnyEntityDeclaration) => void,
 ): void {
    source.extractToObject('match', '%', props, 'parameter');
-   source.extractNoParams('space', (parameterSpace) => {
+   source.extract('space', (parameterSpace) => {
       props.parameterSpace = parameterSpace;
       done(props);
    });
@@ -37,7 +36,7 @@ function parseName(
    done: (result: AnyEntityDeclaration) => void,
 ): void {
    source.extractToObject('word', ['>', '"', "'", ';'], props, 'name');
-   source.extractNoParams('space', (nameSpace) => {
+   source.extract('space', (nameSpace) => {
       props.nameSpace = nameSpace;
       done(props);
    });
@@ -59,7 +58,7 @@ function parseLiteralValue(
       },
       (appendedPToken) => {
          if (appendedPToken) {
-            source.extractNoParams('space', (sToken) => {
+            source.extract('space', (sToken) => {
                appendedPToken.valueSpace = sToken;
                done(appendedPToken as any); // typehack
             });
@@ -78,7 +77,7 @@ function parseNData(
    source.extract('peekWord', ['>'], (sToken) => {
       if (strOrBlank(sToken).toLocaleUpperCase() === 'NDATA') {
          source.extractToObject('word', ['>'], props, 'nData');
-         source.extractNoParams('space', (sToken) => {
+         source.extract('space', (sToken) => {
             props.nDataSpace = sToken;
             done(props);
          });
@@ -94,7 +93,7 @@ function parseNDataName(
    done: (result: AnyEntityDeclaration) => void,
 ) {
    source.extractToObject('word', ['>'], props, 'nDataName');
-   source.extractNoParams('space', (sToken) => {
+   source.extract('space', (sToken) => {
       props.nDataNameSpace = sToken;
       done(props);
    });
@@ -167,7 +166,7 @@ function parseValue(
             return;
          }
 
-         source.extractNoParams('space', (externalIdSpace) => {
+         source.extract('space', (externalIdSpace) => {
             props.externalIdSpace = externalIdSpace;
 
             if (!isGeDecl) {
@@ -255,7 +254,7 @@ function parseEntityDeclaration(
 
             const open = withName.parameter;
 
-            source.extractNoParams('peekChar', (sToken) => {
+            source.extract('peekChar', (sToken) => {
                if (strOrBlank(sToken) !== ';') {
                   parseValue(source, declarationStart, withName, false, deliverPToken);
                   return;
@@ -263,11 +262,11 @@ function parseEntityDeclaration(
 
                source.extract('match', ';', (semicolon) => {
                   const peRef = new ParameterEntityReferencePToken({
-                     open,
-                     openSpace: withName.parameterSpace,
+                     close: semicolon,
                      name: withName.name,
                      nameSpace: withName.nameSpace,
-                     close: semicolon,
+                     open,
+                     openSpace: withName.parameterSpace,
                   });
 
                   parseUnexpandedAfterPeRef(source, 'parameter', (result) => {
@@ -321,7 +320,7 @@ function resumeParseParts(
             } else {
                props.externalId = parsedExtId.externalId;
                props.nameSpace = combineSTokens(props.nameSpace, preSpace);
-               source.extractNoParams('space', (externalIdSpace) => {
+               source.extract('space', (externalIdSpace) => {
                   props.externalIdSpace = externalIdSpace;
                   if (!props.parameter) {
                      resumeParseParts(source, props, 'nData', undefined, deliverProps);
@@ -391,7 +390,7 @@ function resumeParseEntityDeclaration(
 
    const dup: AnyEntityDeclaration = { ...existing };
 
-   source.extractNoParams('space', (preSpace) => {
+   source.extract('space', (preSpace) => {
       const propName = existing.unexpanded!.propName; // eslint-disable-line @typescript-eslint/no-non-null-assertion
 
       resumeParseParts(source, dup, propName, preSpace, (props) => {

@@ -230,7 +230,7 @@ class PTokenParser {
          this.state = ParseState.PROLOG;
          this.pushToken([confVer, entityId]);
       } else {
-         this.sTokenSource.extractNoParams('peekDecl', (sToken) => {
+         this.sTokenSource.extract('peekDecl', (sToken) => {
             if (sToken) {
                const processedString = sToken.str.replace(WHITESPACE_REGEXP, '');
                const match = VERSION_REGEXP.exec(processedString);
@@ -250,7 +250,7 @@ class PTokenParser {
    }
 
    private findToken(): void {
-      this.sTokenSource.extractNoParams('peekChar', (sToken) => {
+      this.sTokenSource.extract('peekChar', (sToken) => {
          if (!sToken) {
             this.pushToken(undefined);
             return;
@@ -294,7 +294,7 @@ class PTokenParser {
                      if (sToken) {
                         this.pushToken(new CharDataPToken({ text: sToken }));
                      } else {
-                        this.sTokenSource.extractNoParams('char', (sToken) => {
+                        this.sTokenSource.extract('char', (sToken) => {
                            // Our trouble is if we are matching ]]> we'll never continue.  So, we
                            if (sToken) {
                               this.pushToken(new CharDataPToken({ text: sToken }));
@@ -323,7 +323,7 @@ class PTokenParser {
    }
 
    private parseMarkup(): void {
-      this.sTokenSource.extractNoParams('markup', (result) => {
+      this.sTokenSource.extract('markup', (result) => {
          let parser = this.markupMap[result?.str ?? ''];
 
          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition

@@ -21,7 +21,7 @@ function continueToContent(
    sectionData: SectionStart,
    deliverSection: DeliverSection,
 ): void {
-   source.extractNoParams('space', (typeSpace) => {
+   source.extract('space', (typeSpace) => {
       sectionData.sectionTypeSpace = typeSpace;
 
       if (sectionData.sectionType && sectionData.sectionType.str.toLowerCase() === 'cdata') {
@@ -56,8 +56,8 @@ function parseSection(source: STokenSource, openSToken: SToken, deliverSection: 
    const sectionData: SectionStart = {
       open: openSToken,
    };
-   source.extractToObjectNoParams('space', sectionData, 'openSpace');
-   source.extractNoParams('peekChar', (charSToken) => {
+   source.extractToObject('space', sectionData, 'openSpace');
+   source.extract('peekChar', (charSToken) => {
       if (charSToken && charSToken.str === '%') {
          parseParameterEntityReference(source, (result) => {
             const extra = !result

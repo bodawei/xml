@@ -40,7 +40,7 @@ class PTokenLiteralParser {
    }
 
    public parse(deliver: DeliverToken): void {
-      this.sTokenSource.extractNoParams('peekChar', (sToken) => {
+      this.sTokenSource.extract('peekChar', (sToken) => {
          const isFirstToken = this.seenFirstToken;
 
          if (!sToken) {
@@ -72,7 +72,7 @@ class PTokenLiteralParser {
                return;
             }
 
-            this.sTokenSource.extractNoParams('char', (sToken) => {
+            this.sTokenSource.extract('char', (sToken) => {
                if (!sToken) {
                   // This can only happen if something has gone drastically wrong.
                   deliver(undefined);
@@ -91,7 +91,7 @@ class PTokenLiteralParser {
    }
 
    private parsePossibleProcessingInstruction(deliver: DeliverToken) {
-      this.sTokenSource.extractNoParams('peekDecl', (sToken) => {
+      this.sTokenSource.extract('peekDecl', (sToken) => {
          if (sToken) {
             this.sTokenSource.extract('match', '<?', (open) => {
                if (!open) {

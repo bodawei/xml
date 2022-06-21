@@ -42,9 +42,9 @@ function parseElementEnd(source: STokenSource, open: SToken, deliverPToken: (res
       open,
    };
 
-   source.extractToObjectNoParams('space', pToken, 'openSpace');
+   source.extractToObject('space', pToken, 'openSpace');
    source.extractToObject('word', [ '>' ], pToken, 'name');
-   source.extractToObjectNoParams('space', pToken, 'nameSpace');
+   source.extractToObject('space', pToken, 'nameSpace');
 
    source.extract('match', '>', (sToken) => {
       pToken.close = sToken;

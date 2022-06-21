@@ -15,6 +15,7 @@ interface RawPI {
    targetSpace?: SToken;
    instruction?: SToken;
    close?: SToken;
+   [foo: string]: SToken | undefined;
 }
 
 function isNotInstructionStart(

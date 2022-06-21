@@ -5,7 +5,7 @@ import {
    ExtractorConstructor,
    ExtractorMap,
 } from '../extractor/defaultExtractors';
-import Extractor, { SegmentInfo } from '../extractor/Extractor';
+import { Extractor, SegmentInfo } from '../extractor/Extractor';
 import { PSEUDO_SPACE, PseudoSpace, Segment } from '../extractor/Segment';
 import { ConformanceVersion } from '../token/conformanceVersion';
 import { EntityId } from '../token/entityId';
@@ -18,7 +18,7 @@ import { SToken } from './sToken';
 
 type DeliverSToken = (stoken?: SToken) => void;
 
-type Params = string | Array<string | undefined> | undefined | number;
+type Params = string | ReadonlyArray<string | undefined> | undefined | number;
 
 interface ExtractorContext {
    extractor: Extractor;
@@ -115,19 +115,19 @@ class STokenSource {
 
    private processLineEndings: boolean;
 
-   private _extractorInfo: ExtractorMap;
+   private extractorInfo: ExtractorMap;
 
-   public _segments: Array<Segment | PseudoSpace>;
+   public segments: Array<Segment | PseudoSpace>;
 
-   public _extractors: Array<ExtractorContext>;
+   public extractors: Array<ExtractorContext>;
 
-   private _lastOffset?: Offset;
+   private lastOffset?: Offset;
 
-   private _allTextAdded = false;
+   private allTextAdded = false;
 
-   private _orphanedRange?: Range;
+   private orphanedRange?: Range;
 
-   private _resuming?: boolean;
+   private resuming?: boolean;
 
    public constructor(other: STokenSource);
    public constructor(
@@ -144,119 +144,119 @@ class STokenSource {
          this.entityId = entityIdOrSource.entityId;
          this.confVer = entityIdOrSource.confVer;
          // Should do a deepl clone or should reset the other
-         this._segments = entityIdOrSource._segments;
-         this._lastOffset = entityIdOrSource._lastOffset;
+         this.segments = entityIdOrSource.segments;
+         this.lastOffset = entityIdOrSource.lastOffset;
          this.processLineEndings = entityIdOrSource.processLineEndings;
       } else {
          this.entityId = entityIdOrSource || new EntityId();
          this.confVer = new ConformanceVersion();
-         this._segments = [];
-         this._lastOffset = undefined;
+         this.segments = [];
+         this.lastOffset = undefined;
          this.processLineEndings = processLineEndings;
       }
       this.errors = [];
-      this._extractorInfo = extractorInfo;
+      this.extractorInfo = extractorInfo;
 
-      this._extractors = [];
+      this.extractors = [];
    }
 
-   setConfVer(version: ConformanceVersion): void {
+   public setConfVer(version: ConformanceVersion): void {
       this.confVer = version;
    }
 
-   addPseudoSpace(): void {
+   public addPseudoSpace(): void {
       const pseudoSpace = new PseudoSpace();
-      this._segments.push(pseudoSpace);
+      this.segments.push(pseudoSpace);
 
-      if (!this._lastOffset) {
-         this._lastOffset = new Offset((pseudoSpace.range as any).entityId, 0, 0, 0);
+      if (!this.lastOffset) {
+         this.lastOffset = new Offset(pseudoSpace.range.entityId, 0, 0, 0);
       }
    }
 
-   addText(text: string, range?: Range): void {
-      if (this._allTextAdded) {
+   public addText(text: string, range?: Range): void {
+      if (this.allTextAdded) {
          throw new Error('Can not add text after endText() has been called.');
       }
 
       if (text.length === 0) {
-         this._orphanedRange = range;
+         this.orphanedRange = range;
          return;
       }
 
-      const rangeToUse = range || this._orphanedRange;
+      const rangeToUse = range || this.orphanedRange;
 
       // If this is the first segment we are adding, then make sure lastOffset contains
       // the starting offset which will either be the start of the range associated
       // with this first segment, or a default offset that starts at 0
-      if (this._segments.length === 0) {
+      if (this.segments.length === 0) {
          if (rangeToUse) {
-            this._lastOffset = rangeStartOffset(rangeToUse);
+            this.lastOffset = rangeStartOffset(rangeToUse);
          } else {
-            this._lastOffset = new Offset(this.entityId, 0, 0, 0);
+            this.lastOffset = new Offset(this.entityId, 0, 0, 0);
          }
       }
 
-      this._segments.push(new Segment(text, rangeToUse));
+      this.segments.push(new Segment(text, rangeToUse));
 
       this.resumeOperation();
    }
 
-   endText(): void {
-      this._allTextAdded = true;
+   public endText(): void {
+      this.allTextAdded = true;
       this.resumeOperation();
    }
 
-   continueText(): void {
-      this._allTextAdded = false;
+   public continueText(): void {
+      this.allTextAdded = false;
       // This might leave us in a limbo spot.  Someone must either call addText or endText to flush any remaining data
    }
 
-   atEnd(): boolean {
-      return this._segments.length === 0;
+   public atEnd(): boolean {
+      return this.segments.length === 0;
    }
 
-   ended(): boolean {
-      return this.atEnd() && this._allTextAdded;
+   public ended(): boolean {
+      return this.atEnd() && this.allTextAdded;
    }
 
-   extractToObjectNoParams(type: string, obj: Record<string, any>, name: string): void {
-      this.extractToObject(type, undefined, obj, name);
-   }
-
-   extractToObject(type: string, obj: Record<string, any>, name: string): void;
-   extractToObject(type: string, params: Params, obj: Record<string, any>, name: string): void;
-   extractToObject(
+   public extractToObject<Obj extends object>(type: string, obj: Obj, name: keyof Obj): void;
+   public extractToObject<Obj extends object>(
       type: string,
-      paramsOrObj: Params | any | Record<string, any>,
-      objOrName: Record<string, any> | string,
-      nameOnly?: string,
+      params: Params,
+      obj: Obj,
+      name: keyof Obj,
+   ): void;
+   public extractToObject<Obj extends object>(
+      type: string,
+      paramsOrObj: Params | Obj,
+      objOrName: Obj | keyof Obj,
+      nameOnly?: keyof Obj,
    ): void {
-      let params: Params | any;
-      let obj: Record<string, any>;
-      let name: string;
+      let params: Params | unknown;
+      let obj: Obj;
+      let name: keyof Obj;
 
       if (nameOnly !== undefined) {
          params = paramsOrObj;
-         obj = objOrName as Record<string, any>;
+         obj = objOrName as Obj;
          name = nameOnly;
       } else {
          params = undefined;
+         // @ts-expect-error -- reworking
          obj = paramsOrObj;
-         name = objOrName as string;
+         name = objOrName as keyof Obj;
       }
 
+      // @ts-expect-error -- reworking
       this.extract(type, params, (sToken) => {
+         // @ts-expect-error -- reworking
          obj[name] = sToken; // typeHack
       });
    }
 
-   extractNoParams(type: string, deliverSToken: DeliverSToken): void {
-      this.extract(type, undefined, deliverSToken);
-   }
-
-   extract(type: string, deliverSToken: DeliverSToken): void;
-   extract(type: string, params: Params, deliverSToken: DeliverSToken): void;
-   extract(
+   public extract(type: string, deliverSToken: DeliverSToken): void;
+   public extract(type: string, params: Params, deliverSToken: DeliverSToken): void;
+   public extract(
       type: string,
       paramsOrDeliver: Params | DeliverSToken,
       deliverSToken?: DeliverSToken,
@@ -264,29 +264,35 @@ class STokenSource {
       let params: Params;
       let deliver: DeliverSToken;
 
-      if (typeof paramsOrDeliver === 'function') {
-         params = undefined;
-         deliver = paramsOrDeliver;
-      } else {
+      if (deliverSToken !== undefined) {
+         // @ts-expect-error -- reworking
          params = paramsOrDeliver;
-         deliver = deliverSToken!;
+         deliver = deliverSToken;
+      } else {
+         params = undefined;
+         // @ts-expect-error -- reworking
+         deliver = paramsOrDeliver;
       }
 
-      const extractorDefinition = this._extractorInfo[type];
+      const extractorDefinition = this.extractorInfo[type];
       let extractorConstructor: ExtractorConstructor;
       let paramsToUse = params;
 
       if (typeof extractorDefinition === 'object') {
          extractorConstructor = extractorDefinition.extractorConstructor;
 
-         if ((extractorDefinition.params as any).extractorConstructor) {
-            paramsToUse = new (extractorDefinition.params as any).extractorConstructor(
+         // @ts-expect-error -- reworking
+         if (extractorDefinition.params.extractorConstructor) {
+            // @ts-expect-error -- reworking
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+            paramsToUse = new extractorDefinition.params.extractorConstructor(
                this.confVer.version,
                this.processLineEndings,
                params,
             );
          } else {
-            paramsToUse = extractorDefinition.params as any;
+            // @ts-expect-error -- reworking
+            paramsToUse = extractorDefinition.params;
          }
       } else {
          // put this check here to make code coverage happier. babel turns typeof object into a check for undef.
@@ -296,10 +302,10 @@ class STokenSource {
          extractorConstructor = extractorDefinition;
       }
 
-      const typeHack = extractorConstructor as any;
+      const typeHack = extractorConstructor;
       const instance = new typeHack(this.confVer.version, this.processLineEndings, paramsToUse);
 
-      this._extractors.push({
+      this.extractors.push({
          extractor: instance,
          callback: deliver,
       });
@@ -307,10 +313,10 @@ class STokenSource {
       this.resumeOperation();
    }
 
-   check(callback: () => void): void {
+   public check(callback: () => void): void {
       const noopExtractor = new NoopExtractor(1);
 
-      this._extractors.push({
+      this.extractors.push({
          extractor: noopExtractor,
          callback,
       });
@@ -323,17 +329,17 @@ class STokenSource {
       // - A is faster, but allows some callers to get "synchronous" returns.
       // - B is much slower, but forces asynchronous returns.
       // A
-      if (this._resuming === true) {
+      if (this.resuming === true) {
          return;
       }
-      this._resuming = true;
+      this.resuming = true;
       // B
       //
 
-      while ((this._segments.length !== 0 || this._allTextAdded) && this._extractors.length > 0) {
-         const extContext = this._extractors[0];
+      while ((this.segments.length !== 0 || this.allTextAdded) && this.extractors.length > 0) {
+         const extContext = this.extractors[0];
          const extractor = extContext.extractor;
-         const nextSegment = this._segments.shift();
+         const nextSegment = this.segments.shift();
 
          if (nextSegment) {
             if (extContext.startIndex === undefined && nextSegment.type !== PSEUDO_SPACE) {
@@ -347,11 +353,11 @@ class STokenSource {
          }
 
          // Extractor has finished extraction (either through SUCCESS or FAILURE)
-         this._extractors.shift();
+         this.extractors.shift();
          const results = extractor.finish();
          const ranges = this.computeRanges(results.segments);
 
-         this._restorePartiallyAndUnusedSegments(results.segments);
+         this.restorePartiallyAndUnusedSegments(results.segments);
 
          // Store where we left off, unless we got no ranges, or we didn't actually consume any segments
          if (
@@ -359,11 +365,11 @@ class STokenSource {
             (results.segments[0].segment as Segment).index !== extContext.startIndex
          ) {
             // typeHack
-            this._lastOffset = rangeEndOffset(ranges[ranges.length - 1]);
+            this.lastOffset = rangeEndOffset(ranges[ranges.length - 1]);
          }
 
          // A
-         this._reportResults(extContext, results.text, results.original, ranges);
+         this.reportResults(extContext, results.text, results.original, ranges);
          /*
           * B:
           * Ultimately, we probably do not want to doing a setTimeout here, as
@@ -378,10 +384,10 @@ class STokenSource {
          // break;
       }
       // A
-      this._resuming = false;
+      this.resuming = false;
    }
 
-   _restorePartiallyAndUnusedSegments(segInfos: Array<SegmentInfo>): void {
+   private restorePartiallyAndUnusedSegments(segInfos: Array<SegmentInfo>): void {
       const returnedSegments = [];
 
       for (let index = 0; index < segInfos.length; index++) {
@@ -393,7 +399,7 @@ class STokenSource {
          }
       }
 
-      this._segments = returnedSegments.concat(this._segments) as Array<Segment>; // typeHack
+      this.segments = returnedSegments.concat(this.segments) as Array<Segment>; // typeHack
    }
 
    private computeRanges(segInfos: Array<SegmentInfo>): Array<Range> {
@@ -404,7 +410,7 @@ class STokenSource {
       const ranges = [];
       // this._lastOffset can't be undefined, since it is set as soon as text is added,
       // and we won't have ranges to compute if no text has been adde
-      let currentRange = new Range(this._lastOffset!); // start off where we left off
+      let currentRange = new Range(this.lastOffset!); // start off where we left off
 
       // Just iterate through the segInfos, and accumulate the chars consumed
       for (let index = 0; index < segInfos.length; index++) {
@@ -450,7 +456,7 @@ class STokenSource {
       return ranges;
    }
 
-   _reportResults(
+   private reportResults(
       extractorContext: ExtractorContext,
       str: string,
       originalStr: string,

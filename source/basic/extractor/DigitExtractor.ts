@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import Extractor from './Extractor';
-import {PseudoSpace, DONE_SEGMENT, PSEUDO_SPACE, Segment} from './Segment';
+import { Extractor } from './Extractor';
+import { PseudoSpace, DONE_SEGMENT, PSEUDO_SPACE, Segment } from './Segment';
 
 const DIGITS_REGEX = /[0-9]+/g;
 const HEX_DIGITS_REGEX = /[0-9A-Fa-f]+/g;
@@ -14,6 +14,7 @@ const HEX_DIGITS_REGEX = /[0-9A-Fa-f]+/g;
 
 class DigitExtractor extends Extractor {
    private foundDigit = false;
+
    private base: 10 | 16;
 
    constructor(version: number, processLineEndings: boolean, base: 10 | 16) {
@@ -74,7 +75,6 @@ class DigitExtractor extends Extractor {
       this.state = this.foundDigit ? Extractor.STATE.SUCCESS : Extractor.STATE.FAILURE;
       return this.innerFinish();
    }
-
 }
 
-export default DigitExtractor;
+export { DigitExtractor };

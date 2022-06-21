@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { Extractor } from './Extractor';
-import {PseudoSpace, PSEUDO_SPACE, Segment} from './Segment';
+import { PseudoSpace, PSEUDO_SPACE, Segment } from './Segment';
 
 const HAS_START = /^\<\?/;
 const HAS_DECL10 = /\<\?[ \t\r\n]*[xXmMlL][^]*\?\>/;
@@ -27,7 +27,7 @@ class PeekDecl extends Extractor {
          this.state = Extractor.STATE.FAILURE;
          return;
       }
-      
+
       this.rawText += segment.text;
 
       if (this.rawText.length < 5) {
@@ -59,7 +59,6 @@ class PeekDecl extends Extractor {
 
       return this.innerFinish();
    }
-
 }
 
-export default PeekDecl;
+export { PeekDecl };

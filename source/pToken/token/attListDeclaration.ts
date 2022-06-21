@@ -428,7 +428,7 @@ function resumeParseAttListDeclaration(
       return;
    }
 
-   source.extractNoParams('space', (preSpace) => {
+   source.extract('space', (preSpace) => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const propName = attListDeclaration.unexpanded!.propName;
 
@@ -441,7 +441,7 @@ function resumeParseAttListDeclaration(
 
             parseElementName(source, attListCopy, (withName) => {
                resumeParseAttDefName(source, (attDefs) => {
-                  source.extractNoParams('all', (extra) => {
+                  source.extract('all', (extra) => {
                      deliverPToken(
                         new AttListDeclarationPToken(attListDeclaration, {
                            ...withName,
@@ -479,7 +479,7 @@ function resumeParseAttListDeclaration(
                   props.attDefs = [...butLast, newLast, ...attDefs];
                }
 
-               source.extractNoParams('all', (extra) => {
+               source.extract('all', (extra) => {
                   deliverPToken(
                      new AttListDeclarationPToken(attListDeclaration, {
                         ...props,
@@ -496,7 +496,7 @@ function resumeParseAttListDeclaration(
             preceding.pop();
 
             resumeParseAttDef(source, propName, trailingDef, preSpace, (attDefs) => {
-               source.extractNoParams('all', (extra) => {
+               source.extract('all', (extra) => {
                   deliverPToken(
                      new AttListDeclarationPToken(attListDeclaration, {
                         attDefs: [...preceding, ...attDefs],

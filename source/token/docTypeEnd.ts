@@ -51,7 +51,7 @@ function parseDocTypeEnd(source: STokenSource, docTypeStart: DocTypeStartPToken,
    };
 
    source.extractToObject('match', ']', pToken, 'closeSubset');
-   source.extractToObjectNoParams('space', pToken, 'closeSubsetSpace');
+   source.extractToObject('space', pToken, 'closeSubsetSpace');
 
    source.extract('match', '>', (sToken) => {
       pToken.close = sToken;

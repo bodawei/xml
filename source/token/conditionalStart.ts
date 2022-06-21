@@ -106,7 +106,7 @@ function parseConditional(
 ): void {
    const otherProps: ConditionalProps = {};
 
-   source.extractNoParams('peekChar', (charSToken) => {
+   source.extract('peekChar', (charSToken) => {
       if (charSToken && charSToken.str === '%') {
          parseParameterEntityReference(source, (result) => {
             const extra = !result
@@ -148,7 +148,7 @@ function resumeParseConditional(
       oldConditional.unexpanded.propName === 'sectionType' &&
       !oldConditional.unexpanded.secondPropName
    ) {
-      source.extractNoParams('space', (openSpace) => {
+      source.extract('space', (openSpace) => {
          source.extractToObject('word', ['[', '>'], newCond, 'sectionType');
          source.extractToObject('space', newCond, 'sectionTypeSpace');
          source.extract('match', '[', (sToken) => {
@@ -168,7 +168,7 @@ function resumeParseConditional(
       oldConditional.unexpanded.propName === 'bracket' ||
       oldConditional.unexpanded.secondPropName === 'bracket'
    ) {
-      source.extractNoParams('space', (sectionTypeSpace) => {
+      source.extract('space', (sectionTypeSpace) => {
          source.extract('match', '[', (sToken) => {
             newCond.sectionTypeSpace = combineSTokens(newCond.sectionTypeSpace, sectionTypeSpace);
             newCond.bracket = sToken;

@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import {DoneSegment, PseudoSpace, PSEUDO_SPACE, Segment} from './Segment';
+import { DoneSegment, PseudoSpace, Segment } from './Segment';
 
 type SegmentInfo = {
    chars: number;
@@ -13,7 +13,7 @@ type ExtractResult = {
    text: string;
    original: string;
    segments: Array<SegmentInfo>;
-}
+};
 
 const LINE_ENDING_10_REGEX = /(\r\n)|(\r)/g;
 const LINE_ENDING_11_REGEX = /(\r[\u0085\n])|([\r\u0085\u2028])/g;
@@ -33,16 +33,22 @@ enum ExtractorState {
 
 class Extractor {
    private lastProcessSawCr = false;
+
    protected version: number;
+
    protected processLineEndings: boolean;
+
    protected text: Array<string>;
+
    protected normalizedText: Array<string>;
+
    protected segInfo: Array<SegmentInfo>;
+
    public state: ExtractorState;
 
    public static STATE = ExtractorState;
 
-   constructor(version: number, processLineEndings: boolean = true) {
+   constructor(version: number, processLineEndings = true) {
       this.version = version;
       this.processLineEndings = processLineEndings;
       this.text = [];
@@ -51,10 +57,8 @@ class Extractor {
       this.state = Extractor.STATE.WORKING;
    }
 
-   process(segment: Segment | PseudoSpace): void {
-      let typeHack = segment;
-      typeHack = typeHack;
-   }
+   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   public process(segment: Segment | PseudoSpace): void {}
 
    finish(): ExtractResult {
       return {
@@ -78,8 +82,7 @@ class Extractor {
       newText = originalText.replace(LINE_ENDING_REGEX, '\n');
 
       if (this.lastProcessSawCr) {
-         if (originalText[0] === '\n' ||
-            (this.version === 1.1 && originalText[0] === '\u0085')) {
+         if (originalText[0] === '\n' || (this.version === 1.1 && originalText[0] === '\u0085')) {
             newText = newText.substring(1);
          }
       }
@@ -102,7 +105,7 @@ class Extractor {
          } while (currentIndex !== -1);
 
          newRows = rowCount;
-         newColumns = (newText.length - lastIndex);
+         newColumns = newText.length - lastIndex;
       }
 
       this.text.push(originalText);
@@ -138,14 +141,6 @@ class Extractor {
          segments: this.segInfo,
       };
    }
-
 }
 
-export default Extractor;
-export {
-   Extractor,
-   ExtractResult,
-   SegmentInfo,
-   DoneSegment,
-   ExtractorState,
-};
+export { Extractor, ExtractResult, SegmentInfo, DoneSegment, ExtractorState };

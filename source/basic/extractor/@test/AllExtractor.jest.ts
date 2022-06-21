@@ -1,11 +1,11 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
+import { describe, it, expect } from '@jest/globals';
 import { EntityId, Range } from 'basic';
 
-import AllExtractor from '../AllExtractor';
-import Extractor from '../Extractor';
-import {DONE_SEGMENT, PseudoSpace, Segment} from '../Segment';
+import { AllExtractor } from '../AllExtractor';
+import { Extractor } from '../Extractor';
+import { DONE_SEGMENT, PseudoSpace, Segment } from '../Segment';
 
 describe('AllExtractor', () => {
    let segmentRange: Range;
@@ -15,7 +15,6 @@ describe('AllExtractor', () => {
    });
 
    describe('basic behavior', () => {
-
       it('reports success when it has found a everything to end of input', () => {
          const extractor = new AllExtractor(1.0, true, []);
          extractor.process(new Segment('xx', segmentRange));
@@ -38,15 +37,17 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'testAll',
             original: 'testAll',
-            segments: [ {
-               chars: 7,
-               rows: 0,
-               columns: 7,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 7,
+                  rows: 0,
+                  columns: 7,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            } ],
+            ],
          });
       });
 
@@ -57,54 +58,60 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'testAll',
             original: 'testAll',
-            segments: [ {
-               chars: 7,
-               rows: 0,
-               columns: 7,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 7,
+                  rows: 0,
+                  columns: 7,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            } ],
+            ],
          });
       });
 
       it('delivers a everything to the terminator', () => {
-         const extractor = new AllExtractor(1.0, true, [ 'x' ]);
+         const extractor = new AllExtractor(1.0, true, ['x']);
          const segment = new Segment('testxAll');
          extractor.process(segment);
 
          expect(extractor.finish()).toEqual({
             text: 'test',
             original: 'test',
-            segments: [ {
-               chars: 4,
-               rows: 0,
-               columns: 4,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 4,
+                  rows: 0,
+                  columns: 4,
+                  segment: segment,
+               },
+            ],
          });
       });
 
       it('allows "]" as a terminator', () => {
-         const extractor = new AllExtractor(1.0, true, [ 'x', 'y', ']' ]);
+         const extractor = new AllExtractor(1.0, true, ['x', 'y', ']']);
          const segment = new Segment('testxAll');
          extractor.process(segment);
 
          expect(extractor.finish()).toEqual({
             text: 'test',
             original: 'test',
-            segments: [ {
-               chars: 4,
-               rows: 0,
-               columns: 4,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 4,
+                  rows: 0,
+                  columns: 4,
+                  segment: segment,
+               },
+            ],
          });
       });
 
       it('return trailing characters that almost look like a match', () => {
-         const extractor = new AllExtractor(1.0, true, [ '<', ']]>' ]);
+         const extractor = new AllExtractor(1.0, true, ['<', ']]>']);
          const segment = new Segment('[&three;]]');
          segment.index = 8;
          extractor.process(segment);
@@ -112,18 +119,20 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: ']]',
             original: ']]',
-            segments: [ {
-               chars: 2,
-               rows: 0,
-               columns: 2,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 2,
+                  rows: 0,
+                  columns: 2,
+                  segment: segment,
+               },
+            ],
          });
          expect(extractor.state).toEqual(Extractor.STATE.SUCCESS);
       });
 
       it('do not return characters that are a legal, but ambiguous match', () => {
-         const extractor = new AllExtractor(1.0, true, [ ']]', ']]>' ]);
+         const extractor = new AllExtractor(1.0, true, [']]', ']]>']);
          const segment = new Segment('[&three;]]');
          segment.index = 8;
          extractor.process(segment);
@@ -131,36 +140,40 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: '',
             original: '',
-            segments: [ {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: segment,
+               },
+            ],
          });
          expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
       });
 
       it('returns characters up to, but not including, an ambiguous match', () => {
-         const extractor = new AllExtractor(1.0, true, [ ']]', ']]>' ]);
+         const extractor = new AllExtractor(1.0, true, [']]', ']]>']);
          const segment = new Segment('x]]');
          extractor.process(segment);
 
          expect(extractor.finish()).toEqual({
             text: 'x',
             original: 'x',
-            segments: [ {
-               chars: 1,
-               rows: 0,
-               columns: 1,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 1,
+                  rows: 0,
+                  columns: 1,
+                  segment: segment,
+               },
+            ],
          });
          expect(extractor.state).toEqual(Extractor.STATE.SUCCESS);
       });
 
       it('returns all characters when there are false matches', () => {
-         const extractor = new AllExtractor(1.0, true, [ ']]', ']]>' ]);
+         const extractor = new AllExtractor(1.0, true, [']]', ']]>']);
          const segment = new Segment('[&three;]x]');
          segment.index = 8;
          extractor.process(segment);
@@ -168,18 +181,20 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: ']x]',
             original: ']x]',
-            segments: [ {
-               chars: 3,
-               rows: 0,
-               columns: 3,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 3,
+                  rows: 0,
+                  columns: 3,
+                  segment: segment,
+               },
+            ],
          });
          expect(extractor.state).toEqual(Extractor.STATE.SUCCESS);
       });
 
       it('returns all characters when there are many repeated false matches', () => {
-         const extractor = new AllExtractor(1.0, true, [ ']]', ']]>' ]);
+         const extractor = new AllExtractor(1.0, true, [']]', ']]>']);
          const segment = new Segment('[&three;]x]');
          segment.index = 8;
          const segmentTwo = new Segment('1]2]3]4]5]');
@@ -193,22 +208,26 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: ']x]1]2]3]4]5]6]7]',
             original: ']x]1]2]3]4]5]6]7]',
-            segments: [ {
-               chars: 3,
-               rows: 0,
-               columns: 3,
-               segment: segment,
-            }, {
-               chars: 10,
-               rows: 0,
-               columns: 10,
-               segment: segmentTwo,
-            }, {
-               chars: 4,
-               rows: 0,
-               columns: 4,
-               segment: segmentThree,
-            } ],
+            segments: [
+               {
+                  chars: 3,
+                  rows: 0,
+                  columns: 3,
+                  segment: segment,
+               },
+               {
+                  chars: 10,
+                  rows: 0,
+                  columns: 10,
+                  segment: segmentTwo,
+               },
+               {
+                  chars: 4,
+                  rows: 0,
+                  columns: 4,
+                  segment: segmentThree,
+               },
+            ],
          });
          expect(extractor.state).toEqual(Extractor.STATE.SUCCESS);
       });
@@ -220,21 +239,21 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: ' ',
             original: '',
-            segments: [ {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: {
-                  type: DONE_SEGMENT,
+            segments: [
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: {
+                     type: DONE_SEGMENT,
+                  },
                },
-            } ],
+            ],
          });
       });
-
    });
 
    describe('finish()', () => {
-
       it('returns whatever has been found when it is called', () => {
          const extractor = new AllExtractor(1.0, true, []);
          const segment = new Segment(' ', segmentRange);
@@ -243,22 +262,22 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: ' ',
             original: ' ',
-            segments: [ {
-               chars: 1,
-               rows: 0,
-               columns: 1,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 1,
+                  rows: 0,
+                  columns: 1,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            } ],
+            ],
          });
       });
-
    });
 
    describe('segment treatment', () => {
-
       it('correctly changes segment index after processing', () => {
          const extractor = new AllExtractor(1.0, true, []);
          const segment = new Segment('  xy');
@@ -269,62 +288,63 @@ describe('AllExtractor', () => {
       });
 
       it('does not change segment index when terminator found immediately', () => {
-         const extractor = new AllExtractor(1.0, true, [ 'h' ]);
+         const extractor = new AllExtractor(1.0, true, ['h']);
          const segment = new Segment('hi there');
          extractor.process(segment);
          extractor.finish();
 
          expect(segment.index).toEqual(0);
       });
-
    });
 
    describe('segment spanning', () => {
-
       it('reports failure state if no segments provided', () => {
-         const extractor = new AllExtractor(1.0, true, [ '<' ]);
+         const extractor = new AllExtractor(1.0, true, ['<']);
          extractor.finish();
 
          expect(extractor.state).toEqual(Extractor.STATE.FAILURE);
       });
 
       it('reports working state when the segment is consumed but end not found', () => {
-         const extractor = new AllExtractor(1.0, true, [ '<' ]);
+         const extractor = new AllExtractor(1.0, true, ['<']);
          extractor.process(new Segment(' ', segmentRange));
 
          expect(extractor.state).toEqual(Extractor.STATE.WORKING);
       });
 
       it('returns text and ranges across multiple segments', () => {
-         const extractor = new AllExtractor(1.0, true, [ 'x' ]);
+         const extractor = new AllExtractor(1.0, true, ['x']);
          extractor.process(new Segment('sun', segmentRange));
          extractor.process(new Segment('funny'));
 
          expect(extractor.finish()).toEqual({
             text: 'sunfunny',
             original: 'sunfunny',
-            segments: [ {
-               chars: 3,
-               rows: 0,
-               columns: 3,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 3,
+                  rows: 0,
+                  columns: 3,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            }, {
-               chars: 5,
-               rows: 0,
-               columns: 5,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+               {
+                  chars: 5,
+                  rows: 0,
+                  columns: 5,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            } ],
+            ],
          });
       });
 
       it('returns all spaces and ranges across multiple segments and is terminated by a terminator', () => {
-         const extractor = new AllExtractor(1.0, true, [ '<' ]);
+         const extractor = new AllExtractor(1.0, true, ['<']);
          const segment = new Segment('two<isenough');
          extractor.process(new Segment('one,', segmentRange));
          extractor.process(segment);
@@ -332,25 +352,28 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'one,two',
             original: 'one,two',
-            segments: [ {
-               chars: 4,
-               rows: 0,
-               columns: 4,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 4,
+                  rows: 0,
+                  columns: 4,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            }, {
-               chars: 3,
-               rows: 0,
-               columns: 3,
-               segment: segment,
-            } ],
+               {
+                  chars: 3,
+                  rows: 0,
+                  columns: 3,
+                  segment: segment,
+               },
+            ],
          });
       });
 
       it('returns all text when picking up in mid-segment', () => {
-         const extractor = new AllExtractor(1.0, true, [ '<' ]);
+         const extractor = new AllExtractor(1.0, true, ['<']);
          const segment = new Segment('xyz', segmentRange);
          segment.index = 2;
          extractor.process(segment);
@@ -358,20 +381,22 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'z',
             original: 'z',
-            segments: [ {
-               chars: 1,
-               rows: 0,
-               columns: 1,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange,
+            segments: [
+               {
+                  chars: 1,
+                  rows: 0,
+                  columns: 1,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            } ],
+            ],
          });
       });
 
       it('returns all text when picking up in mid-segment', () => {
-         const extractor = new AllExtractor(1.0, true, [ '/>' ]);
+         const extractor = new AllExtractor(1.0, true, ['/>']);
          const segment = new Segment('f/');
          const seg1 = new Segment('f/');
          seg1.index = 1;
@@ -381,17 +406,20 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'f',
             original: 'f',
-            segments: [ {
-               chars: 1,
-               rows: 0,
-               columns: 1,
-               segment: seg1,
-            }, {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: new Segment('>'),
-            } ],
+            segments: [
+               {
+                  chars: 1,
+                  rows: 0,
+                  columns: 1,
+                  segment: seg1,
+               },
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: new Segment('>'),
+               },
+            ],
          });
       });
 
@@ -403,22 +431,25 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: ' xxx',
             original: 'xxx',
-            segments: [ {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: {
-                  type: DONE_SEGMENT,
+            segments: [
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: {
+                     type: DONE_SEGMENT,
+                  },
                },
-            }, {
-               chars: 3,
-               rows: 0,
-               columns: 3,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange
+               {
+                  chars: 3,
+                  rows: 0,
+                  columns: 3,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            } ],
+            ],
          });
       });
 
@@ -430,22 +461,25 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'xxx ',
             original: 'xxx',
-            segments: [ {
-               chars: 3,
-               rows: 0,
-               columns: 3,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange
+            segments: [
+               {
+                  chars: 3,
+                  rows: 0,
+                  columns: 3,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            }, {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: {
-                  type: DONE_SEGMENT,
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: {
+                     type: DONE_SEGMENT,
+                  },
                },
-            } ],
+            ],
          });
       });
 
@@ -457,29 +491,30 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'xxx',
             original: 'xxx',
-            segments: [ {
-               chars: 3,
-               rows: 0,
-               columns: 3,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: segmentRange
+            segments: [
+               {
+                  chars: 3,
+                  rows: 0,
+                  columns: 3,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: segmentRange,
+                  },
                },
-            }, {
-               chars: 0,
-               rows: 0,
-               columns: 0,
-               segment: new PseudoSpace(),
-            } ],
+               {
+                  chars: 0,
+                  rows: 0,
+                  columns: 0,
+                  segment: new PseudoSpace(),
+               },
+            ],
          });
       });
-
    });
 
    describe('newlines', () => {
-
       it('adjusts line breaks and counts', () => {
-         const extractor = new AllExtractor(1.0, true, [ '!' ]);
+         const extractor = new AllExtractor(1.0, true, ['!']);
          const segment = new Segment('fox\r\nand\nfriends!');
          extractor.process(segment);
          extractor.finish();
@@ -487,17 +522,19 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'fox\nand\nfriends',
             original: 'fox\r\nand\nfriends',
-            segments: [ {
-               chars: 16,
-               rows: 2,
-               columns: 7,
-               segment: segment,
-            } ],
+            segments: [
+               {
+                  chars: 16,
+                  rows: 2,
+                  columns: 7,
+                  segment: segment,
+               },
+            ],
          });
       });
 
       it('copes with CR/LF on segment boundaries', () => {
-         const extractor = new AllExtractor(1.0, true, [ '!' ]);
+         const extractor = new AllExtractor(1.0, true, ['!']);
          const segment1 = new Segment('fox\r');
          const segment2 = new Segment('\nand\nfriends!');
          extractor.process(segment1);
@@ -507,25 +544,28 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'fox\nand\nfriends',
             original: 'fox\r\nand\nfriends',
-            segments: [ {
-               chars: 4,
-               rows: 1,
-               columns: 0,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+            segments: [
+               {
+                  chars: 4,
+                  rows: 1,
+                  columns: 0,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            }, {
-               chars: 12,
-               rows: 1,
-               columns: 7,
-               segment: segment2,
-            } ],
+               {
+                  chars: 12,
+                  rows: 1,
+                  columns: 7,
+                  segment: segment2,
+               },
+            ],
          });
       });
 
       it('copes with CR/\\u0085 on segment boundaries', () => {
-         const extractor = new AllExtractor(1.1, true, [ '!' ]);
+         const extractor = new AllExtractor(1.1, true, ['!']);
          const segment1 = new Segment('fox\r');
          const segment2 = new Segment('\u0085and\nfriends!');
          extractor.process(segment1);
@@ -535,25 +575,28 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'fox\nand\nfriends',
             original: 'fox\r\u0085and\nfriends',
-            segments: [ {
-               chars: 4,
-               rows: 1,
-               columns: 0,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+            segments: [
+               {
+                  chars: 4,
+                  rows: 1,
+                  columns: 0,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            }, {
-               chars: 12,
-               rows: 1,
-               columns: 7,
-               segment: segment2,
-            } ],
+               {
+                  chars: 12,
+                  rows: 1,
+                  columns: 7,
+                  segment: segment2,
+               },
+            ],
          });
       });
 
       it('copes with CR on segment boundaries', () => {
-         const extractor = new AllExtractor(1.0, true, [ '!' ]);
+         const extractor = new AllExtractor(1.0, true, ['!']);
          const segment1 = new Segment('fox\r');
          const segment2 = new Segment('\rand\nfriends!');
          extractor.process(segment1);
@@ -563,25 +606,28 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'fox\n\nand\nfriends',
             original: 'fox\r\rand\nfriends',
-            segments: [ {
-               chars: 4,
-               rows: 1,
-               columns: 0,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+            segments: [
+               {
+                  chars: 4,
+                  rows: 1,
+                  columns: 0,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            }, {
-               chars: 12,
-               rows: 2,
-               columns: 7,
-               segment: segment2,
-            } ],
+               {
+                  chars: 12,
+                  rows: 2,
+                  columns: 7,
+                  segment: segment2,
+               },
+            ],
          });
       });
 
       it('counts rows correctly when a mismatch happens across segment boundaries', () => {
-         const extractor = new AllExtractor(1.0, true, [ '<!--' ]);
+         const extractor = new AllExtractor(1.0, true, ['<!--']);
          const segment1 = new Segment('fox<!');
          const segment2 = new Segment('-and\nfriends<!--');
          extractor.process(segment1);
@@ -591,25 +637,28 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'fox<!-and\nfriends',
             original: 'fox<!-and\nfriends',
-            segments: [ {
-               chars: 5,
-               rows: 0,
-               columns: 5,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+            segments: [
+               {
+                  chars: 5,
+                  rows: 0,
+                  columns: 5,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            }, {
-               chars: 12,
-               rows: 1,
-               columns: 7,
-               segment: segment2,
-            } ],
+               {
+                  chars: 12,
+                  rows: 1,
+                  columns: 7,
+                  segment: segment2,
+               },
+            ],
          });
       });
 
       it('counts rows correctly when a newline is found after a mismatched terminator', () => {
-         const extractor = new AllExtractor(1.0, true, [ '<!--' ]);
+         const extractor = new AllExtractor(1.0, true, ['<!--']);
          const segment1 = new Segment('fox<!-\nand\nfriends<!--');
          extractor.process(segment1);
          extractor.finish();
@@ -617,18 +666,19 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'fox<!-\nand\nfriends',
             original: 'fox<!-\nand\nfriends',
-            segments: [ {
-               chars: 18,
-               rows: 2,
-               columns: 7,
-               segment: segment1,
-            } ],
+            segments: [
+               {
+                  chars: 18,
+                  rows: 2,
+                  columns: 7,
+                  segment: segment1,
+               },
+            ],
          });
       });
 
-
       it('does NOT do newline replacement when processNewLines is false', () => {
-         const extractor = new AllExtractor(1.0, false, [ '!' ]);
+         const extractor = new AllExtractor(1.0, false, ['!']);
          const segment1 = new Segment('fox\r');
          const segment2 = new Segment('\nand\nfriends!');
          extractor.process(segment1);
@@ -638,29 +688,30 @@ describe('AllExtractor', () => {
          expect(extractor.finish()).toEqual({
             text: 'fox\r\nand\nfriends',
             original: 'fox\r\nand\nfriends',
-            segments: [ {
-               chars: 4,
-               rows: 1,
-               columns: 0,
-               segment: {
-                  type: DONE_SEGMENT,
-                  range: undefined,
+            segments: [
+               {
+                  chars: 4,
+                  rows: 1,
+                  columns: 0,
+                  segment: {
+                     type: DONE_SEGMENT,
+                     range: undefined,
+                  },
                },
-            }, {
-               chars: 12,
-               rows: 1,
-               columns: 7,
-               segment: segment2,
-            } ],
+               {
+                  chars: 12,
+                  rows: 1,
+                  columns: 7,
+                  segment: segment2,
+               },
+            ],
          });
       });
-
    });
 
    describe('terminators', () => {
-
       it('can cross multiple ambiguous terminators and match one', () => {
-         const extractor = new AllExtractor(1.0, true, [ '<!--', '<!-', '<!' ]);
+         const extractor = new AllExtractor(1.0, true, ['<!--', '<!-', '<!']);
          extractor.process(new Segment('Te'));
          extractor.process(new Segment('xt<'));
          extractor.process(new Segment('!'));
@@ -671,7 +722,7 @@ describe('AllExtractor', () => {
       });
 
       it('recognizes terminator across segments', () => {
-         const extractor = new AllExtractor(1.0, true, [ '<!--' ]);
+         const extractor = new AllExtractor(1.0, true, ['<!--']);
          extractor.process(new Segment('Te'));
          extractor.process(new Segment('xt<'));
          extractor.process(new Segment('!'));
@@ -682,7 +733,7 @@ describe('AllExtractor', () => {
       });
 
       it('returns text including a misleading almost-terminator across segment boundaries', () => {
-         const extractor = new AllExtractor(1.0, true, [ '<!---' ]);
+         const extractor = new AllExtractor(1.0, true, ['<!---']);
          extractor.process(new Segment('Te'));
          extractor.process(new Segment('xt<'));
          extractor.process(new Segment('!'));
@@ -693,26 +744,24 @@ describe('AllExtractor', () => {
       });
 
       it('returns text matches second possible terminator', () => {
-         const extractor = new AllExtractor(1.0, true, [ '0', '1' ]);
+         const extractor = new AllExtractor(1.0, true, ['0', '1']);
          extractor.process(new Segment('Text10'));
 
          expect(extractor.finish().text).toEqual('Text');
       });
 
       it('returns text including a misleading almost-terminator at input end', () => {
-         const extractor = new AllExtractor(1.0, true, [ '<!--' ]);
+         const extractor = new AllExtractor(1.0, true, ['<!--']);
          extractor.process(new Segment('Text<!-'));
 
          expect(extractor.finish().text).toEqual('Text<!-');
       });
 
       it('returns the value minus the terminator if the terminator is at the end', () => {
-         const extractor = new AllExtractor(1.0, true, [ '<!--' ]);
+         const extractor = new AllExtractor(1.0, true, ['<!--']);
          extractor.process(new Segment('Text<!--'));
 
          expect(extractor.finish().text).toEqual('Text');
       });
-
    });
-
 });

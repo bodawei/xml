@@ -212,7 +212,7 @@ class PTokenParser {
     * to do our processing, and feed that information into the stream.
     */
    private examineDeclaration(done: DeliverPToken): void {
-      this.sTokenSource.extractNoParams('peekDecl', (sToken) => {
+      this.sTokenSource.extract('peekDecl', (sToken) => {
          if (sToken && !this.isConfVerDelivered) {
             const processedString = sToken.str.replace(WHITESPACE_REGEXP, '');
             const match = VERSION_REGEXP.exec(processedString);
@@ -232,7 +232,7 @@ class PTokenParser {
    }
 
    private parseContent(deliverParse: DeliverPToken): void {
-      this.sTokenSource.extractNoParams('peekChar', (sToken) => {
+      this.sTokenSource.extract('peekChar', (sToken) => {
          if (!sToken) {
             deliverParse(undefined);
             return;
@@ -266,7 +266,7 @@ class PTokenParser {
                      if (sToken) {
                         deliverParse(new CharDataPToken({ text: sToken }));
                      } else {
-                        this.sTokenSource.extractNoParams('char', (sToken) => {
+                        this.sTokenSource.extract('char', (sToken) => {
                            // Our trouble is if we are matching ]]> we'll never continue.  So, we
                            if (sToken) {
                               deliverParse(new CharDataPToken({ text: sToken }));
@@ -292,7 +292,7 @@ class PTokenParser {
    }
 
    private parseMarkup(deliverParse: DeliverPToken): void {
-      this.sTokenSource.extractNoParams('markup', (result) => {
+      this.sTokenSource.extract('markup', (result) => {
          switch (result?.str) {
             case '&':
                parseGeneralEntityReference(this.sTokenSource, result, deliverParse);

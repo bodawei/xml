@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import Extractor from './Extractor';
-import {PseudoSpace, DONE_SEGMENT, PSEUDO_SPACE, Segment} from './Segment';
+import { Extractor } from './Extractor';
+import { PseudoSpace, DONE_SEGMENT, PSEUDO_SPACE, Segment } from './Segment';
 
 /**********************************************************************\
  A MatchExtractor will look for the specified candidate string starting
@@ -19,8 +19,11 @@ import {PseudoSpace, DONE_SEGMENT, PSEUDO_SPACE, Segment} from './Segment';
 
 class MatchExtractor extends Extractor {
    private _candidate: string;
+
    private _candIndex: number;
+
    private _firstSegment: Segment | PseudoSpace | undefined;
+
    private _firstIndex: number;
 
    /* istanbul ignore next */ // Istanbul is confused by node transpilation
@@ -84,7 +87,8 @@ class MatchExtractor extends Extractor {
             info.segment = { type: DONE_SEGMENT };
             return;
          }
-         if ((info.segment as Segment).atEnd()) { // typeHack
+         if ((info.segment as Segment).atEnd()) {
+            // typeHack
             info.segment = { type: DONE_SEGMENT, range: info.segment.range };
          }
       });
@@ -113,7 +117,6 @@ class MatchExtractor extends Extractor {
             return this.innerFinish();
       }
    }
-
 }
 
-export default MatchExtractor;
+export { MatchExtractor };

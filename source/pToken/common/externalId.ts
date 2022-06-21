@@ -77,7 +77,7 @@ function parseExternalType(
       }
 
       base.extractToObject('word', terminators, newExtId, 'externalType');
-      base.extractNoParams('space', (externalTypeSpace) => {
+      base.extract('space', (externalTypeSpace) => {
          newExtId.externalTypeSpace = externalTypeSpace;
          deliverExternalType(newExtId, capitalType);
       });
@@ -97,7 +97,7 @@ function parsePublic(
          return;
       }
 
-      base.extractNoParams('space', (space) => {
+      base.extract('space', (space) => {
          result.publicSpace = space;
          deliverPublic(result);
       });

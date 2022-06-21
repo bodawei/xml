@@ -11,7 +11,7 @@ describe('entityValueToSTokenSource() (unit)', () => {
    it('returns an empty STokenSource when given an empty EntityValuePToken', (done) => {
       const result = entityValueToSTokenSource([], new EntityId());
 
-      result.extractNoParams('all', (stoken) => {
+      result.extract('all', (stoken) => {
          expect(stoken).toBeUndefined();
          done();
       });
@@ -23,7 +23,7 @@ describe('entityValueToSTokenSource() (unit)', () => {
          new EntityId(),
       );
 
-      result.extractNoParams('all', (stoken) => {
+      result.extract('all', (stoken) => {
          expect(stoken!.str).toEqual('wowzers');
          done();
       });
@@ -55,7 +55,7 @@ describe('entityValueToSTokenSource() (unit)', () => {
          new EntityId(),
       );
 
-      result.extractNoParams('all', (stoken) => {
+      result.extract('all', (stoken) => {
          expect(stoken!.str).toEqual('Aonethree');
          done();
       });

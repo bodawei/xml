@@ -67,12 +67,12 @@ function parse(source: STokenSource, type: WordListType, deliverPToken: DeliverP
       }
 
       const wlProps: WordListProps = { open: charSToken };
-      source.extractToObjectNoParams('space', wlProps, 'openSpace');
+      source.extractToObject('space', wlProps, 'openSpace');
 
       parseNames(source, (pToken) => {
          wlProps.words = pToken;
          source.extractToObject('match', ')', wlProps, 'close');
-         source.extractNoParams('space', (spaceSToken?) => {
+         source.extract('space', (spaceSToken?) => {
             wlProps.closeSpace = spaceSToken;
 
             deliverPToken(new WordListPToken(type, wlProps));
@@ -82,19 +82,19 @@ function parse(source: STokenSource, type: WordListType, deliverPToken: DeliverP
 }
 
 function parseNames(source: STokenSource, deliverPToken: DeliverNamePToken): void {
-   source.extractNoParams('peekChar', (charSToken) => {
+   source.extract('peekChar', (charSToken) => {
       if (!charSToken || charSToken.str === ')' || charSToken.str === '%' || charSToken.str === '>') {
          deliverPToken([]);
          return;
       }
 
-      let aWord = {};
+      let aWord: WordListEntryPToken = {};
 
       // Codi will always match at least one of these.
       source.extractToObject('word', [ ')', '%', '>', '|' ], aWord, 'word');
-      source.extractToObjectNoParams('space', aWord, 'wordSpace');
+      source.extractToObject('space', aWord, 'wordSpace');
       source.extractToObject('match', '|', aWord, 'connector');
-      source.extractToObjectNoParams('space', aWord, 'connectorSpace');
+      source.extractToObject('space', aWord, 'connectorSpace');
       parseNames(source, (result) => {
          result.unshift(aWord);
          deliverPToken(result);

@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import Extractor from './Extractor';
-import {PseudoSpace, DONE_SEGMENT, PSEUDO_SPACE, Segment} from './Segment';
+import { Extractor } from './Extractor';
+import { PseudoSpace, DONE_SEGMENT, PSEUDO_SPACE, Segment } from './Segment';
 
 const SPACE_10_REGEX = /[ \t\n\r]+/g;
 const SPACE_11_REGEX = /[ \t\n\r\u0085\u2028]+/g;
@@ -75,7 +75,6 @@ class SpaceExtractor extends Extractor {
 
       return result;
    }
-
 }
 
-export default SpaceExtractor;
+export { SpaceExtractor };

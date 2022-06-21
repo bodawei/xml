@@ -22,6 +22,7 @@ interface RawInstructionField {
    value?: SToken;
    closeQuote?: SToken;
    valueSpace?: SToken;
+   [field: string]: SToken | undefined;
 }
 
 interface RawFieldedInstruction {
@@ -94,9 +95,9 @@ function addField(
    attrs.push(field);
 
    source.extractToObject('word', DECL_NAME_TERMINATORS, field, 'name');
-   source.extractToObjectNoParams('space', field, 'nameSpace');
+   source.extractToObject('space', field, 'nameSpace');
    source.extractToObject('match', '=', field, 'equal');
-   source.extractToObjectNoParams('space', field, 'equalSpace');
+   source.extractToObject('space', field, 'equalSpace');
    literal.parse(source, undefined, (literal) => {
       field.openQuote = literal?.openQuote;
       field.closeQuote = literal?.closeQuote;
@@ -108,7 +109,7 @@ function addField(
       }
 
       if (literal) {
-         source.extractToObjectNoParams('space', field, 'valueSpace');
+         source.extractToObject('space', field, 'valueSpace');
       }
 
       // eslint-disable-next-line @typescript-eslint/no-use-before-define

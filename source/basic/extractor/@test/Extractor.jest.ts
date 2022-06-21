@@ -1,8 +1,9 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
-import Extractor from '../Extractor';
-import {Segment} from '../Segment';
+import { describe, it, expect } from '@jest/globals';
+
+import { Extractor } from '../Extractor';
+import { Segment } from '../Segment';
 
 describe('Extractor', () => {
    let extractor: Extractor;
@@ -28,5 +29,4 @@ describe('Extractor', () => {
    it('STATE is defined', () => {
       expect(Extractor.STATE).not.toBeUndefined();
    });
-
 });

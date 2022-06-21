@@ -15,7 +15,7 @@ function getText(
    doAsyncWhileLoop<Array<UnexpandedMarkupToken>>(
       (callback) => {
          parseText(source, ["'", '"', '%', '>', ']'], (textPToken) => {
-            source.extractNoParams('peekChar', (next) => {
+            source.extract('peekChar', (next) => {
                if (!next || (next.str !== '"' && next.str !== "'")) {
                   callback(textPToken ? [textPToken] : undefined);
                   return;
@@ -61,7 +61,7 @@ function parseUnexpanded(
    propName: string,
    done: (value: UnexpandedMarkupDetails | undefined) => void,
 ): void {
-   source.extractNoParams('peekChar', (sToken) => {
+   source.extract('peekChar', (sToken) => {
       if (!sToken || sToken.str !== '%') {
          done(undefined);
          return;
