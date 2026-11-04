@@ -1,4 +1,5 @@
 .nyc_output
+.context
 .DS_Store
 admin
 temp
