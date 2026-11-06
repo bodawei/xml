@@ -98,7 +98,7 @@ describe('ContentModel (integration)', () => {
                ContentModelP {
                  "close": SToken {
                    "originalStr": ")",
-                   "ranges": Array [
+                   "ranges": [
                      Range {
                        "endColumn": 43,
                        "endIndex": 43,
@@ -116,11 +116,11 @@ describe('ContentModel (integration)', () => {
                    "str": ")",
                  },
                  "closeSpace": undefined,
-                 "delimitedParticles": Array [
-                   Object {
+                 "delimitedParticles": [
+                   {
                      "delimiter": SToken {
                        "originalStr": "|",
-                       "ranges": Array [
+                       "ranges": [
                          Range {
                            "endColumn": 8,
                            "endIndex": 8,
@@ -139,7 +139,7 @@ describe('ContentModel (integration)', () => {
                      },
                      "delimiterSpace": SToken {
                        "originalStr": " ",
-                       "ranges": Array [
+                       "ranges": [
                          Range {
                            "endColumn": 9,
                            "endIndex": 9,
@@ -156,10 +156,10 @@ describe('ContentModel (integration)', () => {
                        ],
                        "str": " ",
                      },
-                     "particle": Object {
+                     "particle": {
                        "name": SToken {
                          "originalStr": "one",
-                         "ranges": Array [
+                         "ranges": [
                            Range {
                              "endColumn": 5,
                              "endIndex": 5,
@@ -179,7 +179,7 @@ describe('ContentModel (integration)', () => {
                        "nameSpace": undefined,
                        "repeat": SToken {
                          "originalStr": "+",
-                         "ranges": Array [
+                         "ranges": [
                            Range {
                              "endColumn": 6,
                              "endIndex": 6,
@@ -198,7 +198,7 @@ describe('ContentModel (integration)', () => {
                        },
                        "repeatSpace": SToken {
                          "originalStr": " ",
-                         "ranges": Array [
+                         "ranges": [
                            Range {
                              "endColumn": 7,
                              "endIndex": 7,
@@ -217,10 +217,10 @@ describe('ContentModel (integration)', () => {
                        },
                      },
                    },
-                   Object {
+                   {
                      "delimiter": SToken {
                        "originalStr": "|",
-                       "ranges": Array [
+                       "ranges": [
                          Range {
                            "endColumn": 37,
                            "endIndex": 37,
@@ -239,7 +239,7 @@ describe('ContentModel (integration)', () => {
                      },
                      "delimiterSpace": SToken {
                        "originalStr": " ",
-                       "ranges": Array [
+                       "ranges": [
                          Range {
                            "endColumn": 38,
                            "endIndex": 38,
@@ -259,7 +259,7 @@ describe('ContentModel (integration)', () => {
                      "particle": ContentModelP {
                        "close": SToken {
                          "originalStr": ")",
-                         "ranges": Array [
+                         "ranges": [
                            Range {
                              "endColumn": 34,
                              "endIndex": 34,
@@ -277,11 +277,11 @@ describe('ContentModel (integration)', () => {
                          "str": ")",
                        },
                        "closeSpace": undefined,
-                       "delimitedParticles": Array [
-                         Object {
+                       "delimitedParticles": [
+                         {
                            "delimiter": SToken {
                              "originalStr": ",",
-                             "ranges": Array [
+                             "ranges": [
                                Range {
                                  "endColumn": 28,
                                  "endIndex": 28,
@@ -300,7 +300,7 @@ describe('ContentModel (integration)', () => {
                            },
                            "delimiterSpace": SToken {
                              "originalStr": " ",
-                             "ranges": Array [
+                             "ranges": [
                                Range {
                                  "endColumn": 29,
                                  "endIndex": 29,
@@ -320,7 +320,7 @@ describe('ContentModel (integration)', () => {
                            "particle": ContentModelP {
                              "close": SToken {
                                "originalStr": ")",
-                               "ranges": Array [
+                               "ranges": [
                                  Range {
                                    "endColumn": 25,
                                    "endIndex": 25,
@@ -338,11 +338,11 @@ describe('ContentModel (integration)', () => {
                                "str": ")",
                              },
                              "closeSpace": undefined,
-                             "delimitedParticles": Array [
-                               Object {
+                             "delimitedParticles": [
+                               {
                                  "delimiter": SToken {
                                    "originalStr": "|",
-                                   "ranges": Array [
+                                   "ranges": [
                                      Range {
                                        "endColumn": 18,
                                        "endIndex": 18,
@@ -361,7 +361,7 @@ describe('ContentModel (integration)', () => {
                                  },
                                  "delimiterSpace": SToken {
                                    "originalStr": " ",
-                                   "ranges": Array [
+                                   "ranges": [
                                      Range {
                                        "endColumn": 19,
                                        "endIndex": 19,
@@ -378,10 +378,10 @@ describe('ContentModel (integration)', () => {
                                    ],
                                    "str": " ",
                                  },
-                                 "particle": Object {
+                                 "particle": {
                                    "name": SToken {
                                      "originalStr": "two",
-                                     "ranges": Array [
+                                     "ranges": [
                                        Range {
                                          "endColumn": 16,
                                          "endIndex": 16,
@@ -400,7 +400,7 @@ describe('ContentModel (integration)', () => {
                                    },
                                    "nameSpace": SToken {
                                      "originalStr": " ",
-                                     "ranges": Array [
+                                     "ranges": [
                                        Range {
                                          "endColumn": 17,
                                          "endIndex": 17,
@@ -421,13 +421,13 @@ describe('ContentModel (integration)', () => {
                                    "repeatSpace": undefined,
                                  },
                                },
-                               Object {
+                               {
                                  "delimiter": undefined,
                                  "delimiterSpace": undefined,
-                                 "particle": Object {
+                                 "particle": {
                                    "name": SToken {
                                      "originalStr": "three",
-                                     "ranges": Array [
+                                     "ranges": [
                                        Range {
                                          "endColumn": 24,
                                          "endIndex": 24,
@@ -452,7 +452,7 @@ describe('ContentModel (integration)', () => {
                              ],
                              "open": SToken {
                                "originalStr": "(",
-                               "ranges": Array [
+                               "ranges": [
                                  Range {
                                    "endColumn": 12,
                                    "endIndex": 12,
@@ -471,7 +471,7 @@ describe('ContentModel (integration)', () => {
                              },
                              "openSpace": SToken {
                                "originalStr": " ",
-                               "ranges": Array [
+                               "ranges": [
                                  Range {
                                    "endColumn": 13,
                                    "endIndex": 13,
@@ -490,7 +490,7 @@ describe('ContentModel (integration)', () => {
                              },
                              "repeat": SToken {
                                "originalStr": "+",
-                               "ranges": Array [
+                               "ranges": [
                                  Range {
                                    "endColumn": 26,
                                    "endIndex": 26,
@@ -509,7 +509,7 @@ describe('ContentModel (integration)', () => {
                              },
                              "repeatSpace": SToken {
                                "originalStr": " ",
-                               "ranges": Array [
+                               "ranges": [
                                  Range {
                                    "endColumn": 27,
                                    "endIndex": 27,
@@ -528,13 +528,13 @@ describe('ContentModel (integration)', () => {
                              },
                            },
                          },
-                         Object {
+                         {
                            "delimiter": undefined,
                            "delimiterSpace": undefined,
-                           "particle": Object {
+                           "particle": {
                              "name": SToken {
                                "originalStr": "four",
-                               "ranges": Array [
+                               "ranges": [
                                  Range {
                                    "endColumn": 33,
                                    "endIndex": 33,
@@ -559,7 +559,7 @@ describe('ContentModel (integration)', () => {
                        ],
                        "open": SToken {
                          "originalStr": "(",
-                         "ranges": Array [
+                         "ranges": [
                            Range {
                              "endColumn": 10,
                              "endIndex": 10,
@@ -578,7 +578,7 @@ describe('ContentModel (integration)', () => {
                        },
                        "openSpace": SToken {
                          "originalStr": " ",
-                         "ranges": Array [
+                         "ranges": [
                            Range {
                              "endColumn": 11,
                              "endIndex": 11,
@@ -597,7 +597,7 @@ describe('ContentModel (integration)', () => {
                        },
                        "repeat": SToken {
                          "originalStr": "?",
-                         "ranges": Array [
+                         "ranges": [
                            Range {
                              "endColumn": 35,
                              "endIndex": 35,
@@ -616,7 +616,7 @@ describe('ContentModel (integration)', () => {
                        },
                        "repeatSpace": SToken {
                          "originalStr": " ",
-                         "ranges": Array [
+                         "ranges": [
                            Range {
                              "endColumn": 36,
                              "endIndex": 36,
@@ -635,13 +635,13 @@ describe('ContentModel (integration)', () => {
                        },
                      },
                    },
-                   Object {
+                   {
                      "delimiter": undefined,
                      "delimiterSpace": undefined,
-                     "particle": Object {
+                     "particle": {
                        "name": SToken {
                          "originalStr": "five",
-                         "ranges": Array [
+                         "ranges": [
                            Range {
                              "endColumn": 42,
                              "endIndex": 42,
@@ -666,7 +666,7 @@ describe('ContentModel (integration)', () => {
                  ],
                  "open": SToken {
                    "originalStr": "(",
-                   "ranges": Array [
+                   "ranges": [
                      Range {
                        "endColumn": 1,
                        "endIndex": 1,
@@ -685,7 +685,7 @@ describe('ContentModel (integration)', () => {
                  },
                  "openSpace": SToken {
                    "originalStr": " ",
-                   "ranges": Array [
+                   "ranges": [
                      Range {
                        "endColumn": 2,
                        "endIndex": 2,

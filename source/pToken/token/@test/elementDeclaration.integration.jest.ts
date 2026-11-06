@@ -87,7 +87,7 @@ describe('elementDeclaration', () => {
                ElementDeclarationPToken {
                  "close": SToken {
                    "originalStr": ">",
-                   "ranges": Array [
+                   "ranges": [
                      Range {
                        "endColumn": 84,
                        "endIndex": 84,
@@ -107,7 +107,7 @@ describe('elementDeclaration', () => {
                  "contentModel": ContentModelP {
                    "close": SToken {
                      "originalStr": ")",
-                     "ranges": Array [
+                     "ranges": [
                        Range {
                          "endColumn": 81,
                          "endIndex": 81,
@@ -125,11 +125,11 @@ describe('elementDeclaration', () => {
                      "str": ")",
                    },
                    "closeSpace": undefined,
-                   "delimitedParticles": Array [
-                     Object {
+                   "delimitedParticles": [
+                     {
                        "delimiter": SToken {
                          "originalStr": "|",
-                         "ranges": Array [
+                         "ranges": [
                            Range {
                              "endColumn": 18,
                              "endIndex": 18,
@@ -148,7 +148,7 @@ describe('elementDeclaration', () => {
                        },
                        "delimiterSpace": SToken {
                          "originalStr": " ",
-                         "ranges": Array [
+                         "ranges": [
                            Range {
                              "endColumn": 19,
                              "endIndex": 19,
@@ -165,10 +165,10 @@ describe('elementDeclaration', () => {
                          ],
                          "str": " ",
                        },
-                       "particle": Object {
+                       "particle": {
                          "name": SToken {
                            "originalStr": "one",
-                           "ranges": Array [
+                           "ranges": [
                              Range {
                                "endColumn": 15,
                                "endIndex": 15,
@@ -188,7 +188,7 @@ describe('elementDeclaration', () => {
                          "nameSpace": undefined,
                          "repeat": SToken {
                            "originalStr": "*",
-                           "ranges": Array [
+                           "ranges": [
                              Range {
                                "endColumn": 16,
                                "endIndex": 16,
@@ -207,7 +207,7 @@ describe('elementDeclaration', () => {
                          },
                          "repeatSpace": SToken {
                            "originalStr": " ",
-                           "ranges": Array [
+                           "ranges": [
                              Range {
                                "endColumn": 17,
                                "endIndex": 17,
@@ -226,10 +226,10 @@ describe('elementDeclaration', () => {
                          },
                        },
                      },
-                     Object {
+                     {
                        "delimiter": SToken {
                          "originalStr": "|",
-                         "ranges": Array [
+                         "ranges": [
                            Range {
                              "endColumn": 25,
                              "endIndex": 25,
@@ -247,10 +247,10 @@ describe('elementDeclaration', () => {
                          "str": "|",
                        },
                        "delimiterSpace": undefined,
-                       "particle": Object {
+                       "particle": {
                          "name": SToken {
                            "originalStr": "two",
-                           "ranges": Array [
+                           "ranges": [
                              Range {
                                "endColumn": 22,
                                "endIndex": 22,
@@ -269,7 +269,7 @@ describe('elementDeclaration', () => {
                          },
                          "nameSpace": SToken {
                            "originalStr": " ",
-                           "ranges": Array [
+                           "ranges": [
                              Range {
                                "endColumn": 23,
                                "endIndex": 23,
@@ -288,7 +288,7 @@ describe('elementDeclaration', () => {
                          },
                          "repeat": SToken {
                            "originalStr": "+",
-                           "ranges": Array [
+                           "ranges": [
                              Range {
                                "endColumn": 24,
                                "endIndex": 24,
@@ -308,10 +308,10 @@ describe('elementDeclaration', () => {
                          "repeatSpace": undefined,
                        },
                      },
-                     Object {
+                     {
                        "delimiter": SToken {
                          "originalStr": "|",
-                         "ranges": Array [
+                         "ranges": [
                            Range {
                              "endColumn": 44,
                              "endIndex": 44,
@@ -330,7 +330,7 @@ describe('elementDeclaration', () => {
                        },
                        "delimiterSpace": SToken {
                          "originalStr": " ",
-                         "ranges": Array [
+                         "ranges": [
                            Range {
                              "endColumn": 45,
                              "endIndex": 45,
@@ -350,7 +350,7 @@ describe('elementDeclaration', () => {
                        "particle": ContentModelP {
                          "close": SToken {
                            "originalStr": ")",
-                           "ranges": Array [
+                           "ranges": [
                              Range {
                                "endColumn": 41,
                                "endIndex": 41,
@@ -368,11 +368,11 @@ describe('elementDeclaration', () => {
                            "str": ")",
                          },
                          "closeSpace": undefined,
-                         "delimitedParticles": Array [
-                           Object {
+                         "delimitedParticles": [
+                           {
                              "delimiter": SToken {
                                "originalStr": ",",
-                               "ranges": Array [
+                               "ranges": [
                                  Range {
                                    "endColumn": 33,
                                    "endIndex": 33,
@@ -390,10 +390,10 @@ describe('elementDeclaration', () => {
                                "str": ",",
                              },
                              "delimiterSpace": undefined,
-                             "particle": Object {
+                             "particle": {
                                "name": SToken {
                                  "originalStr": "threeA",
-                                 "ranges": Array [
+                                 "ranges": [
                                    Range {
                                      "endColumn": 32,
                                      "endIndex": 32,
@@ -415,13 +415,13 @@ describe('elementDeclaration', () => {
                                "repeatSpace": undefined,
                              },
                            },
-                           Object {
+                           {
                              "delimiter": undefined,
                              "delimiterSpace": undefined,
-                             "particle": Object {
+                             "particle": {
                                "name": SToken {
                                  "originalStr": "threeB",
-                                 "ranges": Array [
+                                 "ranges": [
                                    Range {
                                      "endColumn": 39,
                                      "endIndex": 39,
@@ -441,7 +441,7 @@ describe('elementDeclaration', () => {
                                "nameSpace": undefined,
                                "repeat": SToken {
                                  "originalStr": "?",
-                                 "ranges": Array [
+                                 "ranges": [
                                    Range {
                                      "endColumn": 40,
                                      "endIndex": 40,
@@ -464,7 +464,7 @@ describe('elementDeclaration', () => {
                          ],
                          "open": SToken {
                            "originalStr": "(",
-                           "ranges": Array [
+                           "ranges": [
                              Range {
                                "endColumn": 26,
                                "endIndex": 26,
@@ -484,7 +484,7 @@ describe('elementDeclaration', () => {
                          "openSpace": undefined,
                          "repeat": SToken {
                            "originalStr": "+",
-                           "ranges": Array [
+                           "ranges": [
                              Range {
                                "endColumn": 42,
                                "endIndex": 42,
@@ -503,7 +503,7 @@ describe('elementDeclaration', () => {
                          },
                          "repeatSpace": SToken {
                            "originalStr": " ",
-                           "ranges": Array [
+                           "ranges": [
                              Range {
                                "endColumn": 43,
                                "endIndex": 43,
@@ -522,13 +522,13 @@ describe('elementDeclaration', () => {
                          },
                        },
                      },
-                     Object {
+                     {
                        "delimiter": undefined,
                        "delimiterSpace": undefined,
                        "particle": ContentModelP {
                          "close": SToken {
                            "originalStr": ")",
-                           "ranges": Array [
+                           "ranges": [
                              Range {
                                "endColumn": 80,
                                "endIndex": 80,
@@ -546,11 +546,11 @@ describe('elementDeclaration', () => {
                            "str": ")",
                          },
                          "closeSpace": undefined,
-                         "delimitedParticles": Array [
-                           Object {
+                         "delimitedParticles": [
+                           {
                              "delimiter": SToken {
                                "originalStr": ",",
-                               "ranges": Array [
+                               "ranges": [
                                  Range {
                                    "endColumn": 53,
                                    "endIndex": 53,
@@ -569,7 +569,7 @@ describe('elementDeclaration', () => {
                              },
                              "delimiterSpace": SToken {
                                "originalStr": " ",
-                               "ranges": Array [
+                               "ranges": [
                                  Range {
                                    "endColumn": 54,
                                    "endIndex": 54,
@@ -586,10 +586,10 @@ describe('elementDeclaration', () => {
                                ],
                                "str": " ",
                              },
-                             "particle": Object {
+                             "particle": {
                                "name": SToken {
                                  "originalStr": "fourA",
-                                 "ranges": Array [
+                                 "ranges": [
                                    Range {
                                      "endColumn": 52,
                                      "endIndex": 52,
@@ -611,10 +611,10 @@ describe('elementDeclaration', () => {
                                "repeatSpace": undefined,
                              },
                            },
-                           Object {
+                           {
                              "delimiter": SToken {
                                "originalStr": ",",
-                               "ranges": Array [
+                               "ranges": [
                                  Range {
                                    "endColumn": 73,
                                    "endIndex": 73,
@@ -633,7 +633,7 @@ describe('elementDeclaration', () => {
                              },
                              "delimiterSpace": SToken {
                                "originalStr": " ",
-                               "ranges": Array [
+                               "ranges": [
                                  Range {
                                    "endColumn": 74,
                                    "endIndex": 74,
@@ -653,7 +653,7 @@ describe('elementDeclaration', () => {
                              "particle": ContentModelP {
                                "close": SToken {
                                  "originalStr": ")",
-                                 "ranges": Array [
+                                 "ranges": [
                                    Range {
                                      "endColumn": 71,
                                      "endIndex": 71,
@@ -671,11 +671,11 @@ describe('elementDeclaration', () => {
                                  "str": ")",
                                },
                                "closeSpace": undefined,
-                               "delimitedParticles": Array [
-                                 Object {
+                               "delimitedParticles": [
+                                 {
                                    "delimiter": SToken {
                                      "originalStr": "|",
-                                     "ranges": Array [
+                                     "ranges": [
                                        Range {
                                          "endColumn": 63,
                                          "endIndex": 63,
@@ -694,7 +694,7 @@ describe('elementDeclaration', () => {
                                    },
                                    "delimiterSpace": SToken {
                                      "originalStr": " ",
-                                     "ranges": Array [
+                                     "ranges": [
                                        Range {
                                          "endColumn": 64,
                                          "endIndex": 64,
@@ -711,10 +711,10 @@ describe('elementDeclaration', () => {
                                      ],
                                      "str": " ",
                                    },
-                                   "particle": Object {
+                                   "particle": {
                                      "name": SToken {
                                        "originalStr": "fourB1",
-                                       "ranges": Array [
+                                       "ranges": [
                                          Range {
                                            "endColumn": 61,
                                            "endIndex": 61,
@@ -733,7 +733,7 @@ describe('elementDeclaration', () => {
                                      },
                                      "nameSpace": SToken {
                                        "originalStr": " ",
-                                       "ranges": Array [
+                                       "ranges": [
                                          Range {
                                            "endColumn": 62,
                                            "endIndex": 62,
@@ -754,13 +754,13 @@ describe('elementDeclaration', () => {
                                      "repeatSpace": undefined,
                                    },
                                  },
-                                 Object {
+                                 {
                                    "delimiter": undefined,
                                    "delimiterSpace": undefined,
-                                   "particle": Object {
+                                   "particle": {
                                      "name": SToken {
                                        "originalStr": "fourB2",
-                                       "ranges": Array [
+                                       "ranges": [
                                          Range {
                                            "endColumn": 70,
                                            "endIndex": 70,
@@ -785,7 +785,7 @@ describe('elementDeclaration', () => {
                                ],
                                "open": SToken {
                                  "originalStr": "(",
-                                 "ranges": Array [
+                                 "ranges": [
                                    Range {
                                      "endColumn": 55,
                                      "endIndex": 55,
@@ -805,7 +805,7 @@ describe('elementDeclaration', () => {
                                "openSpace": undefined,
                                "repeat": SToken {
                                  "originalStr": "*",
-                                 "ranges": Array [
+                                 "ranges": [
                                    Range {
                                      "endColumn": 72,
                                      "endIndex": 72,
@@ -825,13 +825,13 @@ describe('elementDeclaration', () => {
                                "repeatSpace": undefined,
                              },
                            },
-                           Object {
+                           {
                              "delimiter": undefined,
                              "delimiterSpace": undefined,
-                             "particle": Object {
+                             "particle": {
                                "name": SToken {
                                  "originalStr": "fourC",
-                                 "ranges": Array [
+                                 "ranges": [
                                    Range {
                                      "endColumn": 79,
                                      "endIndex": 79,
@@ -856,7 +856,7 @@ describe('elementDeclaration', () => {
                          ],
                          "open": SToken {
                            "originalStr": "(",
-                           "ranges": Array [
+                           "ranges": [
                              Range {
                                "endColumn": 46,
                                "endIndex": 46,
@@ -875,7 +875,7 @@ describe('elementDeclaration', () => {
                          },
                          "openSpace": SToken {
                            "originalStr": " ",
-                           "ranges": Array [
+                           "ranges": [
                              Range {
                                "endColumn": 47,
                                "endIndex": 47,
@@ -899,7 +899,7 @@ describe('elementDeclaration', () => {
                    ],
                    "open": SToken {
                      "originalStr": "(",
-                     "ranges": Array [
+                     "ranges": [
                        Range {
                          "endColumn": 11,
                          "endIndex": 11,
@@ -918,7 +918,7 @@ describe('elementDeclaration', () => {
                    },
                    "openSpace": SToken {
                      "originalStr": " ",
-                     "ranges": Array [
+                     "ranges": [
                        Range {
                          "endColumn": 12,
                          "endIndex": 12,
@@ -937,7 +937,7 @@ describe('elementDeclaration', () => {
                    },
                    "repeat": SToken {
                      "originalStr": "?",
-                     "ranges": Array [
+                     "ranges": [
                        Range {
                          "endColumn": 82,
                          "endIndex": 82,
@@ -956,7 +956,7 @@ describe('elementDeclaration', () => {
                    },
                    "repeatSpace": SToken {
                      "originalStr": " ",
-                     "ranges": Array [
+                     "ranges": [
                        Range {
                          "endColumn": 83,
                          "endIndex": 83,
@@ -981,7 +981,7 @@ describe('elementDeclaration', () => {
                  "extra": undefined,
                  "name": SToken {
                    "originalStr": "AnElement",
-                   "ranges": Array [
+                   "ranges": [
                      Range {
                        "endColumn": 9,
                        "endIndex": 9,
@@ -1000,7 +1000,7 @@ describe('elementDeclaration', () => {
                  },
                  "nameSpace": SToken {
                    "originalStr": " ",
-                   "ranges": Array [
+                   "ranges": [
                      Range {
                        "endColumn": 10,
                        "endIndex": 10,
@@ -1019,7 +1019,7 @@ describe('elementDeclaration', () => {
                  },
                  "open": SToken {
                    "originalStr": "<!",
-                   "ranges": Array [
+                   "ranges": [
                      Range {
                        "endColumn": 0,
                        "endIndex": 0,

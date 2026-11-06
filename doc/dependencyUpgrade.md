@@ -836,3 +836,32 @@ column, rule, severity), after mapping `import-x/` to `import/` and allowing for
 in the 45 files that lost a comment line. No new warnings on stderr. `lint:ci`, `check:types`, Jest
 (265 suites / 9768 tests) and Jasmine (336 specs) all pass. Prettier-non-conforming status of the
 45 touched files is unchanged (42 before and after).
+
+### DEP-7 — Jest 30 and Babel 7 latest (stacked on DEP-6d)
+
+`jest` and `@jest/globals` 28.1.0 → 30.5.2; `@babel/core` 7.17.10 → 7.29.13, `@babel/preset-env`
+→ 7.29.7, `@babel/preset-typescript` → 7.29.7 (all still Babel 7). `jest.config.js` and
+`.babelrc` needed no change; `coverageProvider: "babel"` and the `.ts` `setupFilesAfterEnv`
+entries work as before.
+
+What Jest 30 broke, and what was done:
+
+-  **Snapshot format (43 of 68 snapshots).** Took the new default, as planned, with `jest -u`;
+   no `snapshotFormat` pin. The diff was checked mechanically rather than only by eye: applying
+   the known conversions (`Array [` → `[`, `Object {` → `{`, `\\"` → `"` for `escapeString: false`)
+   to the old text reproduces the new text exactly, apart from one `'[]'` → `` `[]` `` quote
+   change. No snapshot value changed.
+-  **`toThrowError` alias removed** (7 uses in 4 `*.jest.ts` files) → `toThrow`. A use in a
+   Jasmine spec (`EntityDetails.test.ts`) is Jasmine's own API and was left alone.
+-  **Stricter `toHaveBeenCalledWith` typing** produced 5 type errors in two test files:
+   `{}` is cast `as never` in four assertions in `validityChecker.jest.ts` (runtime equality
+   against `{}` is unchanged), and a spy-typing `Array<never>` in `DocumentChecker.jest.ts`
+   became `Array<unknown>`.
+
+`@types/jest` stays at 27.5.1: Jasmine specs under ts-node need the `jest` namespace (see
+DEP-4), and the types check clean against Jest 30.
+
+**Verified.** Jest with coverage: 265 suites / 9768 tests / 68 snapshots, all passing; coverage
+98.18% statements. Jasmine 336 specs. `check:types` 0 errors. Lint 3313 findings by rule, same as
+before; `lint:ci` passes. Prettier non-conforming files 91, unchanged. `npm audit`: critical
+1 → 0, high 13 → 5, moderate 32, low 2 (39 total).

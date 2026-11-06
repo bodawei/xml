@@ -73,18 +73,18 @@ describe('convertPTokenToXToken() (integration)', () => {
       delete (result as AttListDeclarationXToken).pToken;
       expect(result).toMatchInlineSnapshot(`
          AttListDeclarationXToken {
-           "attDefs": Array [
-             Object {
+           "attDefs": [
+             {
                "defaultType": "REQUIRED",
                "enumeration": undefined,
                "name": "att1",
                "type": "CDATA",
-               "value": Array [
+               "value": [
                  TextXToken {
                    "pToken": TextPToken {
                      "text": SToken {
                        "originalStr": "x",
-                       "ranges": Array [
+                       "ranges": [
                          Range {
                            "endColumn": 0,
                            "endIndex": 0,
@@ -235,19 +235,19 @@ describe('convertPTokenToXToken() (integration)', () => {
          ElementDeclarationXToken {
            "contentModel": ContentModelX {
              "listType": "CHOICE",
-             "particles": Array [
-               Object {
+             "particles": [
+               {
                  "name": "aName",
                  "repeat": "ONEPLUS",
                },
                ContentModelX {
                  "listType": "SEQUENCE",
-                 "particles": Array [
-                   Object {
+                 "particles": [
+                   {
                      "name": "first",
                      "repeat": "ONE",
                    },
-                   Object {
+                   {
                      "name": "second",
                      "repeat": "ZEROONE",
                    },
@@ -272,7 +272,7 @@ describe('convertPTokenToXToken() (integration)', () => {
       delete (result as ElementEmptyXToken).pToken;
       expect(result).toMatchInlineSnapshot(`
          ElementEmptyXToken {
-           "attributes": Array [],
+           "attributes": [],
            "name": "elStart",
            "type": "ELEMENT_EMPTY_XTOKEN",
          }
@@ -301,15 +301,15 @@ describe('convertPTokenToXToken() (integration)', () => {
       delete (result as ElementStartXToken).pToken;
       expect(result).toMatchInlineSnapshot(`
          ElementStartXToken {
-           "attributes": Array [
+           "attributes": [
              AttributeX {
                "name": "att1",
-               "value": Array [
+               "value": [
                  TextXToken {
                    "pToken": TextPToken {
                      "text": SToken {
                        "originalStr": "attr",
-                       "ranges": Array [],
+                       "ranges": [],
                        "str": "attr",
                      },
                      "type": "TEXT_PTOKEN",
@@ -341,7 +341,7 @@ describe('convertPTokenToXToken() (integration)', () => {
            "name": "geDecl",
            "notationDataName": undefined,
            "type": "GENERAL_ENTITY_DECLARATION_XTOKEN",
-           "value": Array [],
+           "value": [],
          }
       `);
    });
@@ -445,12 +445,12 @@ describe('convertPTokenToXToken() (integration)', () => {
            "externalId": undefined,
            "name": "entityName",
            "type": "PARAMETER_ENTITY_DECLARATION_XTOKEN",
-           "value": Array [
+           "value": [
              TextXToken {
                "pToken": TextPToken {
                  "text": SToken {
                    "originalStr": "value",
-                   "ranges": Array [
+                   "ranges": [
                      Range {
                        "endColumn": 0,
                        "endIndex": 0,

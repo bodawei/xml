@@ -19,32 +19,32 @@ describe('ValidityState (unit)', () => {
    it('constructs an empty default state when given no parameters', () => {
       expect(new ValidityState()).toMatchInlineSnapshot(`
          ValidityState {
-           "attributes": Object {},
+           "attributes": {},
            "confVer": ConformanceVersion {
              "edition": 5,
              "type": "CONFORMANCE_VERSION",
              "version": 1,
            },
            "docType": undefined,
-           "dtdContext": Object {
-             "enclosingStack": Array [],
+           "dtdContext": {
+             "enclosingStack": [],
              "inExternalMarkupContext": false,
              "inExternalSubset": false,
              "lastPToken": undefined,
            },
-           "elementContext": Object {
-             "contextStack": Array [],
+           "elementContext": {
+             "contextStack": [],
              "pastEnd": false,
            },
-           "elements": Object {},
-           "generalEntities": Object {},
+           "elements": {},
+           "generalEntities": {},
            "hasExternalSubset": false,
            "hasPeRefs": false,
-           "idRefs": Object {},
-           "ids": Object {},
+           "idRefs": {},
+           "ids": {},
            "isStandalone": false,
-           "notations": Object {},
-           "parameterEntities": Object {},
+           "notations": {},
+           "parameterEntities": {},
          }
       `);
    });

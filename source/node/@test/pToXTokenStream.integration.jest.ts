@@ -43,7 +43,7 @@ describe('PToXTokenStream (integration)', () => {
             });
 
             expect(noPTokens).toMatchInlineSnapshot(`
-               Array [
+               [
                  ConformanceVersion {
                    "edition": 5,
                    "type": "CONFORMANCE_VERSION",
@@ -104,7 +104,7 @@ describe('PToXTokenStream (integration)', () => {
                    "type": "SPACE_XTOKEN",
                  },
                  ElementStartXToken {
-                   "attributes": Array [],
+                   "attributes": [],
                    "name": "doc",
                    "type": "ELEMENT_START_XTOKEN",
                  },

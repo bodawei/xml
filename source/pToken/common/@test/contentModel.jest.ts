@@ -68,7 +68,7 @@ describe('ContentModel (unit)', () => {
             ContentModelP {
               "close": undefined,
               "closeSpace": undefined,
-              "delimitedParticles": Array [],
+              "delimitedParticles": [],
               "open": undefined,
               "openSpace": undefined,
               "repeat": undefined,

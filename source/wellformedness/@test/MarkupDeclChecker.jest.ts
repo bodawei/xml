@@ -142,7 +142,7 @@ describe('MarkupDeclChecker (unit)', () => {
 
          checker.check(parameterEntityEnd, collector);
 
-         expect(() => checker.check(comment, collector)).toThrowError(
+         expect(() => checker.check(comment, collector)).toThrow(
             /Passed a token to MarkupDeclChecker/,
          );
       });
@@ -182,7 +182,7 @@ describe('MarkupDeclChecker (unit)', () => {
       it('reports an error if called after an internal subset closed it', () => {
          checker.check(docTypeEnd, collector);
 
-         expect(() => checker.check(comment, collector)).toThrowError(
+         expect(() => checker.check(comment, collector)).toThrow(
             /Passed a token to MarkupDeclChecker/,
          );
       });
@@ -424,7 +424,7 @@ describe('MarkupDeclChecker (unit)', () => {
       it('closes an external subset', () => {
          checker.check(externalSubsetEnd, collector);
 
-         expect(() => checker.check(comment, collector)).toThrowError(
+         expect(() => checker.check(comment, collector)).toThrow(
             /Passed a token to MarkupDeclChecker/,
          );
       });

@@ -128,7 +128,7 @@ describe('ValidityChecker (unit)', () => {
 
       expect(elementDeclarationValidate).toHaveBeenCalledWith(
          elDecl,
-         {},
+         {} as never,
          expect.any(Object),
          expect.any(ProblemCollector),
       );
@@ -145,7 +145,7 @@ describe('ValidityChecker (unit)', () => {
 
       expect(elementDeclarationValidate).toHaveBeenCalledWith(
          elDecl,
-         {},
+         {} as never,
          expect.any(Object),
          expect.any(ProblemCollector),
       );
@@ -272,7 +272,11 @@ describe('ValidityChecker (unit)', () => {
 
       checker.check(elDecl);
 
-      expect(elementDeclarationUpdateState).toHaveBeenCalledWith(elDecl, {}, expect.any(Object));
+      expect(elementDeclarationUpdateState).toHaveBeenCalledWith(
+         elDecl,
+         {} as never,
+         expect.any(Object),
+      );
    });
 
    it('validates an element declaration', () => {
@@ -285,7 +289,7 @@ describe('ValidityChecker (unit)', () => {
 
       expect(elementDeclarationValidate).toHaveBeenCalledWith(
          elDecl,
-         {},
+         {} as never,
          expect.any(Object),
          expect.any(ProblemCollector),
       );

@@ -199,7 +199,10 @@ describe('DocumentChecker (unit)', () => {
    describe('check()', () => {
       it('calls pToken.checkWellFormed() when encountering an XML Declaration', () => {
          const cwfSpy = jest
-            .spyOn(checkMap as Record<string, (...args: Array<never>) => unknown>, 'XMLDECL_PTOKEN')
+            .spyOn(
+               checkMap as Record<string, (...args: Array<unknown>) => unknown>,
+               'XMLDECL_PTOKEN',
+            )
             .mockImplementation((() => {}) as never);
          checker.check(confVer);
 
@@ -631,7 +634,7 @@ describe('DocumentChecker (unit)', () => {
             const p3 = checker.check(cdata);
 
             expect([...p1, ...p2, ...p3]).toMatchInlineSnapshot(`
-               Array [
+               [
                  WellFormedError {
                    "code": 1003,
                    "context": Offset {
@@ -669,7 +672,7 @@ describe('DocumentChecker (unit)', () => {
             const p2 = checker.check(cdata);
 
             expect([...p1, ...p2]).toMatchInlineSnapshot(`
-               Array [
+               [
                  WellFormedError {
                    "code": 1003,
                    "context": Offset {

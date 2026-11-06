@@ -71,7 +71,7 @@ describe('ContentChecker (unit)', () => {
       it('throws an error if called after it is already done', () => {
          const checker = makeChecker(elementEmpty);
 
-         expect(() => checker.check(generalEntityReference, collector)).toThrowError(
+         expect(() => checker.check(generalEntityReference, collector)).toThrow(
             /Passed a token to ContentChecker/,
          );
       });

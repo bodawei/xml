@@ -21,10 +21,10 @@
       "test": "nodemon --ext ts --exec  './node_modules/.bin/ts-node -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/jasmine.json' "
    },
    "devDependencies": {
-      "@babel/core": "7.17.10",
-      "@babel/preset-env": "7.17.10",
-      "@babel/preset-typescript": "7.16.7",
-      "@jest/globals": "^28.1.0",
+      "@babel/core": "7.29.13",
+      "@babel/preset-env": "7.29.7",
+      "@babel/preset-typescript": "7.29.7",
+      "@jest/globals": "30.5.2",
       "@types/jasmine": "4.0.3",
       "@types/jest": "27.5.1",
       "@types/node": "26.6.6",
@@ -35,7 +35,7 @@
       "globals": "16.5.0",
       "jasmine": "4.1.0",
       "jasmine-core": "4.1.1",
-      "jest": "28.1.0",
+      "jest": "30.5.2",
       "node-properties-parser": "0.0.2",
       "nodemon": "2.0.16",
       "prettier": "3.9.10",
