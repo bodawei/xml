@@ -883,3 +883,17 @@ dry run clean; `npm audit` unchanged (39).
 `dependencies` altogether (ROADMAP.md still mentions it among the runtime dependencies). That is
 a package-surface decision, so it was not done here. Similarly, `eslint-plugin-custom-rules`
 is listed under `dependencies` rather than `devDependencies`.
+
+### DEP-10 — `nodemon` 2.0.16 → 3.1.14 (stacked on DEP-9)
+
+Bumped as planned. The `test` script (`nodemon --ext ts --exec …`) needed no change.
+
+**Verified by running the watch loop**, since the unit suites do not exercise nodemon: `npm test`
+started, ran the Jasmine suite (336 specs, 0 failures), reported "clean exit - waiting for
+changes", then on `touch` of a source file printed "restarting due to changes" and ran the
+suite again with the same result. `npm ci` dry run clean. `npm audit`: 39 → 33 (high 5 → 3,
+moderate 32 → 28, critical 0).
+
+The plan suggested doing this alongside or after DEP-11 because DEP-11 rewrites the command
+nodemon executes. That ordering still holds for the command itself, but nothing here depends on
+it: the current command works on nodemon 3, and DEP-11 will re-verify it.
