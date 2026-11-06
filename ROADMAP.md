@@ -34,16 +34,46 @@ The package dependencies and devDependencies are all about 4 years old. Bring th
 
 ### Done when
 
-`npm outdated` reports nothing out of date, and `npm audit` shows no errors
+`npm outdated` is empty and `npm audit` reports no critical or high advisories, with
+both suites still passing at their baseline counts. Full criteria in
+`doc/dependencyUpgrade.md`. The only relaxation from the original goal is the audit
+line: a clean audit including moderate and low advisories is not reliably achievable
+in a dev-only toolchain.
+
+Scope rule: P7 modernizes every dependency regardless of whether a later project
+(P8, P9, P10, P11) would replace the tool. Replacement is decided later, from a
+current baseline rather than a four-year-old one.
 
 ### Current state
 
-This is unstarted
+Evaluated, not yet started. `doc/dependencyUpgrade.md` holds the staged plan
+(DEP-1 … DEP-13), the measured baseline, and the peer-range constraints that fix
+the ordering.
+
+Baseline as of 2026-11-05: 930 packages, 59 audit advisories (27 critical), 29 of 43
+direct deps behind. Both suites pass (265 Jest suites / 9768 tests, 336 Jasmine
+specs). 26 of the 27 criticals sit in unreferenced Babel 6 packages, so DEP-1 removes
+them with no version changes.
+
+Three stages can each take a session or more: DEP-3 (TypeScript 4.6 → 6.0, unknown
+type errors), DEP-6 (ESLint 10 + ESM flat config, which also means dropping both
+airbnb configs) and DEP-11 (Jasmine 7, which removed the `jsLoader` option this repo
+depends on — the alias-resolution mechanism has to be replaced, not reconfigured).
+
+TypeScript 7 is in scope, and is decided. It ships no programmatic compiler API, so
+typescript-eslint refuses it outright; DEP-13 therefore replaces typescript-eslint
+with `ts7-eslint`, which reruns the published 8.66.0 rules unmodified over a rebuilt
+compiler layer. That makes DEP-6 a hard prerequisite, since `ts7-eslint` needs
+ESLint 9 or 10. Alternatives considered (oxlint + tsgolint, staying at 6.0.x, a
+`@typescript/typescript6` hybrid) are recorded in the plan so the choice is not
+relitigated from memory.
 
 ### Next actions
 
--  [ ] Evaluate all the packages and put together a proposed order for upgrading
--  [ ] Upgrade each, as atomically as possible (e.g. try not to need to upgrade a bunch of unrelated packages at once). Run linting, testing and formatting after each change.
+-  [x] Evaluate all the packages and put together a proposed order for upgrading
+-  [x] Decide the TypeScript 7 approach (`ts7-eslint`, DEP-13)
+-  [ ] Work the stages in order, one PR each, re-measuring the baseline table in every
+       PR description. Start with DEP-1 (dead dependency removal).
 
 ## P8: Try swapping oxfmt in for prettier
 
