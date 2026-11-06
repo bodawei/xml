@@ -122,13 +122,21 @@ file:
 | `@babel/cli`                                                      | no npm script invokes `babel`                                                    |
 | `babel-plugin-istanbul`                                           | Jest's `coverageProvider: "babel"` pulls its own copy via `@jest/transform`      |
 | `babel-plugin-module-resolver`                                    | aliases come from `jest.config.js` `moduleNameMapper` and `tsconfig-paths`       |
-| `@types/jest`                                                     | every `*.jest.ts` imports from `@jest/globals` (220 files); nothing uses globals |
 | `jasmine-ts`, `jasmine-console-reporter`, `jasmine-spec-reporter` | `build/jasmine.json` configures no reporter                                      |
 | `jest-simple-dot-reporter`                                        | only appears in a commented-out `reporters` block in `jest.config.js`            |
+
+**Do not remove `@types/jest`.** It looked dead (every `*.jest.ts` imports from
+`@jest/globals`), but non-test helpers use the ambient `jest` namespace
+(`source/basic/@test/helper/makeProblemMatcher.ts`), and the Jasmine specs run under
+`ts-node`, which fails to compile without it (TS2503, and TS2339 in
+`streamParsedReplacementText.test.ts`). Found by running Jasmine after removal; a text
+search cannot see it. Re-evaluate in DEP-7 / DEP-11.
 
 **Do not remove `@types/jasmine`.** The 58 Jasmine specs call bare `describe` / `it` /
 `expect` globals and never import `jasmine`, so `tsc` needs the ambient types even
 though a text search finds no reference.
+
+**Measured effect (done):** 59 → 31 advisories, critical 27 → 1.
 
 **Expected effect:** 26 of the 27 critical advisories live in this dead Babel 6
 subtree (`babel-traverse` / `babel-template` / `babel-helper-*` /
