@@ -56,6 +56,13 @@ Do not treat these as regressions, and do not fix them as part of unrelated work
    grouping (external, then internal aliases such as `basic` / `pToken` / `token`,
    then relative), declarations before logic with a blank line after, and a `@test/`
    directory containing `*.jest.ts` files.
+-  Copyright header years: every source file starts with a comment of the form
+   `/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */` (or a single year,
+   `2021`). Whenever you touch a file, set the last year to the current year, keeping
+   the first year: `2017-2021` becomes `2017-2026`, and a single `2021` becomes
+   `2021-2026`. If you create a new file that has no such comment, add it as the first
+   line with the current year alone (`/* Copyright ® 2026 by 柏大衛. All rights reserved. */`).
+   Do this for files you edit by hand; do not mass-update untouched files.
 -  `source/basic/extractor/*New.ts` is a mid-rewrite experiment; use completed files
    as the design model, not unfinished ones.
 -  Prettier and ESLint are authoritative for formatting. Run them on the files you
