@@ -83,9 +83,9 @@ describe('AttListDeclaration (unit)', () => {
       beforeEach(() => {
          callback = jest.fn();
 
-         (literal.parse as jest.Mock).mockImplementation((_1: any, _2: any, done: () => void) =>
-            done(),
-         );
+         (literal.parse as jest.Mock).mockImplementation((_1: any, _2: any, done: () => void) => {
+            done();
+         });
       });
 
       it('does a parse of a basic attribute list declaration', () => {
@@ -968,9 +968,9 @@ describe('AttListDeclaration (unit)', () => {
       ];
 
       beforeEach(() => {
-         (literal.parse as jest.Mock).mockImplementation((_1: any, _2: any, done: () => void) =>
-            done(),
-         );
+         (literal.parse as jest.Mock).mockImplementation((_1: any, _2: any, done: () => void) => {
+            done();
+         });
       });
 
       it('returns original token unchanged if there is no unexpanded', (done) => {

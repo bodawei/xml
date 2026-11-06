@@ -774,3 +774,20 @@ still fall back to the default; they carry a documented `eslint-disable`. A thir
 `a || (b ?? false)` to keep boolean semantics.
 
 The first override (`basic`, `valid`) was left on `recommended-type-checked` only.
+
+### DEP-6f — strict-type-checked preset adopted (maintainer decision, stacked on DEP-6e)
+
+`plugin:@typescript-eslint/strict-type-checked` added to the main override; the 9 explicit
+rules it duplicates were removed. 92 new findings; lint total unchanged at 3313.
+
+-  `no-misused-spread` (41): **turned off, not fixed.** The codebase deliberately spreads token
+   (class-instance) data into a modified props object (`{ ...pToken, externalId }`). The token
+   classes are plain data holders, so losing the prototype is the intent; restructuring 41 sites
+   would be a design change, not a lint fix.
+-  `restrict-template-expressions` (39 → 13 after allowing numbers): numbers in template
+   strings are harmless, so `allowNumber: true`. The option object restates the preset's other
+   options explicitly, because a rule entry **replaces** a preset's options rather than merging
+   with them; naming only `allowNumber` silently re-allowed `any`, booleans and nullish values.
+   The remaining 11 were `any` values in test-helper error messages, wrapped in `String()`.
+-  `no-confusing-void-expression` (13): arrow shorthands that return a void call, given braces.
+-  `no-deprecated` (1): `substr` → `slice` in `entityDeclarationCheck` (start index is never negative).
