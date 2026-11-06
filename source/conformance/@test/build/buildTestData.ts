@@ -181,7 +181,7 @@ function addRelatedData(
                result.attr.testData = readFileSync(result.attr.testPath, { encoding: 'latin1' });
             }
          } catch (e) {
-            result.attr.missingTestFile = e.message;
+            result.attr.missingTestFile = (e as Error).message;
          }
 
          if (data.attr.OUTPUT) {
@@ -191,7 +191,7 @@ function addRelatedData(
 
                result.attr.outputData = convertToStringWithSurrogateHalves(rawBuffer);
             } catch (e) {
-               result.attr.missingOutputFile = e.message;
+               result.attr.missingOutputFile = (e as Error).message;
             }
          }
 

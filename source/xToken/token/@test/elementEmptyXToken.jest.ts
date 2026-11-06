@@ -6,7 +6,7 @@ import { toSToken } from 'basic';
 import { ElementEmptyPToken } from 'token';
 
 import { AttributeX, cloneAttributeX } from '../../common/attributeX';
-import { ElementEmptyXToken, ELEMENT_EMPTY_XTOKEN } from '../ElementEmptyXToken';
+import { ElementEmptyXToken, ELEMENT_EMPTY_XTOKEN } from '../elementEmptyXToken';
 
 jest.mock('../../common/attributeX');
 

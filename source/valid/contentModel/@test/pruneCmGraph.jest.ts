@@ -2,12 +2,12 @@
 
 import { describe, expect, it } from '@jest/globals';
 
-import { CmGraph } from '../cmGraphTypes';
+import { MutableCmGraph } from '../cmGraphTypes';
 import { pruneCmGraph } from '../pruneCmGraph';
 
 describe('pruneCmGraph()', () => {
    it('removes autoTrans and dead states', () => {
-      const graph: CmGraph = {
+      const graph: MutableCmGraph = {
          endId: 1,
          startId: 0,
          states: {
@@ -269,7 +269,7 @@ describe('pruneCmGraph()', () => {
    });
 
    it('does nothing with a graph that has no autotrans', () => {
-      const graph: CmGraph = {
+      const graph: MutableCmGraph = {
          endId: 1,
          startId: 0,
          states: {

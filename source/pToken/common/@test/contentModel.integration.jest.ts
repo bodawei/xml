@@ -49,6 +49,7 @@ describe('ContentModel (integration)', () => {
          source.endText();
 
          parseContentModel(source, (result) => {
+            // @ts-expect-error 2329/matchers
             expect(result).toEqualRangeless(contentSpec);
             done();
          });
@@ -60,6 +61,7 @@ describe('ContentModel (integration)', () => {
          source.endText();
 
          parseContentModel(source, (result) => {
+            // @ts-expect-error 2329/matchers
             expect(result).toEqualRangeless(
                new ContentModelP({
                   open: toSToken('('),
@@ -92,7 +94,6 @@ describe('ContentModel (integration)', () => {
          source.endText();
 
          parseContentModel(source, (result) => {
-            // @ts-expect-error matcher not recognized
             expect(result).toMatchInlineSnapshot(`
                ContentModelP {
                  "close": SToken {

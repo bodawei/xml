@@ -11,7 +11,7 @@ import { WordListPToken, WordListType } from 'token';
 import { literalCheck } from '../../common/literalCheck';
 import { nameCheck } from '../../common/nameCheck';
 import { nameXmlCheck } from '../../common/nameXmlCheck';
-import { wordListCheck } from '../../common/wordListCheck';
+import { wordListCheck } from '../../common/wordlistCheck';
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { warningCodes } from '../../error/warningCodes';
 
@@ -20,7 +20,7 @@ import { attListDeclarationCheck } from '../attListDeclarationCheck';
 jest.mock('../../common/literalCheck');
 jest.mock('../../common/nameCheck');
 jest.mock('../../common/nameXmlCheck');
-jest.mock('../../common/wordListCheck');
+jest.mock('../../common/wordlistCheck');
 
 const WFEID = wellFormedErrorCodes.id;
 const WID = warningCodes.id;

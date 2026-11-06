@@ -3,7 +3,7 @@
 import { WARNING_SEVERITY, PROBLEM, EntityId, Offset } from 'basic';
 import { toSToken } from 'basic';
 
-import { Warning } from '../Warning';
+import { Warning } from '../warning';
 
 describe('Warning()', () => {
    it('constructs an instance with just an id', () => {

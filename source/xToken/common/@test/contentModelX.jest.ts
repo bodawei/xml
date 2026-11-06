@@ -10,7 +10,7 @@ import {
    CpType,
    isContentNameX,
    cloneContentModelX,
-} from '../ContentModelX';
+} from '../contentModelX';
 
 describe('ContentModelX()', () => {
    let contentModelP: ContentModelP;

@@ -12,7 +12,7 @@ function makeAllDone(doneCount: number, func: DoneFn | undefined): () => void {
       count++;
 
       if (count === doneCount) {
-         func();
+         func?.();
       }
    };
 }

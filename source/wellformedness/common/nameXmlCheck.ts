@@ -2,7 +2,7 @@
 
 import { ConformanceVersion, Collector } from 'basic';
 import { SToken } from 'basic';
-import { Warning } from '../error/Warning';
+import { Warning } from '../error/warning';
 
 /**********************************************************************\
  nameXmlCheck() does a check whether a name starts

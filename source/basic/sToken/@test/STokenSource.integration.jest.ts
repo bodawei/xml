@@ -336,7 +336,7 @@ describe('STokenSource (integration)', () => {
          source.endText();
 
          source.extract('word', ['>', '/>'], (sToken) => {
-            expect(sToken.str).toEqual('foo');
+            expect(sToken?.str).toEqual('foo');
             expect(source.segments as any).toEqualRangeless([
                {
                   type: SEGMENT_TYPE,

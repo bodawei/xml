@@ -9,7 +9,7 @@ import { wellFormedErrorCodes } from '../../error/wellFormedError';
 
 import { nameCheck } from '../nameCheck';
 import { nmTokenCheck } from '../nmTokenCheck';
-import { wordListCheck } from '../wordListCheck';
+import { wordListCheck } from '../wordlistCheck';
 
 jest.mock('../nmTokenCheck');
 jest.mock('../nameCheck');

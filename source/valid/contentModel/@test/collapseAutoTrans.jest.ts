@@ -4,12 +4,12 @@ import { describe, expect, it } from '@jest/globals';
 import { STokenSource } from 'basic';
 import { parseContentModel } from 'pToken';
 
-import { CmGraph } from '../cmGraphTypes';
+import { MutableCmGraph } from '../cmGraphTypes';
 import { cmToCmGraph } from '../cmToCmGraph';
 import { collapseAutoTrans } from '../collapseAutoTrans';
 
 describe('collapseAutoTrans()', () => {
-   function prepForDeAuto(input: string, cb: (graph: CmGraph) => void) {
+   function prepForDeAuto(input: string, cb: (graph: MutableCmGraph) => void) {
       const source = new STokenSource();
       source.addText(input);
       source.endText();
@@ -22,7 +22,7 @@ describe('collapseAutoTrans()', () => {
    it('converts a list of zero plus items', () => {
       // (first, (first)*, last)
 
-      const foo: CmGraph = {
+      const foo: MutableCmGraph = {
          endId: 1,
          startId: 0,
          states: {
@@ -137,7 +137,7 @@ describe('collapseAutoTrans()', () => {
    it('converts a list of one plus items', () => {
       // (first, (first)+, last)
 
-      const foo: CmGraph = {
+      const foo: MutableCmGraph = {
          endId: 1,
          startId: 0,
          states: {
@@ -248,7 +248,7 @@ describe('collapseAutoTrans()', () => {
    it('combines ambiguous transitions (by hand)', () => {
       // (first, (first)+, first, last)
 
-      const foo: CmGraph = {
+      const foo: MutableCmGraph = {
          endId: 1,
          startId: 0,
          states: {
@@ -915,7 +915,7 @@ describe('collapseAutoTrans()', () => {
    it('fnctions if there is no autoTrans', () => {
       // (first, (first)*, last)
 
-      const foo: CmGraph = {
+      const foo: MutableCmGraph = {
          endId: 1,
          startId: 0,
          states: {

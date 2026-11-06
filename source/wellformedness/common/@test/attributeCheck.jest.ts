@@ -68,7 +68,7 @@ describe('attributeCheck (unit)', () => {
    });
 
    it('calls the attributeLangCheck() routine', () => {
-      attributesPChunk[0].name.str = 'xml:lang';
+      (attributesPChunk[0].name as { str: string }).str = 'xml:lang';
       attributeCheck(attributesPChunk, collector, confVer, previousSpace, WFEID.NOUN_ATTRIBUTE);
 
       expect(attributeLangCheck).toHaveBeenCalledWith(
@@ -260,7 +260,7 @@ describe('attributeCheck (unit)', () => {
    });
 
    it('reports an error if attributes have duplicate names', () => {
-      attributesPChunk[1].name.str = attributesPChunk[0].name.str;
+      (attributesPChunk[1].name as { str: string }).str = attributesPChunk[0].name.str;
 
       attributeCheck(attributesPChunk, collector, confVer, previousSpace, WFEID.NOUN_ATTRIBUTE);
 
@@ -273,7 +273,7 @@ describe('attributeCheck (unit)', () => {
    });
 
    it('reports no error if there is a duplicate name but it is not an attribute', () => {
-      attributesPChunk[1].name.str = attributesPChunk[0].name.str;
+      (attributesPChunk[1].name as { str: string }).str = attributesPChunk[0].name.str;
 
       attributeCheck(attributesPChunk, collector, confVer, previousSpace, 'other');
 

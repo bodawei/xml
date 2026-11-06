@@ -739,6 +739,7 @@ describe('ContentModel (unit)', () => {
             parseContentModel(mockSource, getResult);
             mockSource.respondInAsyncTime();
 
+            // @ts-expect-error 2329/matchers
             expect(result).toEqualRangeless(expected);
          });
       });

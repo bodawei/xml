@@ -26,7 +26,7 @@ import { NotationDeclarationXToken } from './token/notationDeclarationXToken';
 import { ParameterEntityDeclarationXToken } from './token/parameterEntityDeclarationXToken';
 import { ParameterEntityReferenceXToken } from './token/parameterEntityReferenceXToken';
 import { ProcessingInstructionXToken } from './token/processingInstructionXToken';
-import { SpaceXToken } from './token/spaceXToken';
+import { SpaceXToken } from './token/spaceXtoken';
 import { TextDeclarationXToken } from './token/textDeclarationXToken';
 import { TextXToken } from './token/textXToken';
 import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';

@@ -1,6 +1,7 @@
 {
    "compilerOptions": {
       "strict": true,
+      "skipLibCheck": true,
       "noImplicitAny": true,
       "allowJs": true,
       "pretty": true,
@@ -13,7 +14,7 @@
       "downlevelIteration": true, 
       "paths": {
          "attFixer": [
-            "source/AttFixer"
+            "source/attFixer"
          ],
          "basic": [
             "./source/basic"
@@ -67,6 +68,7 @@
    ],
    "exclude": [
       "node_modules",
+      "source/basic/extractor/*New.ts", // Unfinished rewrite (ROADMAP P1); not type-correct yet.
       "xmlconfig.json"
    ]
 }

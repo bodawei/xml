@@ -7,7 +7,7 @@ import { LiteralValuePToken } from 'token';
 import { CheckState, GeneralEntitiesInfo } from '../checkUtils';
 import { FatalError } from '../error/fatalError';
 import { fatalErrorCodes } from '../error/fatalErrorCodes';
-import { Warning } from '../error/Warning';
+import { Warning } from '../error/warning';
 import { warningCodes } from '../error/warningCodes';
 import { errorCodes } from '../error/errorCodes';
 import { Error } from '../error/error';
