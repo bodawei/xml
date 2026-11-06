@@ -21,9 +21,9 @@
       "test": "nodemon --ext ts --exec  './node_modules/.bin/ts-node -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/jasmine.json' "
    },
    "devDependencies": {
-      "@babel/core": "7.29.13",
-      "@babel/preset-env": "7.29.7",
-      "@babel/preset-typescript": "7.29.7",
+      "@babel/core": "8.1.0",
+      "@babel/preset-env": "8.0.7",
+      "@babel/preset-typescript": "8.0.7",
       "@jest/globals": "30.5.2",
       "@types/jasmine": "4.0.3",
       "@types/jest": "27.5.1",
