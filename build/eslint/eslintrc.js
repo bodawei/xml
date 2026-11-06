@@ -1,9 +1,13 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 const { rules: baseBestPracticesRules } = require('eslint-config-airbnb-base/rules/best-practices');
-const { rules: baseErrorsRules } = require('eslint-config-airbnb-base/rules/errors');
 const { rules: baseES6Rules } = require('eslint-config-airbnb-base/rules/es6');
 const { rules: baseStyleRules } = require('eslint-config-airbnb-base/rules/style');
 const { rules: baseVariablesRules } = require('eslint-config-airbnb-base/rules/variables');
+
+const path = require('path');
+
+// typescript-eslint 8 requires an absolute tsconfigRootDir.
+const ROOT = path.resolve(__dirname, '../..');
 
 const OFF = 0;
 // const WARN = 1;
@@ -37,7 +41,7 @@ module.exports = {
          parser: '@typescript-eslint/parser',
          parserOptions: {
             project: './tsconfig.json',
-            tsconfigRootDir: './',
+            tsconfigRootDir: ROOT,
             warnOnUnsupportedTypeScriptVersion: true,
          },
          extends: [
@@ -46,12 +50,26 @@ module.exports = {
             'plugin:prettier/recommended', // https://github.com/prettier/eslint-plugin-prettier
             'plugin:import/recommended', // https://www.npmjs.com/package/eslint-plugin-import
             "plugin:@typescript-eslint/recommended",
-            "plugin:@typescript-eslint/recommended-requiring-type-checking",
-            'airbnb-typescript/base', // https://github.com/iamturns/eslint-config-airbnb-typescript -- Also note this seems to provide settings.import/resolver.typescript: {}
+            "plugin:@typescript-eslint/recommended-type-checked",
            ],
+         // These were supplied by eslint-config-airbnb-typescript/base, which DEP-5 removed.
+         settings: {
+            'import/parsers': {
+               '@typescript-eslint/parser': ['.ts', '.tsx', '.d.ts'],
+            },
+            'import/resolver': {
+               node: {
+                  extensions: ['.mjs', '.js', '.json', '.ts', '.d.ts'],
+               },
+            },
+            'import/extensions': ['.js', '.mjs', '.jsx', '.ts', '.tsx', '.d.ts'],
+            'import/external-module-folders': ['node_modules', 'node_modules/@types'],
+         },
          rules: {
-            indent: 'off',
-            '@typescript-eslint/indent': 'off',
+            // Also supplied by airbnb-typescript/base for .ts files: TypeScript already checks these.
+            'import/named': 'off',
+            'import/no-named-as-default-member': 'off',
+            'import/no-unresolved': 'off',
             "import/order": ['error', {
                groups: ["builtin", "external", "internal", "parent", "sibling", "index", "object", "type"],
                'newlines-between': 'always',
@@ -70,7 +88,6 @@ module.exports = {
             rules: {
                '@typescript-eslint/no-non-null-assertion': [ 'off' ],
                '@typescript-eslint/no-empty-function': [ 'off' ],
-               '@typescript-eslint/no-explit-any': [ 'off' ],
                '@typescript-eslint/no-unsafe-argument': [ 'off' ],
                '@typescript-eslint/no-unsafe-call': [ 'off' ],
                "import/no-extraneous-dependencies": [
@@ -104,7 +121,7 @@ module.exports = {
          parser: '@typescript-eslint/parser',
          parserOptions: {
             project: './tsconfig.json',
-            tsconfigRootDir: './',
+            tsconfigRootDir: ROOT,
             warnOnUnsupportedTypeScriptVersion: true,
           },
           settings: {
@@ -127,7 +144,7 @@ module.exports = {
             'prettier',
             'plugin:@typescript-eslint/eslint-recommended',
             'plugin:@typescript-eslint/recommended',
-            'plugin:@typescript-eslint/recommended-requiring-type-checking',
+            'plugin:@typescript-eslint/recommended-type-checked',
          ],
          rules: {
             'prettier/prettier': 'error',
@@ -149,7 +166,10 @@ module.exports = {
             //    minimumDescriptionLength: 3,
             // } ],
             // '@typescript-eslint/ban-tslint-comment': 'error',
-            '@typescript-eslint/ban-types': ['error', /* using the defaults */ ],
+            // ban-types was split in v8; these three are its default-equivalents.
+            '@typescript-eslint/no-empty-object-type': ['error'],
+            '@typescript-eslint/no-unsafe-function-type': ['error'],
+            '@typescript-eslint/no-wrapper-object-types': ['error'],
             '@typescript-eslint/class-literal-property-style': ["error", "fields"],
             '@typescript-eslint/consistent-type-assertions': ["error", { assertionStyle: 'as', objectLiteralTypeAssertions: 'never' }],
             "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
@@ -467,14 +487,14 @@ module.exports = {
              // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-non-null-assertion.md
              "@typescript-eslint/no-non-null-assertion": ["error"],
      
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-parameter-properties.md
-             "@typescript-eslint/no-parameter-properties": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/parameter-properties.md
+             "@typescript-eslint/parameter-properties": ["error"],
      
              // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-require-imports.md
              "@typescript-eslint/no-require-imports": ["error"],
      
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-throw-literal.md
-             "@typescript-eslint/no-throw-literal": ["error"],
+             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/only-throw-error.md
+             "@typescript-eslint/only-throw-error": ["error"],
      
             //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-type-alias.md
             //  "@typescript-eslint/no-type-alias": ["error"],
@@ -632,19 +652,6 @@ module.exports = {
              },
            ],
 
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/type-annotation-spacing.md
-           '@typescript-eslint/type-annotation-spacing': [
-             'error',
-             {
-               before: true,
-               after: true,
-               overrides: {
-                 colon: { before: false, after: true },
-                 /* other overrides available: colon, arrow, variable, parameter, property, returnType with { before: boolean, after: boolean } possible if you want different values for these cases  */
-               },
-             },
-           ],
-
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/typedef.md
            '@typescript-eslint/typedef': [
             'error',
@@ -679,18 +686,6 @@ module.exports = {
            // same functionality, but also supports TypeScript.
            //
 
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/brace-style.md
-           // https://eslint.org/docs/rules/brace-style
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/style.js
-           'brace-style': 'off',
-           '@typescript-eslint/brace-style': baseStyleRules['brace-style'],
-
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/comma-spacing.md
-           // https://eslint.org/docs/rules/comma-spacing
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/style.js
-           'comma-spacing': 'off',
-           '@typescript-eslint/comma-spacing': baseStyleRules['comma-spacing'],
-
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/default-param-last.md
            // https://eslint.org/docs/rules/default-param-last
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
@@ -703,35 +698,11 @@ module.exports = {
            'dot-notation': 'off',
            '@typescript-eslint/dot-notation': baseBestPracticesRules['dot-notation'],
 
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/func-call-spacing.md
-           // https://eslint.org/docs/rules/func-call-spacing
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/style.js
-           'func-call-spacing': 'off',
-           '@typescript-eslint/func-call-spacing': baseStyleRules['func-call-spacing'],
-
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/indent.md
-           // https://eslint.org/docs/rules/indent
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/style.js
-           indent: 'off',
-         //   '@typescript-eslint/indent': ['error', 3], // baseStyleRules.indent,
-
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/init-declarations.md
            // https://eslint.org/docs/rules/init-declarations
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/variables.js
            'init-declarations': 'off',
            '@typescript-eslint/init-declarations': baseVariablesRules['init-declarations'],
-
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/keyword-spacing.md
-           // https://eslint.org/docs/rules/keyword-spacing
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/style.js
-           'keyword-spacing': 'off',
-           '@typescript-eslint/keyword-spacing': baseStyleRules['keyword-spacing'],
-
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/lines-between-class-members.md
-           // https://eslint.org/docs/rules/lines-between-class-members
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/style.js
-           'lines-between-class-members': 'off',
-           '@typescript-eslint/lines-between-class-members': baseStyleRules['lines-between-class-members'],
 
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-array-constructor.md
            // https://eslint.org/docs/rules/no-array-constructor
@@ -750,18 +721,6 @@ module.exports = {
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
            'no-empty-function': 'off',
            '@typescript-eslint/no-empty-function': baseBestPracticesRules['no-empty-function'],
-
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-extra-parens.md
-           // https://eslint.org/docs/rules/no-extra-parens
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/errors.js
-           'no-extra-parens': 'off',
-           '@typescript-eslint/no-extra-parens': baseErrorsRules['no-extra-parens'],
-
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-extra-semi.md
-           // https://eslint.org/docs/rules/no-extra-semi
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/errors.js
-           'no-extra-semi': 'off',
-           '@typescript-eslint/no-extra-semi': baseErrorsRules['no-extra-semi'],
 
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-invalid-this.md
            // https://eslint.org/docs/rules/no-invalid-this
@@ -798,11 +757,6 @@ module.exports = {
            'no-useless-constructor': 'off',
            '@typescript-eslint/no-useless-constructor': baseES6Rules['no-useless-constructor'],
 
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/quotes.md\
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/style.js
-           quotes: 'off',
-           '@typescript-eslint/quotes': baseStyleRules.quotes,
-
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/require-await.md
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
            'require-await': 'off',
@@ -812,16 +766,6 @@ module.exports = {
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
            'no-return-await': 'off',
            '@typescript-eslint/return-await': baseBestPracticesRules['no-return-await'],
-
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/semi.md
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/style.js
-           semi: 'off',
-           '@typescript-eslint/semi': baseStyleRules.semi,
-
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/space-before-function-paren.md
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/style.js
-           'space-before-function-paren': 'off',
-           '@typescript-eslint/space-before-function-paren': baseStyleRules['space-before-function-paren'],
          },
          overrides: [ {
             files: [
@@ -831,7 +775,6 @@ module.exports = {
             rules: {
                '@typescript-eslint/no-non-null-assertion': [ 'off' ],
                '@typescript-eslint/no-empty-function': [ 'off' ],
-               '@typescript-eslint/no-explit-any': [ 'off' ],
                '@typescript-eslint/no-unsafe-call': [ 'off' ],
             },
             env: {

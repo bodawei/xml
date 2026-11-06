@@ -661,3 +661,36 @@ Findings the plan did not anticipate:
 
 `@types/node` 26.6.6. Zero new errors; it also cleared the one `Buffer` overload error
 that 5.9 raised against `@types/node` 17.
+
+### DEP-5 — done
+
+`typescript-eslint` 8.72.1 (meta-package) replaces `@typescript-eslint/parser` and
+`/eslint-plugin`; `eslint-config-airbnb-typescript` removed. Findings beyond the plan:
+
+-  **`eslint` must move 8.15.0 → 8.57.1 in this stage.** `typescript-eslint@8` peers
+   `eslint ^8.57`. Still the 8 line, still eslintrc.
+-  **`tsconfigRootDir` must be absolute** in v8 (`'./'` was a parse error on every file);
+   the config now uses `path.resolve(__dirname, '../..')`.
+-  **`airbnb-typescript/base` also turned off `import/no-unresolved`, `import/named` and
+   `import/no-named-as-default-member` for `.ts` files.** Dropping it without copying
+   those turned on 266 false `no-unresolved` errors (and broke the clean `valid`
+   module). They are now set explicitly in the first override, along with the
+   `settings` block (`import/parsers`, `import/resolver.node`, `import/extensions`,
+   `import/external-module-folders`).
+-  Removed the 12 formatting rules and their core `'off'` pairs; `ban-types` →
+   `no-empty-object-type` + `no-unsafe-function-type` + `no-wrapper-object-types`;
+   `no-throw-literal` → `only-throw-error`; `no-parameter-properties` →
+   `parameter-properties`; deleted the dead `no-explit-any` typo entries.
+
+Lint re-baseline: 3287 → 3313. Per module (before → after): attFixer 124→127,
+basic 477→470, conformance 67→73, expand 489→506, flat 122→123, pToken 1241→1232,
+wellformedness 376→380, xToken 391→402; `valid`, `token`, `node`, `demo` stay at 0.
+The increase is the stricter `recommended-type-checked` set (`no-unsafe-enum-comparison`,
+`no-redundant-type-constituents`, `no-duplicate-type-constituents`, ...), not the
+migration; `sort-keys` (2351) and `prettier/prettier` (454) are unchanged.
+
+`npm audit` 31 → 35 (critical 1 and high 13 unchanged): four new moderates inside
+`typescript-eslint`'s own `minimatch` / `brace-expansion` dependencies. Not gating, per the
+exit criteria. `source/basic/extractor/*New.ts` (excluded from `tsconfig.json` in DEP-3)
+now reports "file not found in project" under type-aware lint; it did before too and is
+part of the baseline.
