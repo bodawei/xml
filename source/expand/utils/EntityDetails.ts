@@ -176,7 +176,9 @@ class EntityDetails {
       const details = this.getContentDetails(declaration);
 
       if (!details?.isLoading) {
-         setTimeout(() => callback({ details, byproducts: [] }), 0);
+         setTimeout(() => {
+            callback({ details, byproducts: [] });
+         }, 0);
          return;
       }
 

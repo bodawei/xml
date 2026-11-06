@@ -274,20 +274,22 @@ class PTokenParser {
                         this.parseType === ParseType.DOCUMENT
                      ) {
                         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                        parseDocTypeEnd(this.sTokenSource, this.docStart!, (token) =>
-                           this.pushToken(token),
-                        );
+                        parseDocTypeEnd(this.sTokenSource, this.docStart!, (token) => {
+                           this.pushToken(token);
+                        });
                         this.state = ParseState.AFTER_DTD;
                      } else {
-                        parseCharData(this.sTokenSource, [], (token) => this.pushToken(token));
+                        parseCharData(this.sTokenSource, [], (token) => {
+                           this.pushToken(token);
+                        });
                      }
                   });
                   // @@ WHY NOT RETURN
                } else if (this.state === ParseState.DTD && this.parseType === ParseType.DOCUMENT) {
                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                  parseDocTypeEnd(this.sTokenSource, this.docStart!, (token) =>
-                     this.pushToken(token),
-                  );
+                  parseDocTypeEnd(this.sTokenSource, this.docStart!, (token) => {
+                     this.pushToken(token);
+                  });
                   this.state = ParseState.AFTER_DTD;
                } else {
                   this.sTokenSource.extract('match', ']]>', (sToken) => {
@@ -309,14 +311,16 @@ class PTokenParser {
                break;
             default:
                if (sToken.str === '%' && this.state === ParseState.DTD) {
-                  parseParameterEntityReference(this.sTokenSource, (token) =>
-                     this.pushToken(token),
-                  );
+                  parseParameterEntityReference(this.sTokenSource, (token) => {
+                     this.pushToken(token);
+                  });
                } else {
                   const terminators: Array<string> =
                      this.state === ParseState.DTD ? ['%', ']'] : [];
 
-                  parseCharData(this.sTokenSource, terminators, (token) => this.pushToken(token));
+                  parseCharData(this.sTokenSource, terminators, (token) => {
+                     this.pushToken(token);
+                  });
                }
                break;
          }
@@ -331,7 +335,9 @@ class PTokenParser {
          parser = parser || function () {}; /// @@@ WRONG WRONG
 
          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-         parser(this.sTokenSource, result!, (token) => this.pushToken(token));
+         parser(this.sTokenSource, result!, (token) => {
+            this.pushToken(token);
+         });
       });
    }
 

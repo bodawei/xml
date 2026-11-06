@@ -44,7 +44,7 @@ function checkAmpersands(value: LiteralValuePToken, collector: Collector): void 
          if (!match) {
             collector.report(
                WFEID.REFERENCE_INVALID_CHARS,
-               [contents.substr(ampIndex, 10)],
+               [contents.slice(ampIndex, ampIndex + 10)],
                element.text,
             );
          } else {
