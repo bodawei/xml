@@ -28,7 +28,7 @@ pipeline: `basic` → `pToken` → `token` / `xToken` / `flat` → `wellformedne
 | All Jest specs     | `npm run jest:all`                                           |
 | One Jest spec      | `npx jest --config ./jest.config.js <path> --coverage=false` |
 | Type-check         | `npm run check:types` (see known failures below)             |
-| Lint touched files | `npx eslint --config ./.eslintrc.json <files>`               |
+| Lint touched files | `npx eslint --config ./eslint.config.mjs <files>`            |
 | Format check       | `npx prettier --check <files>`                               |
 
 ## Known pre-existing failures
@@ -78,7 +78,7 @@ Do not treat these as regressions, and do not fix them as part of unrelated work
 ## Definition of done
 
 -  Relevant specs pass: `npm run jest:all` and/or `npm test`.
--  `npx eslint --config ./.eslintrc.json` passes for the files you touched (no new
+-  `npx eslint --config ./eslint.config.mjs` passes for the files you touched (no new
    errors or warnings).
 -  `npx prettier --check` passes for the files you touched.
 -  Type-check your changes; note the `flatDocs.json` baseline above.

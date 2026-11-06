@@ -791,3 +791,31 @@ rules it duplicates were removed. 92 new findings; lint total unchanged at 3313.
    The remaining 11 were `any` values in test-helper error messages, wrapped in `String()`.
 -  `no-confusing-void-expression` (13): arrow shorthands that return a void call, given braces.
 -  `no-deprecated` (1): `substr` → `slice` in `entityDeclarationCheck` (start index is never negative).
+
+### DEP-6c — flat config on ESLint 9 (stacked on DEP-6f)
+
+`.eslintrc.json` and `build/eslint/eslintrc.js` replaced by `eslint.config.mjs`.
+`eslint` 8.57.1 → 9.39.5, `eslint-plugin-import` ^2.26 (resolved 2.26.0, which has no
+flat-config export) → 2.32.0, and `globals` 16.5.0 added to replace the old `env:` keys.
+
+**Verified identical.** Linting `source` with the old config on ESLint 8 and the new one on
+ESLint 9 gives the same 3313 findings, matched by (file, line, column, rule, severity) with
+no differences either way. `lint:ci` passes; a deliberately bad file fails it.
+
+Translation notes:
+
+-  A nested eslintrc `overrides` entry matches the intersection of its own and its parent's
+   `files`. Flat `files` entries that are arrays are an AND, so those are generated as
+   (parent, child) pairs by `intersect()`. The old `env: jasmine` for `*.test.ts` and
+   `*.jest.ts` became `globals.jasmine` on the same intersection.
+-  `reportUnusedDisableDirectives` defaulted to `"warn"` in ESLint 9; it is set to `"off"` so
+   nothing new is reported. Turning it on is a separate cleanup.
+-  `--ext` does not exist in flat config; the `lint`, `lint:all` and `lint:ci` scripts and the
+   `AGENTS.md` command rows were updated. The files-to-lint set is now decided by `files:
+   ['**/*.ts']`.
+-  The second group carried `import/*` settings although it never loaded the import plugin;
+   they were inert and were not carried over.
+-  The roughly 350 lines of commented-out rule documentation in the old file were not ported.
+   They remain in git history.
+-  The 45 `/* eslint-env jasmine */` comments are ignored by flat config (ESLint 9 prints a
+   warning; ESLint 10 reports them as errors). They are removed in DEP-6d.
