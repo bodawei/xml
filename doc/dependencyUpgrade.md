@@ -879,7 +879,8 @@ Bumped as planned (exact pin, like the other dependencies). **Verified:** Jest 2
 tests (includes the conformance corpus), Jasmine 336 specs, `check:types` 0 errors, `npm ci`
 dry run clean; `npm audit` unchanged (39).
 
-**Open question for the maintainer:** since nothing uses it, `iconv-lite` could be removed from
-`dependencies` altogether (ROADMAP.md still mentions it among the runtime dependencies). That is
-a package-surface decision, so it was not done here. Similarly, `eslint-plugin-custom-rules`
-is listed under `dependencies` rather than `devDependencies`.
+**Decided by the maintainer:** because nothing uses it, `iconv-lite` was **removed** from
+`dependencies` instead of being bumped (so the 0.7.3 bump above never shipped). Separately,
+`eslint-plugin-custom-rules` was moved from `dependencies` to `devDependencies`, so that the
+only runtime dependency is `bcp47-validate`. `ROADMAP.md` still mentions `iconv-lite`
+among the runtime dependencies and should be corrected when it is next edited.
