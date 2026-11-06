@@ -13,7 +13,7 @@ describe('PeekExtractor', () => {
       sub = {
          process: jest.fn(),
          finish: jest.fn(),
-      };
+      } as unknown as Extractor;
       sub.state = Extractor.STATE.WORKING;
 
       extractor = new PeekExtractor(1.0, true, sub);

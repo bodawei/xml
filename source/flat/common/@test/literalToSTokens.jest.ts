@@ -6,10 +6,10 @@ import { TextPToken } from 'pToken';
 import { toSToken } from 'basic';
 import { LiteralPToken } from 'token';
 
-import { literalValueToSTokens } from '../literalValueToStokens';
+import { literalValueToSTokens } from '../literalValueToSTokens';
 import { literalToSTokens } from '../literalToSTokens';
 
-jest.mock('../literalValueToStokens');
+jest.mock('../literalValueToSTokens');
 
 describe('literalToSTokens() (unit)', () => {
    let literalPToken: LiteralPToken;

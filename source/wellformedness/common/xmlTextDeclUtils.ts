@@ -6,7 +6,7 @@ import { SToken } from 'basic';
 
 import { Error } from '../error/error';
 import { FatalError } from '../error/fatalError';
-import { Warning } from '../error/Warning';
+import { Warning } from '../error/warning';
 import { wellFormedErrorCodes } from '../error/wellFormedError';
 import { warningCodes } from '../error/warningCodes';
 import { errorCodes } from '../error/errorCodes';

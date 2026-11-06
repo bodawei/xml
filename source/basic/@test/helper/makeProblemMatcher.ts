@@ -1,12 +1,16 @@
 /* Copyright ® 2022 by 柏大衛. All rights reserved. */
 
+import type { expect } from '@jest/globals';
+
 import { ProblemCodes } from '../../util/problemCodes';
 
 import { ParamCollector, ProblemParams } from './paramCollector';
 
+type MatcherContext = ThisParameterType<Parameters<typeof expect.extend>[0][string]>;
+
 function makeProblemMatcher(codes: ProblemCodes) {
    function problemMatcher(
-      this: jest.MatcherContext,
+      this: MatcherContext,
       paramCollector: ParamCollector,
       expected: Omit<ProblemParams, 'Constructor'>,
    ) {

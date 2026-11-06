@@ -49,7 +49,14 @@ import {
 import { dtdEndCheck } from '../common/dtdEndCheck';
 import { wellFormedErrorCodes, WellFormedError } from '../error/wellFormedError';
 import { DocumentChecker } from '../DocumentChecker';
-import { CHECKER_DONE, CheckState, MarkupChecker, ContentChecker } from '../checkUtils';
+import {
+   CHECKER_DONE,
+   CheckState,
+   MarkupChecker,
+   ContentChecker,
+   ContentCheckerConstructor,
+   MarkupCheckerConstructor,
+} from '../checkUtils';
 import { checkMap } from '../checkMap';
 import { conditionalStartCheck } from '../token/conditionalStartCheck';
 
@@ -153,8 +160,8 @@ describe('DocumentChecker (unit)', () => {
       subState = new CheckState();
       subParams = [];
       checker = new DocumentChecker({
-         content: MockContentChecker,
-         dtd: MockMarkupChecker,
+         content: MockContentChecker as unknown as ContentCheckerConstructor,
+         dtd: MockMarkupChecker as unknown as MarkupCheckerConstructor,
       });
 
       confVer = new ConformanceVersion();
@@ -191,7 +198,9 @@ describe('DocumentChecker (unit)', () => {
 
    describe('check()', () => {
       it('calls pToken.checkWellFormed() when encountering an XML Declaration', () => {
-         const cwfSpy = jest.spyOn(checkMap, 'XMLDECL_PTOKEN').mockImplementation(() => {});
+         const cwfSpy = jest
+            .spyOn(checkMap as Record<string, (...args: Array<never>) => unknown>, 'XMLDECL_PTOKEN')
+            .mockImplementation((() => {}) as never);
          checker.check(confVer);
 
          checker.check(xmlDecl);

@@ -4,7 +4,7 @@ import { ConformanceVersion, Collector } from 'basic';
 import { SToken } from 'basic';
 
 import { wellFormedErrorCodes } from '../error/wellFormedError';
-import { Warning } from '../error/Warning';
+import { Warning } from '../error/warning';
 import { warningCodes } from '../error/warningCodes';
 
 const WFEID = wellFormedErrorCodes.id;

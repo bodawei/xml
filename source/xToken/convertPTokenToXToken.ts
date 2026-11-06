@@ -40,7 +40,7 @@ import { GeneralEntityStartXToken } from './marker/generalEntityStartXToken';
 import { ParameterEntityEndXToken } from './marker/parameterEntityEndXToken';
 import { ParameterEntityStartXToken } from './marker/parameterEntityStartXToken';
 import { AttListDeclarationXToken } from './token/attListDeclarationXToken';
-import { CharRefXToken } from './token/CharRefXToken';
+import { CharRefXToken } from './token/charRefXToken';
 import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
 import { NotationDeclarationXToken } from './token/notationDeclarationXToken';
 import { ConditionalEndXToken } from './token/conditionalEndXToken';
@@ -56,7 +56,7 @@ import { GeneralEntityDeclarationXToken } from './token/generalEntityDeclaration
 import { ParameterEntityDeclarationXToken } from './token/parameterEntityDeclarationXToken';
 import { ParameterEntityReferenceXToken } from './token/parameterEntityReferenceXToken';
 import { ProcessingInstructionXToken } from './token/processingInstructionXToken';
-import { SpaceXToken } from './token/spaceXToken';
+import { SpaceXToken } from './token/spaceXtoken';
 import { TextDeclarationXToken } from './token/textDeclarationXToken';
 import { TextXToken } from './token/textXToken';
 import { UnknownDeclarationXToken } from './token/unknownDeclarationXToken';

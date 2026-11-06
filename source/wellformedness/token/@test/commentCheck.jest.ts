@@ -60,9 +60,15 @@ describe('commentCheck()', () => {
    });
 
    it('reports an error when the content ends with a hyphen, and there is no range', () => {
-      commentPToken.text[0].str += '-';
-      commentPToken.text[0].originalStr += '-';
-      commentPToken.text[0].ranges = [];
+      const mutableText = commentPToken.text[0] as {
+         str: string;
+         originalStr: string;
+         ranges: Array<unknown>;
+      };
+
+      mutableText.str += '-';
+      mutableText.originalStr += '-';
+      mutableText.ranges = [];
 
       commentCheck(commentPToken, collector, confVer);
 

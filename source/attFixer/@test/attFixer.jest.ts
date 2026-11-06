@@ -29,7 +29,7 @@ import {
 import { ElementStartPToken, GeneralEntityStartPToken, GeneralEntityEndPToken } from 'token';
 import { AttributePToken, AttrValue } from '../../token/common/attribute';
 
-import { isAugmentedAttribute, AttFixer, AugmentedAttributePToken } from '../AttFixer';
+import { isAugmentedAttribute, AttFixer, AugmentedAttributePToken } from '../attFixer';
 
 describe('AttFixer', () => {
    let fixAttributes: AttFixer;

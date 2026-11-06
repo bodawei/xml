@@ -77,7 +77,7 @@ export {
    PROCESSING_INSTRUCTION_XTOKEN,
    ProcessingInstructionXToken,
 } from './token/processingInstructionXToken';
-export { SPACE_XTOKEN, SpaceXToken } from './token/spaceXToken';
+export { SPACE_XTOKEN, SpaceXToken } from './token/spaceXtoken';
 export { TEXT_XTOKEN, TextXToken, isTextXToken } from './token/textXToken';
 export { TEXTDECL_XTOKEN, TextDeclarationXToken } from './token/textDeclarationXToken';
 export {

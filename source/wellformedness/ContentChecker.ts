@@ -30,7 +30,7 @@ import {
    scanAttributeValues,
    checkGeneralEntity,
 } from './checkUtils';
-import { Warning } from './error/Warning';
+import { Warning } from './error/warning';
 import { warningCodes } from './error/warningCodes';
 import { wellFormedErrorCodes } from './error/wellFormedError';
 

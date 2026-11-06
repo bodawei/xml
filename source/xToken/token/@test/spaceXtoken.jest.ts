@@ -4,7 +4,7 @@ import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { SpacePToken } from 'token';
 
-import { SpaceXToken } from '../spaceXToken';
+import { SpaceXToken } from '../spaceXtoken';
 
 describe('space (unit)', () => {
    let spacePToken: SpacePToken;

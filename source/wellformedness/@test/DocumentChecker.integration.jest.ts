@@ -37,7 +37,7 @@ describe('DocumentChecker (integration)', () => {
 
       pTokenStream = new PTokenStream(sTokenSource, {
          confVer,
-         context: ParseType.DOCUMENT,
+         parseType: ParseType.DOCUMENT,
       });
       sTokenSource.addText(input);
       sTokenSource.endText();

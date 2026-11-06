@@ -66,7 +66,11 @@ describe('parseUnexpanded (unit)', () => {
       jest
          .spyOn(textStuff, 'parseText')
          .mockImplementation(
-            (src: STokenSource, terms: Array<string>, cb: (x: TextPToken | undefined) => void) => {
+            (
+               src: STokenSource,
+               terms: ReadonlyArray<string>,
+               cb: (x: TextPToken | undefined) => void,
+            ) => {
                cb(textResults.shift());
             },
          );
@@ -80,6 +84,7 @@ describe('parseUnexpanded (unit)', () => {
       ]);
 
       parseUnexpanded(mockSource, 'foo', (result) => {
+         // @ts-expect-error 2329/matchers
          expect(result).toEqualRangeless({
             propName: 'foo',
             tokens: [
@@ -109,7 +114,11 @@ describe('parseUnexpanded (unit)', () => {
       jest
          .spyOn(textStuff, 'parseText')
          .mockImplementation(
-            (src: STokenSource, terms: Array<string>, cb: (x: TextPToken | undefined) => void) => {
+            (
+               src: STokenSource,
+               terms: ReadonlyArray<string>,
+               cb: (x: TextPToken | undefined) => void,
+            ) => {
                cb(textResults.shift());
             },
          );
@@ -129,6 +138,7 @@ describe('parseUnexpanded (unit)', () => {
       ]);
 
       parseUnexpanded(mockSource, 'foo', (result) => {
+         // @ts-expect-error 2329/matchers
          expect(result).toEqualRangeless({
             propName: 'foo',
             tokens: [
@@ -163,7 +173,11 @@ describe('parseUnexpanded (unit)', () => {
       jest
          .spyOn(textStuff, 'parseText')
          .mockImplementation(
-            (src: STokenSource, terms: Array<string>, cb: (x: TextPToken | undefined) => void) => {
+            (
+               src: STokenSource,
+               terms: ReadonlyArray<string>,
+               cb: (x: TextPToken | undefined) => void,
+            ) => {
                cb(textResults.shift());
             },
          );
@@ -182,6 +196,7 @@ describe('parseUnexpanded (unit)', () => {
       ]);
 
       parseUnexpanded(mockSource, 'foo', (result) => {
+         // @ts-expect-error 2329/matchers
          expect(result).toEqualRangeless({
             propName: 'foo',
             tokens: [
@@ -214,7 +229,11 @@ describe('parseUnexpanded (unit)', () => {
       jest
          .spyOn(textStuff, 'parseText')
          .mockImplementation(
-            (src: STokenSource, terms: Array<string>, cb: (x: TextPToken | undefined) => void) => {
+            (
+               src: STokenSource,
+               terms: ReadonlyArray<string>,
+               cb: (x: TextPToken | undefined) => void,
+            ) => {
                cb(undefined);
             },
          );
@@ -226,6 +245,7 @@ describe('parseUnexpanded (unit)', () => {
       ]);
 
       parseUnexpanded(mockSource, 'foo', (result) => {
+         // @ts-expect-error 2329/matchers
          expect(result).toEqualRangeless({
             propName: 'foo',
             tokens: [
@@ -252,7 +272,11 @@ describe('parseUnexpanded (unit)', () => {
       jest
          .spyOn(textStuff, 'parseText')
          .mockImplementation(
-            (src: STokenSource, terms: Array<string>, cb: (x: TextPToken | undefined) => void) => {
+            (
+               src: STokenSource,
+               terms: ReadonlyArray<string>,
+               cb: (x: TextPToken | undefined) => void,
+            ) => {
                cb(textResults.shift());
             },
          );
@@ -263,6 +287,7 @@ describe('parseUnexpanded (unit)', () => {
       ]);
 
       parseUnexpanded(mockSource, 'foo', (result) => {
+         // @ts-expect-error 2329/matchers
          expect(result).toEqualRangeless({
             propName: 'foo',
             tokens: [new ParameterEntityReferencePToken({ open: toSToken('%') }), textPToken],
@@ -286,7 +311,11 @@ describe('parseUnexpanded (unit)', () => {
       jest
          .spyOn(textStuff, 'parseText')
          .mockImplementation(
-            (src: STokenSource, terms: Array<string>, cb: (x: TextPToken | undefined) => void) => {
+            (
+               src: STokenSource,
+               terms: ReadonlyArray<string>,
+               cb: (x: TextPToken | undefined) => void,
+            ) => {
                cb(textResults.shift());
             },
          );
@@ -297,6 +326,7 @@ describe('parseUnexpanded (unit)', () => {
       ]);
 
       parseUnexpanded(mockSource, 'foo', (result) => {
+         // @ts-expect-error 2329/matchers
          expect(result).toEqualRangeless({
             propName: 'foo',
             tokens: [new ParameterEntityReferencePToken({ open: toSToken('%') }), textPToken],
@@ -320,7 +350,11 @@ describe('parseUnexpanded (unit)', () => {
       jest
          .spyOn(textStuff, 'parseText')
          .mockImplementation(
-            (src: STokenSource, terms: Array<string>, cb: (x: TextPToken | undefined) => void) => {
+            (
+               src: STokenSource,
+               terms: ReadonlyArray<string>,
+               cb: (x: TextPToken | undefined) => void,
+            ) => {
                cb(textResults.shift());
             },
          );
@@ -334,6 +368,7 @@ describe('parseUnexpanded (unit)', () => {
       ]);
 
       parseUnexpanded(mockSource, 'foo', (result) => {
+         // @ts-expect-error 2329/matchers
          expect(result).toEqualRangeless({
             propName: 'foo',
             tokens: [
@@ -356,7 +391,7 @@ describe('parseUnexpanded (unit)', () => {
             .mockImplementation(
                (
                   src: STokenSource,
-                  terms: Array<string>,
+                  terms: ReadonlyArray<string>,
                   cb: (x: TextPToken | undefined) => void,
                ) => {
                   cb(textResults.shift());
@@ -369,6 +404,7 @@ describe('parseUnexpanded (unit)', () => {
          ]);
 
          parseUnexpandedAfterPeRef(mockSource, 'foo', (result) => {
+            // @ts-expect-error 2329/matchers
             expect(result).toEqualRangeless({
                propName: 'foo',
                tokens: [textPToken],
@@ -386,7 +422,7 @@ describe('parseUnexpanded (unit)', () => {
             .mockImplementation(
                (
                   src: STokenSource,
-                  terms: Array<string>,
+                  terms: ReadonlyArray<string>,
                   cb: (x: TextPToken | undefined) => void,
                ) => {
                   cb(textResults.shift());
@@ -421,7 +457,7 @@ describe('parseUnexpanded (unit)', () => {
             .mockImplementation(
                (
                   src: STokenSource,
-                  terms: Array<string>,
+                  terms: ReadonlyArray<string>,
                   cb: (x: TextPToken | undefined) => void,
                ) => {
                   cb(textResults.shift());
@@ -434,6 +470,7 @@ describe('parseUnexpanded (unit)', () => {
          ]);
 
          parseUnexpandedAfterPeRef(mockSource, 'foo', (result) => {
+            // @ts-expect-error 2329/matchers
             expect(result).toEqualRangeless({
                propName: 'foo',
                tokens: [peRef],
@@ -458,7 +495,7 @@ describe('parseUnexpanded (unit)', () => {
             .mockImplementation(
                (
                   src: STokenSource,
-                  terms: Array<string>,
+                  terms: ReadonlyArray<string>,
                   cb: (x: TextPToken | undefined) => void,
                ) => {
                   cb(textResults.shift());
@@ -474,6 +511,7 @@ describe('parseUnexpanded (unit)', () => {
          ]);
 
          parseUnexpandedAfterPeRef(mockSource, 'foo', (result) => {
+            // @ts-expect-error 2329/matchers
             expect(result).toEqualRangeless({
                propName: 'foo',
                tokens: [textPToken],

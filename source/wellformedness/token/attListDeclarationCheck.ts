@@ -7,8 +7,8 @@ import { strOrBlank } from 'basic';
 import { literalCheck } from '../common/literalCheck';
 import { nameCheck } from '../common/nameCheck';
 import { nameXmlCheck } from '../common/nameXmlCheck';
-import { wordListCheck } from '../common/wordListCheck';
-import { Warning } from '../error/Warning';
+import { wordListCheck } from '../common/wordlistCheck';
+import { Warning } from '../error/warning';
 import { warningCodes } from '../error/warningCodes';
 import { wellFormedErrorCodes } from '../error/wellFormedError';
 
