@@ -723,7 +723,7 @@ Method: compared the effective config of eight representative files before and a
 the full lint result (file, line, column, rule, message) on all 3313 findings. Both
 identical apart from rules that were `'off'` and are now simply unset.
 
-Removed from the main override's `rules` (74 → 33 entries): the 25 `@typescript-eslint/*`
+Removed from the main override's `rules` (74 → 34 entries): the 25 `@typescript-eslint/*`
 rules that merely restated `recommended-type-checked`, the 3 `ban-types` replacements added
 in DEP-5 (also already in the preset), and every core-rule `'off'` that only existed to
 pair with a typescript-eslint extension rule (the preset or ESLint's default already has
