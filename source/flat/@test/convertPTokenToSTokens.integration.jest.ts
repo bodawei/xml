@@ -34,10 +34,10 @@ import { Warning } from 'wellformedness'; // ick
 describe('convertPTokenToSTokens (integration)', () => {
    it('returns an AttListDeclaration', () => {
       expect(convertPTokenToSTokens(makeAttListDeclaration())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "<!",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -56,7 +56,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "elStart",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -75,7 +75,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": " ",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -94,7 +94,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "att1",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -113,7 +113,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": " ",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -132,7 +132,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "CDATA",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -151,7 +151,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": " ",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -170,7 +170,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "#REQUIRED",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -189,7 +189,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": " ",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -207,8 +207,8 @@ describe('convertPTokenToSTokens (integration)', () => {
              "str": " ",
            },
            SToken {
-             "originalStr": "\\"",
-             "ranges": Array [
+             "originalStr": """,
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -223,11 +223,11 @@ describe('convertPTokenToSTokens (integration)', () => {
                  "startRow": 0,
                },
              ],
-             "str": "\\"",
+             "str": """,
            },
            SToken {
              "originalStr": "x",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -245,8 +245,8 @@ describe('convertPTokenToSTokens (integration)', () => {
              "str": "x",
            },
            SToken {
-             "originalStr": "\\"",
-             "ranges": Array [
+             "originalStr": """,
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -261,11 +261,11 @@ describe('convertPTokenToSTokens (integration)', () => {
                  "startRow": 0,
                },
              ],
-             "str": "\\"",
+             "str": """,
            },
            SToken {
              "originalStr": ">",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -288,10 +288,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a CDataPToken', () => {
       expect(convertPTokenToSTokens(makeCdata())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "<![",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -310,7 +310,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "CDATA",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -329,7 +329,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "[",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -348,7 +348,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "test text",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -367,7 +367,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "]]>",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -390,10 +390,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a CharData', () => {
       expect(convertPTokenToSTokens(makeCharData())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "test text",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -416,10 +416,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a CharRef', () => {
       expect(convertPTokenToSTokens(makeCharRef())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "&#",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -438,7 +438,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "68",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -457,7 +457,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": ";",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -480,10 +480,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a Comment', () => {
       expect(convertPTokenToSTokens(makeComment())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "<!--",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -502,7 +502,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "commentText",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -521,7 +521,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "-->",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -544,10 +544,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a ConditionalStart', () => {
       expect(convertPTokenToSTokens(makeConditionalStart())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "<[",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -570,10 +570,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a conditionalEnd', () => {
       expect(convertPTokenToSTokens(makeConditionalClose())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "]]>",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -596,10 +596,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a doctype end', () => {
       expect(convertPTokenToSTokens(makeDocTypeEnd())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "]",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -618,7 +618,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": ">",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -641,10 +641,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a doctype start', () => {
       expect(convertPTokenToSTokens(makeDocTypeStart())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "<!",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -663,7 +663,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "DOCTYPE",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -682,7 +682,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "root",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -701,7 +701,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "[",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -724,10 +724,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a element declaration', () => {
       expect(convertPTokenToSTokens(makeElementDeclaration())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "<!",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -746,7 +746,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "ELEMENT",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -765,7 +765,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": " ",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -784,7 +784,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "elementName",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -803,7 +803,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": " ",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -822,7 +822,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "ANY",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -841,7 +841,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": " ",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -860,7 +860,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": ">",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -883,10 +883,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a element end', () => {
       expect(convertPTokenToSTokens(makeElementEnd())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "</",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -905,7 +905,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "elStart",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -924,7 +924,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": ">",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -947,10 +947,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a element start', () => {
       expect(convertPTokenToSTokens(makeElementStart())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "<",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -969,7 +969,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "elStart",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -988,7 +988,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": ">",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1011,10 +1011,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a element empty', () => {
       expect(convertPTokenToSTokens(makeElementEmpty())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "<",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1033,7 +1033,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "elStart",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1052,7 +1052,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "/>",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1075,10 +1075,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a general entity declaration', () => {
       expect(convertPTokenToSTokens(makeGeneralEntityDeclaration())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "<!",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1097,7 +1097,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "geDecl",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1116,7 +1116,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "blah",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1135,7 +1135,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": ">",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1158,10 +1158,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a general entity reference', () => {
       expect(convertPTokenToSTokens(makeGeneralEntityReference())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "&",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1180,7 +1180,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "testRef",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1199,7 +1199,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": ";",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1222,10 +1222,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a notation declaration', () => {
       expect(convertPTokenToSTokens(makeNotationDeclaration())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "<!",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1244,7 +1244,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "NOTATION",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1263,7 +1263,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": " ",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1282,7 +1282,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "notationName",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1301,7 +1301,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": " ",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1320,7 +1320,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": " ",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1339,7 +1339,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": ">",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1362,10 +1362,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a parameter entity declaration', () => {
       expect(convertPTokenToSTokens(makeParameterEntityDeclaration())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "<!",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1384,7 +1384,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "%",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1403,7 +1403,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": " ",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1422,7 +1422,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "entityName",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1441,7 +1441,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": " ",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1459,8 +1459,8 @@ describe('convertPTokenToSTokens (integration)', () => {
              "str": " ",
            },
            SToken {
-             "originalStr": "\\"",
-             "ranges": Array [
+             "originalStr": """,
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1475,11 +1475,11 @@ describe('convertPTokenToSTokens (integration)', () => {
                  "startRow": 0,
                },
              ],
-             "str": "\\"",
+             "str": """,
            },
            SToken {
              "originalStr": "value",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1497,8 +1497,8 @@ describe('convertPTokenToSTokens (integration)', () => {
              "str": "value",
            },
            SToken {
-             "originalStr": "\\"",
-             "ranges": Array [
+             "originalStr": """,
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1513,11 +1513,11 @@ describe('convertPTokenToSTokens (integration)', () => {
                  "startRow": 0,
                },
              ],
-             "str": "\\"",
+             "str": """,
            },
            SToken {
              "originalStr": ">",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1540,10 +1540,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a parameter entity reference', () => {
       expect(convertPTokenToSTokens(makeParameterEntityReference())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "&",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1562,7 +1562,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "entityName",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1581,7 +1581,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": ";",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1604,10 +1604,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a processing instruction', () => {
       expect(convertPTokenToSTokens(makeProcessingInstruction())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "<?",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1626,7 +1626,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "foo",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1645,7 +1645,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": " ",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1664,7 +1664,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "blah",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1683,7 +1683,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "?>",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1706,10 +1706,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a space token', () => {
       expect(convertPTokenToSTokens(makeSpace())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": " ",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1732,10 +1732,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a text token', () => {
       expect(convertPTokenToSTokens(makeTextPToken('foo'))).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "foo",
-             "ranges": Array [],
+             "ranges": [],
              "str": "foo",
            },
          ]
@@ -1744,10 +1744,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a text declaration', () => {
       expect(convertPTokenToSTokens(makeTextDecl())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "<?",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1766,7 +1766,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "xml",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1785,7 +1785,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": " ",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1804,7 +1804,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "version",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1823,7 +1823,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "=",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1842,7 +1842,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "1.1",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1861,7 +1861,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "?>",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1884,10 +1884,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a unknown declaration', () => {
       expect(convertPTokenToSTokens(makeUnknownDeclaration())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1910,10 +1910,10 @@ describe('convertPTokenToSTokens (integration)', () => {
 
    it('returns a xml declaration', () => {
       expect(convertPTokenToSTokens(makeXmlDecl())).toMatchInlineSnapshot(`
-         Array [
+         [
            SToken {
              "originalStr": "<?",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1932,7 +1932,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "xml",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1951,7 +1951,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": " ",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1970,7 +1970,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "version",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -1989,7 +1989,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "=",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -2008,7 +2008,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "1.1",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -2027,7 +2027,7 @@ describe('convertPTokenToSTokens (integration)', () => {
            },
            SToken {
              "originalStr": "?>",
-             "ranges": Array [
+             "ranges": [
                Range {
                  "endColumn": 0,
                  "endIndex": 0,
@@ -2049,6 +2049,6 @@ describe('convertPTokenToSTokens (integration)', () => {
    });
 
    it('returns an empty array when encountering an error', () => {
-      expect(convertPTokenToSTokens(new Warning('foobar'))).toMatchInlineSnapshot('Array []');
+      expect(convertPTokenToSTokens(new Warning('foobar'))).toMatchInlineSnapshot(`[]`);
    });
 });

@@ -20,7 +20,7 @@ describe('TextXToken (unit)', () => {
               "pToken": TextPToken {
                 "text": SToken {
                   "originalStr": "foo",
-                  "ranges": Array [
+                  "ranges": [
                     Range {
                       "endColumn": 0,
                       "endIndex": 0,

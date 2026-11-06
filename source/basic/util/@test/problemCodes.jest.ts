@@ -19,20 +19,20 @@ describe('ProblemCodes()', () => {
 
       expect(result).toMatchInlineSnapshot(`
          ProblemCodes {
-           "code": Object {
+           "code": {
              "ID": 1,
              "ID2": 2,
            },
-           "id": Object {
+           "id": {
              "ID": "ID",
              "ID2": "ID2",
            },
-           "mapping": Object {
-             "ID": Object {
+           "mapping": {
+             "ID": {
                "code": 1,
                "message": "whee",
              },
-             "ID2": Object {
+             "ID2": {
                "code": 2,
                "message": "whee {0} {{1} {1} {0}",
              },

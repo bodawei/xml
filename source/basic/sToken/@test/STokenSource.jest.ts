@@ -322,7 +322,7 @@ describe('STokenSource (unit)', () => {
 
          expect(() => {
             source.addText('2');
-         }).toThrowError('Can not add text after endText() has been called.');
+         }).toThrow('Can not add text after endText() has been called.');
       });
 
       it('carries a range passed on an empty value to the next if it has no range (whitebox)', () => {
@@ -383,7 +383,7 @@ describe('STokenSource (unit)', () => {
       it('throws an error if type is not known', () => {
          expect(() => {
             source.extract('bogus', () => {});
-         }).toThrowError('"bogus" is not a known extractor type.');
+         }).toThrow('"bogus" is not a known extractor type.');
       });
 
       it('passes a version and arbitrary params to the extractor', () => {

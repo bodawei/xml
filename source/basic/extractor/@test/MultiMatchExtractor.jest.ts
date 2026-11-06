@@ -19,7 +19,7 @@ describe('MultiMatchExtractor', () => {
       it('throws an error if called with the same candidate twice', () => {
          expect(() => {
             new MultiMatchExtractor(1.0, true, ['w', 'w']);
-         }).toThrowError('"w" was specified twice.');
+         }).toThrow('"w" was specified twice.');
       });
    });
 
