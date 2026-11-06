@@ -75,7 +75,8 @@ relitigated from memory.
 -  [x] Decide the TypeScript 7 approach (`ts7-eslint`, DEP-13)
 -  [x] DEP-1 … DEP-5 (dead deps, Prettier 3, TypeScript 6.0, `@types/node` 26, typescript-eslint 8)
 -  [x] DEP-6a (remove airbnb-base)
--  [ ] DEP-6b (prune config against plugin `recommended` sets), then 6c (flat config on ESLint 9), 6d (ESLint 10 + import-x); see the plan. Continue in order, one PR each, re-measuring the
+-  [x] DEP-6b (prune config; decisions on adopting stylistic/strict presets left open)
+-  [ ] DEP-6c (flat config on ESLint 9), 6d (ESLint 10 + import-x); see the plan. Continue in order, one PR each, re-measuring the
        baseline table in every PR description.
 
 ## P8: Try swapping oxfmt in for prettier

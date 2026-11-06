@@ -716,3 +716,41 @@ part of the baseline.
 (four of them are `'off'` upstream: `init-declarations`, `no-invalid-this`,
 `no-magic-numbers` and `require-await`). Lint result is identical
 to the pre-change run on every one of the 3313 findings (file, line, column, rule).
+
+### DEP-6b — pruned (no behaviour change); further pruning needs decisions
+
+Method: compared the effective config of eight representative files before and after, and
+the full lint result (file, line, column, rule, message) on all 3313 findings. Both
+identical apart from rules that were `'off'` and are now simply unset.
+
+Removed from the main override's `rules` (74 → 33 entries): the 25 `@typescript-eslint/*`
+rules that merely restated `recommended-type-checked`, the 3 `ban-types` replacements added
+in DEP-5 (also already in the preset), and every core-rule `'off'` that only existed to
+pair with a typescript-eslint extension rule (the preset or ESLint's default already has
+it off). Also removed: the `plugins`, `parser` and `warnOnUnsupportedTypeScriptVersion`
+lines that the presets or defaults supply, the duplicate `eslint-recommended` / `recommended`
+/ `prettier` entries in `extends` (`recommended-type-checked` and `prettier/recommended`
+include them), and the stale airbnb-base comment.
+
+What remains in the main override are rules that *do* something: `sort-keys`, the five
+that change a preset option (`triple-slash-reference`, `unbound-method`,
+`no-unused-expressions`, `no-unused-vars`, and `require-await: off`), and 28 that
+add a rule the `recommended` set lacks. Of those 28, these are available in other
+typescript-eslint presets, so the explicit entries could go if the whole preset is adopted:
+
+-  `stylistic-type-checked` (23 rules): `adjacent-overload-signatures`, `array-type`,
+   `class-literal-property-style`, `consistent-type-assertions`, `consistent-type-definitions`,
+   `no-inferrable-types`, `prefer-regexp-exec`, `prefer-string-starts-ends-with`.
+-  `strict-type-checked` (79 rules): `no-dynamic-delete`, `no-extraneous-class`,
+   `no-invalid-void-type`, `no-non-null-assertion`, `no-unnecessary-boolean-literal-compare`,
+   `no-unnecessary-condition`, `prefer-reduce-type-parameter`, `unified-signatures`.
+
+Adopting either preset is **not** behaviour-neutral: `stylistic-type-checked` would also turn
+on 11 rules this repo does not enable (`prefer-nullish-coalescing`, `prefer-optional-chain`,
+`prefer-includes`, `prefer-for-of`, ...) and `strict-type-checked` ~16 more. That is a
+decision for the maintainer, not part of a no-behaviour-change prune. Rules in no preset
+(and so must stay): `parameter-properties`, `prefer-ts-expect-error`,
+`switch-exhaustiveness-check`, `typedef`, `no-empty-interface`, plus the `sort-keys` and
+`import/order` configuration.
+
+The ~250 lines of commented-out rule documentation are untouched.

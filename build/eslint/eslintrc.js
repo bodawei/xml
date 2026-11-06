@@ -34,19 +34,15 @@ module.exports = {
             './source/basic/**/*.ts',
             './source/valid/**/*.ts',
          ],
-         parser: '@typescript-eslint/parser',
          parserOptions: {
             project: './tsconfig.json',
             tsconfigRootDir: ROOT,
-            warnOnUnsupportedTypeScriptVersion: true,
          },
          extends: [
-            // Right now can't use airbnb base because it is conflicting with @typescript-eslint
-            // 'airbnb-base', // https://www.npmjs.com/package/eslint-config-airbnb-base
             'plugin:prettier/recommended', // https://github.com/prettier/eslint-plugin-prettier
             'plugin:import/recommended', // https://www.npmjs.com/package/eslint-plugin-import
-            "plugin:@typescript-eslint/recommended",
-            "plugin:@typescript-eslint/recommended-type-checked",
+            // recommended-type-checked already includes `recommended` and `eslint-recommended`.
+            'plugin:@typescript-eslint/recommended-type-checked',
            ],
          // These were supplied by eslint-config-airbnb-typescript/base, which DEP-5 removed.
          settings: {
@@ -114,11 +110,9 @@ module.exports = {
             './source/token/conditional.ts',
             './source/token/common/externalId.ts',
          ],
-         parser: '@typescript-eslint/parser',
          parserOptions: {
             project: './tsconfig.json',
             tsconfigRootDir: ROOT,
-            warnOnUnsupportedTypeScriptVersion: true,
           },
           settings: {
             'import/parsers': {
@@ -131,29 +125,19 @@ module.exports = {
             },
             'import/extensions': ['.ts', '.mjs'],
           },
-          plugins: [
-            '@typescript-eslint',
-            'prettier',
-         ],
          extends: [
+            // Includes the `prettier` plugin, `eslint-config-prettier` and `prettier/prettier`.
             'plugin:prettier/recommended',
-            'prettier',
-            'plugin:@typescript-eslint/eslint-recommended',
-            'plugin:@typescript-eslint/recommended',
+            // Includes `recommended` and `eslint-recommended`, the parser and the plugin.
             'plugin:@typescript-eslint/recommended-type-checked',
          ],
          rules: {
-            'prettier/prettier': 'error',
-            'no-unused-vars': 'off',
-
             // https://eslint.org/docs/rules/sort-keys
             'sort-keys': ['error', 'asc', { caseSensitive: false, minKeys: 2, natural: true }],
 
             // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin
             '@typescript-eslint/adjacent-overload-signatures': 'error',
             '@typescript-eslint/array-type': [ 'error', { default: 'generic' } ],
-            '@typescript-eslint/await-thenable': 'error',
-            '@typescript-eslint/ban-ts-comment': [ 'error' ],
             // , {
             //    'ts-expect-error': 'allow-with-description',
             //    'ts-ignore': true,
@@ -162,10 +146,6 @@ module.exports = {
             //    minimumDescriptionLength: 3,
             // } ],
             // '@typescript-eslint/ban-tslint-comment': 'error',
-            // ban-types was split in v8; these three are its default-equivalents.
-            '@typescript-eslint/no-empty-object-type': ['error'],
-            '@typescript-eslint/no-unsafe-function-type': ['error'],
-            '@typescript-eslint/no-wrapper-object-types': ['error'],
             '@typescript-eslint/class-literal-property-style': ["error", "fields"],
             '@typescript-eslint/consistent-type-assertions': ["error", { assertionStyle: 'as', objectLiteralTypeAssertions: 'never' }],
             "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
@@ -444,23 +424,8 @@ module.exports = {
              // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-empty-interface.md
              "@typescript-eslint/no-empty-interface": ["error"],
      
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-explicit-any.md
-             "@typescript-eslint/no-explicit-any": ["error"],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-extra-non-null-assertion.md
-             "@typescript-eslint/no-extra-non-null-assertion": ["error"],
-     
              // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-extraneous-class.md
              "@typescript-eslint/no-extraneous-class": ["error"],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-floating-promises.md
-             "@typescript-eslint/no-floating-promises": ["error"],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-for-in-array.md
-             "@typescript-eslint/no-for-in-array": ["error"],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-implied-eval.md
-             "@typescript-eslint/no-implied-eval": ["error"],
      
              // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-inferrable-types.md
              "@typescript-eslint/no-inferrable-types": ["error"],
@@ -468,29 +433,11 @@ module.exports = {
              // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-invalid-void-type.md
              "@typescript-eslint/no-invalid-void-type": ["error"],
      
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-misused-new.md
-             "@typescript-eslint/no-misused-new": ["error"],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-misused-promises.md
-             "@typescript-eslint/no-misused-promises": ["error"],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-namespace.md
-             "@typescript-eslint/no-namespace": ["error"],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-non-null-asserted-optional-chain.md
-             "@typescript-eslint/no-non-null-asserted-optional-chain": ["error"],
-     
              // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-non-null-assertion.md
              "@typescript-eslint/no-non-null-assertion": ["error"],
      
              // https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/parameter-properties.md
              "@typescript-eslint/parameter-properties": ["error"],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-require-imports.md
-             "@typescript-eslint/no-require-imports": ["error"],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/only-throw-error.md
-             "@typescript-eslint/only-throw-error": ["error"],
      
             //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-type-alias.md
             //  "@typescript-eslint/no-type-alias": ["error"],
@@ -512,21 +459,6 @@ module.exports = {
             //    },
             //    */,
             //  ],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unnecessary-type-assertion.md
-             '@typescript-eslint/no-unnecessary-type-assertion': ['error'],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unsafe-assignment.md
-             '@typescript-eslint/no-unsafe-assignment': ['error'],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unsafe-call.md
-             '@typescript-eslint/no-unsafe-call': ['error'],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unsafe-member-access.md
-             '@typescript-eslint/no-unsafe-member-access': ['error'],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unsafe-return.md
-             '@typescript-eslint/no-unsafe-return': ['error'],
      
             //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unused-vars-experimental.md
             //  // ???
@@ -684,85 +616,24 @@ module.exports = {
            // same functionality, but also supports TypeScript.
            //
 
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/default-param-last.md
-           // https://eslint.org/docs/rules/default-param-last
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
-           'default-param-last': 'off',
            '@typescript-eslint/default-param-last': 'error',
 
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/dot-notation.md
-           // https://eslint.org/docs/rules/dot-notation
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
-           'dot-notation': 'off',
            '@typescript-eslint/dot-notation': ['error', { allowKeywords: true }],
 
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/init-declarations.md
-           // https://eslint.org/docs/rules/init-declarations
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/variables.js
-           'init-declarations': 'off',
-           '@typescript-eslint/init-declarations': 'off',
-
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-array-constructor.md
-           // https://eslint.org/docs/rules/no-array-constructor
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/style.js
-           'no-array-constructor': 'off',
-           '@typescript-eslint/no-array-constructor': 'error',
-
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-dupe-class-members.md
-           // https://eslint.org/docs/rules/no-dupe-class-members
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/es6.js
-           'no-dupe-class-members': 'off',
            '@typescript-eslint/no-dupe-class-members': 'error',
 
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-empty-function.md
-           // https://eslint.org/docs/rules/no-empty-function
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
-           'no-empty-function': 'off',
            '@typescript-eslint/no-empty-function': ['error', { allow: ['arrowFunctions', 'functions', 'methods'] }],
 
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-invalid-this.md
-           // https://eslint.org/docs/rules/no-invalid-this
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
-           'no-invalid-this': 'off',
-           '@typescript-eslint/no-invalid-this': 'off',
-
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-magic-numbers.md
-           // https://eslint.org/docs/rules/no-magic-numbers
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
-           'no-magic-numbers': 'off',
-           '@typescript-eslint/no-magic-numbers': 'off',
-
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unused-expressions.md
-           // https://eslint.org/docs/rules/no-unused-expressions
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
-           'no-unused-expressions': 'off',
            '@typescript-eslint/no-unused-expressions': ['error', { allowShortCircuit: false, allowTernary: false, allowTaggedTemplates: false }],
 
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unused-vars.md
-           // https://eslint.org/docs/rules/no-unused-vars
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/variables.js
-           'no-unused-vars': 'off',
            '@typescript-eslint/no-unused-vars': ['error', { vars: 'all', args: 'after-used', ignoreRestSiblings: true }],
 
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-use-before-define.md
-           // https://eslint.org/docs/rules/no-use-before-define
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/variables.js
-           'no-use-before-define': 'off',
            '@typescript-eslint/no-use-before-define': ['error', { functions: true, classes: true, variables: true }],
 
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-useless-constructor.md
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/es6.js
-           'no-useless-constructor': 'off',
            '@typescript-eslint/no-useless-constructor': 'error',
 
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/require-await.md
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
-           'require-await': 'off',
            '@typescript-eslint/require-await': 'off',
 
-           // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/return-await.md
-           // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
-           'no-return-await': 'off',
            '@typescript-eslint/return-await': 'error',
          },
          overrides: [ {
