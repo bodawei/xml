@@ -865,3 +865,29 @@ DEP-4), and the types check clean against Jest 30.
 98.18% statements. Jasmine 336 specs. `check:types` 0 errors. Lint 3313 findings by rule, same as
 before; `lint:ci` passes. Prettier non-conforming files 91, unchanged. `npm audit`: critical
 1 → 0, high 13 → 5, moderate 32, low 2 (39 total).
+
+### DEP-8 — Babel 8 (stacked on DEP-7)
+
+`@babel/core` 7.29.13 → 8.1.0, `@babel/preset-env` and `@babel/preset-typescript` → 8.0.7.
+`babel-jest@30` allows Babel 8 (`^7.11.0 || ^8.0.0-0`).
+
+**One real behaviour change, and a small plugin to neutralise it.** Babel 8's TypeScript
+transform initialises every class field that has no initializer to `undefined`, as
+`useDefineForClassFields: true` does. This repo builds with `tsc` and
+`useDefineForClassFields: false` (see DEP-3 — switching it breaks 16 Jasmine specs), where such
+fields emit nothing. Left alone, 9 Jest suites failed: snapshots gained `"pToken": undefined`,
+and subclass field declarations overwrote values set by the parent constructor, which made the
+`ValidityChecker` integration specs time out. There is no option to turn this off.
+`build/babel-plugin-omit-uninitialized-fields.js` (about 10 lines) drops value-less, non-`declare`
+`ClassProperty` members before the TypeScript transform sees the class, which is what Babel 7
+did and what `tsc` does here. It is registered in `build/babelrc-ts.js`. **This is a decision
+for review:** the alternatives are to adopt `useDefineForClassFields: true` project-wide (a
+semantic change to the shipped code) or to add `declare` to the affected fields.
+
+`npm ls` marks nested `@babel/plugin-syntax-*` packages inside `babel-preset-current-node-syntax`
+as invalid (they peer `@babel/core ^7`). `npm ci` is unaffected and the syntax plugins are
+no-ops on Node 26.
+
+**Verified.** Jest with coverage: 265 suites / 9768 tests / 68 snapshots, all passing with no
+snapshot changes; coverage 98.18% statements, identical to Babel 7. Jasmine 336 specs,
+`check:types` 0 errors, `npm ci` dry run clean, `npm audit` unchanged (39).
