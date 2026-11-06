@@ -52,7 +52,7 @@ function setUpStreams(test: TestDetails, ver?: XmlVersion, rev?: XmlEdition): Tr
 
    wellFormedStream.pipe(checkValidity);
 
-   sTokenSource.addText(test.testData || '');
+   sTokenSource.addText(test.testData ?? '');
    sTokenSource.endText();
 
    return checkValidity;
@@ -64,7 +64,7 @@ describe('XML Conformance tests', () => {
    allDetails.forEach((testData) => {
       const ver = testData.VERSION ? (Number.parseFloat(testData.VERSION) as XmlVersion) : 1.0;
       const defaultRev: XmlEdition = ver === 1.0 ? 5 : 2;
-      const editionString = testData.EDITION ? testData.EDITION : String(defaultRev);
+      const editionString = testData.EDITION ?? String(defaultRev);
       const hasEdition = !!testData.EDITION;
 
       const allEditions = editionString
@@ -97,7 +97,7 @@ describe('XML Conformance tests', () => {
                let expectedError;
 
                if (testData.expectedError) {
-                  expectedError = testData.expectedError[key] || testData.expectedError.default;
+                  expectedError = testData.expectedError[key] ?? testData.expectedError.default;
                }
 
                // console.log(
@@ -144,7 +144,7 @@ describe('XML Conformance tests', () => {
                   revToUse,
                );
 
-               sTokenSource.addText(testData.testData || '');
+               sTokenSource.addText(testData.testData ?? '');
                sTokenSource.endText();
 
                // We also want to test  whether the errors match as expected

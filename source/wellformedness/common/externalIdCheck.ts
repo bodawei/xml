@@ -35,7 +35,7 @@ function externalIdCheck(
    collector.setPos(externalId.externalType);
    const typeText = strOrBlank(externalId.externalType);
    const capitalType = typeText.toLocaleUpperCase();
-   collector.check(ALLOWED_TYPES.indexOf(capitalType) === -1, WFEID.EXTERNALID_UNKNOWN, [typeText]);
+   collector.check(!ALLOWED_TYPES.includes(capitalType), WFEID.EXTERNALID_UNKNOWN, [typeText]);
    collector.check(typeText !== capitalType, WFEID.EXTERNALID_INVALID_CASE, [
       capitalType,
       typeText,
@@ -58,12 +58,10 @@ function externalIdCheck(
 
             const match = PUBID_CHARS.exec(pubLiteral);
 
-            const str: string = (match && match[0]) || '';
-            collector.check(
-               !match || match[0] !== pubLiteral,
-               WFEID.EXTERNALID_PUBLIC_INVALID_CHARS,
-               [pubLiteral[str.length]],
-            );
+            const str: string = match?.[0] ?? '';
+            collector.check(match?.[0] !== pubLiteral, WFEID.EXTERNALID_PUBLIC_INVALID_CHARS, [
+               pubLiteral[str.length],
+            ]);
          }
       });
    }
@@ -84,7 +82,7 @@ function externalIdCheck(
          //    to be part of a system identifier
          const literalString = pTokenArrayToString(externalId.system?.value);
 
-         if (literalString.indexOf('#') !== -1) {
+         if (literalString.includes('#')) {
             collector.reportProblem(Error, errorCodes.id.SYSTEMLITERAL_NO_FRAGMENT, [
                literalString,
             ]);

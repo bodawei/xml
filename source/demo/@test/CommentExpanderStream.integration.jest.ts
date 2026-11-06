@@ -5,13 +5,7 @@ import { gatherStreamResults } from 'basic-test';
 import { PTokenStream } from 'node';
 import { XMLDECL_PTOKEN, ParseToken } from 'pToken';
 import { STokenSource } from 'basic';
-import {
-   COMMENT_PTOKEN,
-   ELEMENT_END_PTOKEN,
-   CHARDATA_PTOKEN,
-   ELEMENT_START_PTOKEN,
-   CommentPToken,
-} from 'token';
+import { COMMENT_PTOKEN, ELEMENT_END_PTOKEN, CHARDATA_PTOKEN, ELEMENT_START_PTOKEN } from 'token';
 
 import { CommentExpanderStream } from '../CommentExpanderStream';
 
@@ -31,7 +25,7 @@ describe('CommentExpanderStream (integration)', () => {
       gatherStreamResults<ParseToken>(ces, (results) => {
          const result = results.find((r) => r.type === COMMENT_PTOKEN);
 
-         expect((result as CommentPToken).text[0].str).toEqual(after);
+         expect(result!.text[0].str).toEqual(after);
          done();
       });
    }

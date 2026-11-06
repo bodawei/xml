@@ -15,8 +15,8 @@ describe('surrogateUtils', () => {
             const buffer = Buffer.from(String.fromCharCode(charCode));
             const expected = [];
 
-            for (let index = 0; index < buffer.length; index++) {
-               expected.push(buffer[index]);
+            for (const byte of buffer) {
+               expected.push(byte);
             }
 
             if (charCode >= 0xd800 && charCode <= 0xdfff) {

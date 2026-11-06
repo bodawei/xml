@@ -18,7 +18,7 @@ function conditionalStartCheck(
 
    const sectionType = strOrBlank(pToken.sectionType);
    const ucSectionType = sectionType.toUpperCase();
-   const knownSectionType = SECTION_TYPES.indexOf(ucSectionType) !== -1;
+   const knownSectionType = SECTION_TYPES.includes(ucSectionType);
 
    collector.setPos(pToken.sectionType);
    collector.check(!knownSectionType, WFEID.CONDITIONAL_UNKNOWN, [sectionType]);

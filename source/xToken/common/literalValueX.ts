@@ -36,9 +36,7 @@ type LiteralValueX = Array<
 function makeLiteralValueX(pToken: LiteralValuePToken): LiteralValueX {
    const value: LiteralValueX = [];
 
-   for (let index = 0; index < pToken.length; index++) {
-      const item = pToken[index];
-
+   for (const item of pToken) {
       if (item.type === TEXT_PTOKEN) {
          value.push(new TextXToken(item));
       } else if (item.type === CHARREF_PTOKEN) {

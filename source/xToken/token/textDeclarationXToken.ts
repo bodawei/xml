@@ -21,6 +21,8 @@ class TextDeclarationXToken {
    constructor(version: XmlVersion, encoding?: string, pToken?: TextDeclarationPToken);
    constructor(versionOrPToken: XmlVersion | TextDeclarationPToken, encoding?: string) {
       this.version = 1.0;
+      // An empty encoding name must fall back to the default too, so this must stay `||`.
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
       this.encoding = encoding || DEFAULT_ENCODING;
 
       if (typeof versionOrPToken === 'number') {

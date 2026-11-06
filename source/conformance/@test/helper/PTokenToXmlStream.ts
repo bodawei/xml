@@ -103,7 +103,7 @@ function formatAttrs(attrs?: ReadonlyArray<AttributePToken>): string {
 class PTokenToXmlStream extends Transform {
    private doctypeStart?: DocTypeStartPToken;
 
-   private notations: { [name: string]: string } = {};
+   private notations: Record<string, string> = {};
 
    private inElement = false;
 

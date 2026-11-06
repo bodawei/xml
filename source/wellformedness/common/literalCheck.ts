@@ -15,7 +15,7 @@ function literalCheck(
    type: string,
    checkValue?: () => void,
 ): void {
-   const pToken: LiteralPToken = pTokenPart || { value: [] };
+   const pToken: LiteralPToken = pTokenPart ?? { value: [] };
 
    collector.setPos(pToken.openQuote);
    collector.check(!pToken.openQuote, WFEID.LITERAL_NO_OPEN_QUOTE, [type]);

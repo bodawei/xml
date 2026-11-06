@@ -15,9 +15,7 @@ type ContentData = string | SimpleObjData;
 
 interface SimpleObjData {
    type: string;
-   attr: {
-      [attrName: string]: string;
-   };
+   attr: Record<string, string>;
    content: Array<ContentData>;
 }
 
@@ -81,11 +79,7 @@ interface TestCases {
    'xml:base'?: string;
    cases: Array<TestCases>;
    tests: Array<Test>;
-   entityPaths: {
-      [path: string]: {
-         [entityName: string]: string | undefined;
-      };
-   };
+   entityPaths: Record<string, Record<string, string | undefined>>;
 }
 
 interface Test {
@@ -169,7 +163,7 @@ function addRelatedData(
          try {
             let workPath = workingPath;
             // the eduni directory appears to be malformed!  Who actually ran these tests??
-            if (workPath.indexOf('namespaces/misc') !== -1) {
+            if (workPath.includes('namespaces/misc')) {
                workPath = workPath.replace('namespaces/misc', 'misc');
             }
             result.attr.testPath = `${workPath}${data.attr.URI || ''}`;
@@ -177,7 +171,7 @@ function addRelatedData(
             result.attr.testData = convertToStringWithSurrogateHalves(rawBuffer);
 
             // Oops. Some tests have other character sets
-            if (result.attr.testData.indexOf('iso-8859-1') !== -1) {
+            if (result.attr.testData.includes('iso-8859-1')) {
                result.attr.testData = readFileSync(result.attr.testPath, { encoding: 'latin1' });
             }
          } catch (e) {
@@ -269,7 +263,7 @@ function addDirectory(pathToHere: string, testCases: TestCases, root: string): v
          const finalPath = resolve(pathToHere, entryName);
          const stats = statSync(finalPath);
          // The eduni directory in some cases suffixes all files with .xml, and in some cases has no extensions.
-         const isEduni = pathToHere.indexOf('eduni') !== -1;
+         const isEduni = pathToHere.includes('eduni');
 
          // eduni puts some files in subfolders
          if (!stats.isFile()) {

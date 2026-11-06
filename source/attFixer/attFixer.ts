@@ -38,17 +38,11 @@ interface AttDetals {
    closeQuote?: SToken;
 }
 
-interface ElementDetails {
-   [attName: string]: AttDetals | undefined;
-}
+type ElementDetails = Record<string, AttDetals | undefined>;
 
-interface AttDetailsMap {
-   [elementName: string]: ElementDetails | undefined;
-}
+type AttDetailsMap = Record<string, ElementDetails | undefined>;
 
-interface NameMap {
-   [name: string]: boolean;
-}
+type NameMap = Record<string, boolean>;
 
 const CDATA_REGEX = /[ \r\n\t]/g;
 const OTHER_REGEX = /[ \r\n\t]+/g;
@@ -206,7 +200,7 @@ function normalizeAttr(
 
                if (isLast) {
                   const prev = newValue[newValue.length - 1];
-                  if (prev && prev.type === CHARREF_PTOKEN && prev.char === ' ') {
+                  if (prev?.type === CHARREF_PTOKEN && prev.char === ' ') {
                      newValue.pop();
                   }
                }
@@ -393,7 +387,7 @@ class AttFixer {
          return;
       }
 
-      this.attDetails[elementName] = this.attDetails[elementName] || {};
+      this.attDetails[elementName] = this.attDetails[elementName] ?? {};
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const elDetails = this.attDetails[elementName]!;
@@ -419,9 +413,9 @@ class AttFixer {
          };
 
          if (def.value.length > 0) {
-            working.openQuote = def.openQuote || toSToken('"');
+            working.openQuote = def.openQuote ?? toSToken('"');
             working.defaultValue = def.value;
-            working.closeQuote = def.closeQuote || toSToken('"');
+            working.closeQuote = def.closeQuote ?? toSToken('"');
          }
 
          elDetails[attName] = working as any;

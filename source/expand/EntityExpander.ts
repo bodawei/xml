@@ -370,7 +370,7 @@ class EntityExpander {
             (results) => {
                this.deliverByproducts(results.byproducts);
                const source = entityValueToSTokenSource(
-                  results.expandedTokens || [],
+                  results.expandedTokens ?? [],
                   this.expandParams.entityId,
                   true,
                ); // THIS entityId IS WRONG!!!!
@@ -395,7 +395,7 @@ class EntityExpander {
             (results) => {
                this.deliverByproducts(results.byproducts);
                const source = entityValueToSTokenSource(
-                  results.expandedTokens || [],
+                  results.expandedTokens ?? [],
                   this.expandParams.entityId,
                   true,
                ); // THIS entityId IS WRONG!!!!
@@ -417,7 +417,7 @@ class EntityExpander {
             (results) => {
                this.deliverByproducts(results.byproducts);
                const source = entityValueToSTokenSource(
-                  results.expandedTokens || [],
+                  results.expandedTokens ?? [],
                   this.expandParams.entityId,
                   true,
                ); // THIS entityId IS WRONG!!!!
@@ -436,7 +436,7 @@ class EntityExpander {
             (results) => {
                this.deliverByproducts(results.byproducts);
                const source = entityValueToSTokenSource(
-                  results.expandedTokens || [],
+                  results.expandedTokens ?? [],
                   this.expandParams.entityId,
                   true,
                ); // THIS entityId IS WRONG!!!!

@@ -18,9 +18,7 @@ import { charRefToSTokens } from '../token/charRefToSTokens';
 function literalValueToSTokens(pToken: LiteralValuePToken): Array<SToken> {
    const builder = new STokenArrayBuilder();
 
-   for (let index = 0; index < pToken.length; index++) {
-      const item = pToken[index];
-
+   for (const item of pToken) {
       if (item.type === CHARREF_PTOKEN) {
          builder.add(charRefToSTokens(item));
       } else if (item.type === TEXT_PTOKEN) {

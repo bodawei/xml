@@ -81,7 +81,7 @@ function utf8BytesToChar(bytes: Uint8Array | Buffer): string {
 
 function mightContainSurrogateHalf(data: Buffer): boolean {
    // All surrogate halves in utf8 start with a byte with decimal vaue 237
-   return data.indexOf(237) !== -1;
+   return data.includes(237);
 }
 
 function* makeSurrogateHalvesIterator(): Generator<Uint8Array> {
@@ -144,8 +144,8 @@ function convertToStringWithSurrogateHalves(input: Buffer): string {
       return srtWithPlaceholders;
    }
 
-   for (let index = 0; index < halves.length; index++) {
-      srtWithPlaceholders = srtWithPlaceholders.replace('\u0001\u0001\u0001', halves[index]);
+   for (const half of halves) {
+      srtWithPlaceholders = srtWithPlaceholders.replace('\u0001\u0001\u0001', half);
    }
 
    return srtWithPlaceholders;

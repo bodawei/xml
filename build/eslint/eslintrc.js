@@ -130,13 +130,12 @@ module.exports = {
             'plugin:prettier/recommended',
             // Includes `recommended` and `eslint-recommended`, the parser and the plugin.
             'plugin:@typescript-eslint/recommended-type-checked',
+            'plugin:@typescript-eslint/stylistic-type-checked',
          ],
          rules: {
             // https://eslint.org/docs/rules/sort-keys
             'sort-keys': ['error', 'asc', { caseSensitive: false, minKeys: 2, natural: true }],
 
-            // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin
-            '@typescript-eslint/adjacent-overload-signatures': 'error',
             '@typescript-eslint/array-type': [ 'error', { default: 'generic' } ],
             // , {
             //    'ts-expect-error': 'allow-with-description',
@@ -146,9 +145,7 @@ module.exports = {
             //    minimumDescriptionLength: 3,
             // } ],
             // '@typescript-eslint/ban-tslint-comment': 'error',
-            '@typescript-eslint/class-literal-property-style': ["error", "fields"],
             '@typescript-eslint/consistent-type-assertions': ["error", { assertionStyle: 'as', objectLiteralTypeAssertions: 'never' }],
-            "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
             // '@typescript-eslint/consistent-type-imports': ["error", {
             //    prefer: 'type-imports',
             //    disallowTypeAnnotations: true,
@@ -427,9 +424,6 @@ module.exports = {
              // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-extraneous-class.md
              "@typescript-eslint/no-extraneous-class": ["error"],
      
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-inferrable-types.md
-             "@typescript-eslint/no-inferrable-types": ["error"],
-     
              // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-invalid-void-type.md
              "@typescript-eslint/no-invalid-void-type": ["error"],
      
@@ -508,12 +502,6 @@ module.exports = {
      
              // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/prefer-reduce-type-parameter.md
              '@typescript-eslint/prefer-reduce-type-parameter': ['error'],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/prefer-regexp-exec.md
-             '@typescript-eslint/prefer-regexp-exec': ['error'],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/prefer-string-starts-ends-with.md
-             '@typescript-eslint/prefer-string-starts-ends-with': ['error'],
      
              // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/prefer-ts-expect-error.md
              '@typescript-eslint/prefer-ts-expect-error': ['error'],
@@ -617,8 +605,6 @@ module.exports = {
            //
 
            '@typescript-eslint/default-param-last': 'error',
-
-           '@typescript-eslint/dot-notation': ['error', { allowKeywords: true }],
 
            '@typescript-eslint/no-dupe-class-members': 'error',
 
