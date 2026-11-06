@@ -22,9 +22,7 @@ const VID = validityErrorCodes.id;
  */
 function ancestorPERefsValidate(
    startPToken:
-      | GeneralEntityStartPToken
-      | ParameterEntityStartPToken
-      | ParameterEntityReferencePToken,
+      GeneralEntityStartPToken | ParameterEntityStartPToken | ParameterEntityReferencePToken,
    state: ValidityState,
    coll: Collector,
 ): void {

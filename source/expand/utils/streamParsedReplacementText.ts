@@ -57,9 +57,7 @@ function noop(): void {}
  */
 function streamParsedReplacementText(
    reference:
-      | ParameterEntityReferencePToken
-      | GeneralEntityReferencePToken
-      | ExternalDtdSubsetPseudoToken,
+      ParameterEntityReferencePToken | GeneralEntityReferencePToken | ExternalDtdSubsetPseudoToken,
    expandParams: ExpandParams,
    entityContextStack: EntityContextStack,
    deliverToken: DeliverToken,
