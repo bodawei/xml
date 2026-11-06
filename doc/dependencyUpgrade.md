@@ -651,12 +651,13 @@ Findings the plan did not anticipate:
    had; fixed.
 -  `source/basic/extractor/*New.ts` is excluded from type-checking: it is the unfinished
    P1 rewrite and does not type-check.
--  After TS 6.0 the `flatDocs.json` errors no longer appear at all; `check:types` is
-   reported clean once DEP-4 lands. `AGENTS.md`'s "known failure" note is now stale.
+-  After TS 6.0 the `flatDocs.json` errors no longer appear. Cause not isolated. That
+   file is expected to be unclean, so `AGENTS.md`'s known-failure note is left as is
+   until this is understood.
 -  Lint total 3292 → 3287 (basic −5, conformance −2, wellformedness +2 from new casts);
    `valid`, `token`, `node`, `demo` still clean.
 
 ### DEP-4 — done
 
 `@types/node` 26.6.6. Zero new errors; it also cleared the one `Buffer` overload error
-that 5.9 raised against `@types/node` 17. `npm run check:types` now exits clean.
+that 5.9 raised against `@types/node` 17.
