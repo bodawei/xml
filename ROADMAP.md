@@ -20,7 +20,9 @@ README goals and the current code; edit, reorder, or replace them as priorities 
 | P10 | idea   | Replace jest with with vitest                                                           |
 | P11 | idea   | Kill jasmine, move those to vitest.                                                     |
 | P12 | idea   | Switch to one of the mono repo systems so we can lock down cross "package" dependencies |
-| P13 | idea   | Clarify/fix the impossible to "fix" core of the parsing loop                            |
+| P13 | idea   | Resolve any lint errors in xToken                                                       |
+| P14 | idea   | Review and refresh knowledge of the state of the project, overall                       |
+| P15 | idea   | Clarify/fix the impossible to "fix" core of the parsing loop                            |
 | P1  | onhold | Finish the `basic` extractor rewrite                                                    |
 | P2  | idea   | Support documents larger than memory                                                    |
 | P3  | idea   | Browser build                                                                           |
@@ -46,8 +48,15 @@ current baseline rather than a four-year-old one.
 
 ### Current state
 
-DEP-1 … DEP-5 are done (see the progress log in `doc/dependencyUpgrade.md`); DEP-6 onward
-is not started. `doc/dependencyUpgrade.md` holds the staged plan
+DEP-1 … DEP-10 are done: DEP-1 … DEP-9 are merged and DEP-10 (nodemon 3, plus removing the
+unused `iconv-lite`) is in PR #31 (see the progress log in `doc/dependencyUpgrade.md`).
+Remaining: DEP-11 (Jasmine 7, project-sized: it removes the `jsLoader` option this repo
+relies on), DEP-12 (`properties-parser`) and DEP-13 (TypeScript 7 via `ts7-eslint`).
+`npm outdated` still lists `jasmine`, `jasmine-core`, `@types/jasmine` and `typescript`
+(DEP-11 / DEP-13), plus `globals` 16 → 17 and `@types/jest` 27 → 30, which are deliberate
+or untouched so far (`@types/jest` stays until Jasmine is replaced; see DEP-4/DEP-7).
+`npm audit` is down to 33 advisories, none critical; the 3 high ones are transitive
+(`brace-expansion`, `braces`, `picomatch`). `doc/dependencyUpgrade.md` holds the staged plan
 (DEP-1 … DEP-13), the measured baseline, and the peer-range constraints that fix
 the ordering.
 
@@ -76,7 +85,10 @@ relitigated from memory.
 -  [x] DEP-1 … DEP-5 (dead deps, Prettier 3, TypeScript 6.0, `@types/node` 26, typescript-eslint 8)
 -  [x] DEP-6a (remove airbnb-base)
 -  [x] DEP-6b (prune config; decisions on adopting stylistic/strict presets left open)
--  [ ] DEP-6c (flat config on ESLint 9), 6d (ESLint 10 + import-x); see the plan. Continue in order, one PR each, re-measuring the
+-  [x] DEP-6c (flat config on ESLint 9), 6d (ESLint 10 + import-x)
+-  [x] DEP-7 (Jest 30, Babel 7), DEP-8 (Babel 8, with a small plugin; see the plan), DEP-9 (`iconv-lite` removed, plugin to devDependencies)
+-  [ ] DEP-10 (nodemon 3) is in PR #31.
+-  [ ] DEP-11 (Jasmine 7), DEP-12 (`properties-parser`), DEP-13 (TypeScript 7). Continue in order, one PR each, re-measuring the
        baseline table in every PR description.
 
 ## P8: Try swapping oxfmt in for prettier
@@ -146,7 +158,7 @@ the README.
 with no Node-only APIs on the core path.
 
 **Current state:** The core still depends on Node-oriented pieces (for example
-`stream` and `iconv-lite`) and there is no browser entry point or build.
+`stream`) and there is no browser entry point or build.
 
 **Next actions:**
 
