@@ -47,6 +47,6 @@
    "dependencies": {
       "bcp47-validate": "1.0.0",
       "eslint-plugin-custom-rules": "file:build/eslint/eslint-plugin-custom-rules",
-      "iconv-lite": "0.6.3"
+      "iconv-lite": "0.7.3"
    }
 }

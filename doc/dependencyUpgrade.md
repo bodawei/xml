@@ -865,3 +865,21 @@ DEP-4), and the types check clean against Jest 30.
 98.18% statements. Jasmine 336 specs. `check:types` 0 errors. Lint 3313 findings by rule, same as
 before; `lint:ci` passes. Prettier non-conforming files 91, unchanged. `npm audit`: critical
 1 → 0, high 13 → 5, moderate 32, low 2 (39 total).
+
+### DEP-9 — `iconv-lite` 0.6.3 → 0.7.3 (stacked on DEP-7)
+
+**The plan's premise was wrong.** DEP-9 was written on the assumption that `iconv-lite` "sits on
+the decoding path". It does not: no file in the repository imports it, and the last source file
+that did was removed long ago (`git log -S"from 'iconv-lite'"` ends in 2017). It is a declared
+runtime dependency that nothing uses, and it is not a dependency of anything else in the tree, so
+the bump cannot change what the library does. The "highest-risk stage" framing above should be
+discounted accordingly.
+
+Bumped as planned (exact pin, like the other dependencies). **Verified:** Jest 265 suites / 9768
+tests (includes the conformance corpus), Jasmine 336 specs, `check:types` 0 errors, `npm ci`
+dry run clean; `npm audit` unchanged (39).
+
+**Open question for the maintainer:** since nothing uses it, `iconv-lite` could be removed from
+`dependencies` altogether (ROADMAP.md still mentions it among the runtime dependencies). That is
+a package-surface decision, so it was not done here. Similarly, `eslint-plugin-custom-rules`
+is listed under `dependencies` rather than `devDependencies`.
