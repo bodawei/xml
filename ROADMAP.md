@@ -46,7 +46,8 @@ current baseline rather than a four-year-old one.
 
 ### Current state
 
-Evaluated, not yet started. `doc/dependencyUpgrade.md` holds the staged plan
+DEP-1 … DEP-4 are done (see the progress log in `doc/dependencyUpgrade.md`); DEP-5 onward
+is not started. `doc/dependencyUpgrade.md` holds the staged plan
 (DEP-1 … DEP-13), the measured baseline, and the peer-range constraints that fix
 the ordering.
 
@@ -72,8 +73,9 @@ relitigated from memory.
 
 -  [x] Evaluate all the packages and put together a proposed order for upgrading
 -  [x] Decide the TypeScript 7 approach (`ts7-eslint`, DEP-13)
--  [ ] Work the stages in order, one PR each, re-measuring the baseline table in every
-       PR description. Start with DEP-1 (dead dependency removal).
+-  [x] DEP-1 … DEP-4 (dead deps, Prettier 3, TypeScript 6.0, `@types/node` 26)
+-  [ ] Continue with DEP-5 (typescript-eslint 8) in order, one PR each, re-measuring the
+       baseline table in every PR description.
 
 ## P8: Try swapping oxfmt in for prettier
 

@@ -35,8 +35,8 @@ pipeline: `basic` → `pToken` → `token` / `xToken` / `flat` → `wellformedne
 
 Do not treat these as regressions, and do not fix them as part of unrelated work:
 
--  `npm run check:types` fails in `source/node/@test/data/flatDocs.json` (TS1328 /
-   TS1005) because it is pulled in via `resolveJsonModule`.
+-  (`npm run check:types` previously failed on `source/node/@test/data/flatDocs.json`;
+   it is clean since the TypeScript 6 upgrade.)
 -  `npm run lint` reports pre-existing errors, notably in `source/wellformedness/`,
    and some in `source/basic/` and `source/valid/`.
 -  Do not run repo-wide `npm run lint` casually: it is configured with `--fix` and
