@@ -34,13 +34,7 @@ import { dtdEndCheck } from './common/dtdEndCheck';
 
 const NO_CHANGE = '---INTERNAL---MARKER---';
 
-interface StateTable {
-   [startState: string]:
-      | {
-           [tokenType: string]: State | typeof NO_CHANGE;
-        }
-      | undefined;
-}
+type StateTable = Record<string, Record<string, State | typeof NO_CHANGE> | undefined>;
 
 interface CheckerMap {
    content: ContentCheckerConstructor;

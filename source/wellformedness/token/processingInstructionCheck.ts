@@ -20,7 +20,7 @@ function processingInstructionCheck(
 ): void {
    const targetName = strOrBlank(pToken.target);
    const lcTarget = targetName.toLowerCase();
-   const hasXml = lcTarget.indexOf('xml') !== -1;
+   const hasXml = lcTarget.includes('xml');
 
    collector.setPos(pToken.open);
    collector.setPos(pToken.openSpace);

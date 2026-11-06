@@ -185,7 +185,7 @@ class MockSTokenSource extends STokenSource {
 
             if (peekString === undefined) {
                token = undefined;
-            } else if (next && next.token) {
+            } else if (next?.token) {
                token = new SToken(
                   peekString,
                   peekString,
@@ -199,7 +199,7 @@ class MockSTokenSource extends STokenSource {
                      next.token.ranges[0].startColumn + peekString.length,
                   ),
                );
-            } else if (prev && prev.token && prev.type !== PEEK) {
+            } else if (prev?.token && prev.type !== PEEK) {
                token = new SToken(
                   peekString,
                   peekString,

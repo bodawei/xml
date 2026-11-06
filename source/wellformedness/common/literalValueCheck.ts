@@ -18,9 +18,7 @@ function literalValueCheck(
    collector: Collector,
    confVer: ConformanceVersion,
 ): void {
-   for (let index = 0; index < pToken.length; index++) {
-      const item = pToken[index];
-
+   for (const item of pToken) {
       if (isTextPToken(item)) {
          collector.setPos(item.text);
          charCheck(item.text, collector, confVer, false);

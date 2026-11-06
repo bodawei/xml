@@ -70,7 +70,7 @@ describe('entityDeclaration (unit)', () => {
 
       it('does a parse of a general entity declaration with a literal value', () => {
          literalParse.mockImplementation((_1, stuff, callback) => {
-            callback({ ...(stuff || {}).pToken, openQuote: toSToken('"'), value: [] });
+            callback({ ...stuff?.pToken, openQuote: toSToken('"'), value: [] });
          });
          const mockSource = new MockSTokenSource([
             [undefined, 'match', '%'],
@@ -211,7 +211,7 @@ describe('entityDeclaration (unit)', () => {
 
       it('adds trailing space after quoted value if present: <!ENTITY entityName "foo" >', () => {
          literalParse.mockImplementation((_1, stuff, callback) => {
-            callback({ ...(stuff || {}).pToken, openQuote: toSToken('"'), value: [] });
+            callback({ ...stuff?.pToken, openQuote: toSToken('"'), value: [] });
          });
          const mockSource = new MockSTokenSource([
             [undefined, 'match', '%'],

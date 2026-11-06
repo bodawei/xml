@@ -101,7 +101,7 @@ function checkSpaceProblems(
    collector: Collector,
    confVer: ConformanceVersion,
 ): void {
-   const text = sToken?.originalStr || '';
+   const text = sToken?.originalStr ?? '';
 
    if (S_REGEXP.test(text) || confVer.version === 1) {
       return;

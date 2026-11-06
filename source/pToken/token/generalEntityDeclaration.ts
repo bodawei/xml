@@ -115,7 +115,7 @@ class GeneralEntityDeclarationPToken {
          this.externalId = props.externalId;
          this.externalIdSpace = props.externalIdSpace;
          this.openQuote = props.openQuote;
-         this.value = props.value || this.value;
+         this.value = props.value ?? this.value;
          this.closeQuote = props.closeQuote;
          this.valueSpace = props.valueSpace;
          this.nData = props.nData;

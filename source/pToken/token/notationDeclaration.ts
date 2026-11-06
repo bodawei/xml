@@ -158,7 +158,7 @@ function parseNotationDeclaration(
 
       parseName(source, protoToken, () => {
          parseExternalId(source, ['>'], (extIdInfo) => {
-            const { externalId, nextPropName } = extIdInfo || {};
+            const { externalId, nextPropName } = extIdInfo ?? {};
             protoToken.externalId = externalId;
 
             if (nextPropName) {

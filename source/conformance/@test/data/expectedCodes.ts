@@ -2,9 +2,7 @@
 
 import { ErrorDetails } from '../helper/types';
 
-interface IdToErrorMap {
-   [testName: string]: string | ErrorDetails;
-}
+type IdToErrorMap = Record<string, string | ErrorDetails>;
 
 const expectedInvalidCodes: IdToErrorMap = {
    'invalid--002': 'PEREF_PARENS_UNBALANCED', // Tests the "Proper Group/PE Nesting" validity constraint by fragmenting a content model between two parameter entities.

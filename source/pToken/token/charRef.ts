@@ -45,7 +45,7 @@ class CharRefPToken {
    public readonly char: string;
 
    constructor(basePToken: CharRefPToken | CharRefProps, other: RawCharRefProps = {}) {
-      this.open = other.open || basePToken.open;
+      this.open = other.open ?? basePToken.open;
       this.openSpace = 'openSpace' in other ? other.openSpace : basePToken.openSpace;
       this.hexMarker = 'hexMarker' in other ? other.hexMarker : basePToken.hexMarker;
       this.hexMarkerSpace =

@@ -52,16 +52,16 @@ import { xmlDeclarationCheck } from './token/xmlDeclarationCheck';
 import { generalEntityStartCheck } from './marker/generalEntityStartCheck';
 import { parameterEntityStartCheck } from './marker/parameterEntityStartCheck';
 
-interface CheckMap {
-   [type: string]:
-      | undefined
-      | ((
-           pToken: any,
-           Collector: Collector,
-           confVer: ConformanceVersion,
-           inSecondPassContxt?: boolean,
-        ) => void);
-}
+type CheckMap = Record<
+   string,
+   | undefined
+   | ((
+        pToken: any,
+        Collector: Collector,
+        confVer: ConformanceVersion,
+        inSecondPassContxt?: boolean,
+     ) => void)
+>;
 
 const checkMap: CheckMap = {
    // markers

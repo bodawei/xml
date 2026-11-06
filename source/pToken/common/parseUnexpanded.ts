@@ -62,7 +62,7 @@ function parseUnexpanded(
    done: (value: UnexpandedMarkupDetails | undefined) => void,
 ): void {
    source.extract('peekChar', (sToken) => {
-      if (!sToken || sToken.str !== '%') {
+      if (sToken?.str !== '%') {
          done(undefined);
          return;
       }
@@ -106,7 +106,7 @@ function parseUnexpandedAfterPeRef(
             return;
          }
 
-         const restTokens = rest?.tokens || [];
+         const restTokens = rest?.tokens ?? [];
 
          done({
             propName,

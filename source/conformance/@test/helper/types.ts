@@ -12,11 +12,7 @@ interface TestCases {
    readonly 'xml:base'?: string;
    readonly cases: Array<TestCases>;
    readonly tests: Array<Test>;
-   readonly entityPaths: {
-      readonly [path: string]: {
-         readonly [entityName: string]: string;
-      };
-   };
+   readonly entityPaths: Readonly<Record<string, Readonly<Record<string, string>>>>;
 }
 
 interface Test {
@@ -54,10 +50,8 @@ interface ErrorDetails {
 }
 
 interface TestDetails extends Test {
-   readonly expectedError?: {
-      // These all are of the form V1R1 or 'default'
-      readonly [versionEdition: string]: ErrorDetails | undefined;
-   };
+   // These all are of the form V1R1 or 'default'
+   readonly expectedError?: Readonly<Record<string, ErrorDetails | undefined>>;
    readonly cases: Array<TestCases>;
    readonly suite: TestSuite;
 }

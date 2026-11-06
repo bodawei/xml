@@ -4,9 +4,7 @@ import { CharRefPToken, TextPToken } from 'pToken';
 import { toSToken } from 'basic';
 import { EntityValuePToken } from 'token';
 
-interface NameToEntityValue {
-   [entityName: string]: EntityValuePToken;
-}
+type NameToEntityValue = Record<string, EntityValuePToken>;
 
 // §4.6.0: This is our set of data to populate our "info" objects for the predefined entities.
 const PREDEFINED_ENTITIES: NameToEntityValue = {

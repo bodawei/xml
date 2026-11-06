@@ -33,7 +33,7 @@ function checkFields(
 
       collector.setPos(param.name);
 
-      if (PARAM_NAMES.indexOf(lcName) !== -1) {
+      if (PARAM_NAMES.includes(lcName)) {
          collector.check(nameText !== lcName, WFEID.XMLDECL_PARAM_INVALID_CASE, [lcName, nameText]);
       }
 

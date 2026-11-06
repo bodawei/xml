@@ -19,7 +19,7 @@ class ProcessingInstructionXToken {
    constructor(targetOrPToken: string | ProcessingInstructionPToken, instruction?: string) {
       if (typeof targetOrPToken === 'string') {
          this.target = targetOrPToken;
-         this.instruction = instruction || '';
+         this.instruction = instruction ?? '';
       } else {
          this.target = strOrBlank(targetOrPToken.target);
          this.instruction = strOrBlank(targetOrPToken.instruction);

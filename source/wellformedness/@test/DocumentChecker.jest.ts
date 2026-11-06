@@ -145,7 +145,7 @@ describe('DocumentChecker (unit)', () => {
             return undefined;
          }
 
-         if (this.lastSeen && this.lastSeen.type === ELEMENT_START_PTOKEN) {
+         if (this.lastSeen?.type === ELEMENT_START_PTOKEN) {
             this.allDone = true;
             return CHECKER_DONE;
          }

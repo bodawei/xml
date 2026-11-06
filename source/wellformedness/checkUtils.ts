@@ -36,22 +36,18 @@ type MarkupStart =
    | ParameterEntityStartPToken
    | ConditionalStartPToken;
 
-interface ElementDeclInfo {
-   [name: string]: 'EMPTY' | 'OTHER' | undefined;
-}
+type ElementDeclInfo = Record<string, 'EMPTY' | 'OTHER' | undefined>;
 
-interface GeneralEntitiesInfo {
-   [name: string]:
-      | {
-           token: GeneralEntityDeclarationPToken;
-           declaredInInternalSubset: boolean;
-        }
-      | undefined;
-}
+type GeneralEntitiesInfo = Record<
+   string,
+   | {
+        token: GeneralEntityDeclarationPToken;
+        declaredInInternalSubset: boolean;
+     }
+   | undefined
+>;
 
-interface ParameterEntitiesInfo {
-   [name: string]: ParameterEntityDeclarationPToken | undefined; // https://stackoverflow.com/questions/61493377/typescript-returned-type-when-accessing-undefined-key-on-object-is-wrong
-}
+type ParameterEntitiesInfo = Record<string, ParameterEntityDeclarationPToken | undefined>;
 
 interface MarkupChecker {
    check(pToken: ParseToken, collector: Collector): undefined | typeof CHECKER_DONE;
@@ -64,23 +60,19 @@ interface ContentChecker {
    inSecondPassContxt: boolean;
 }
 
-interface ContentCheckerConstructor {
-   new (
-      start: ContentStart,
-      collector: Collector,
-      checkState: CheckState,
-      geContext: Array<string>,
-   ): ContentChecker;
-}
+type ContentCheckerConstructor = new (
+   start: ContentStart,
+   collector: Collector,
+   checkState: CheckState,
+   geContext: Array<string>,
+) => ContentChecker;
 
-interface MarkupCheckerConstructor {
-   new (
-      start: MarkupStart,
-      collector: Collector,
-      checkState: CheckState,
-      geContext: Array<string>,
-   ): MarkupChecker;
-}
+type MarkupCheckerConstructor = new (
+   start: MarkupStart,
+   collector: Collector,
+   checkState: CheckState,
+   geContext: Array<string>,
+) => MarkupChecker;
 
 const CHECKER_DONE = '**Checker Done**';
 
@@ -91,7 +83,7 @@ const PROTECTED_ENTITIES = ['amp', 'lt', 'gt', 'apos', 'quot'];
 class CheckState {
    public confVer: ConformanceVersion = new ConformanceVersion();
 
-   public atts: { [elName: string]: { [attName: string]: boolean | undefined } | undefined } = {};
+   public atts: Record<string, Record<string, boolean | undefined> | undefined> = {};
 
    public elementDecl: ElementDeclInfo = {};
 
@@ -204,7 +196,7 @@ function checkGeneralEntity(
    const name = strOrBlank(pToken.name);
    const genEntityDecl = entityDecls[name];
    const declarationExists = genEntityDecl !== undefined;
-   const isPredefinedEntity = PROTECTED_ENTITIES.indexOf(name) !== -1;
+   const isPredefinedEntity = PROTECTED_ENTITIES.includes(name);
    const mustHaveDeclaration =
       state.isStandalone || state.hasNoDTD || (!state.hasExternalDTD && state.peRefCount === 0); // @@@@ Test this
 

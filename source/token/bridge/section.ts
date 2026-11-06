@@ -24,7 +24,7 @@ function continueToContent(
    source.extract('space', (typeSpace) => {
       sectionData.sectionTypeSpace = typeSpace;
 
-      if (sectionData.sectionType && sectionData.sectionType.str.toLowerCase() === 'cdata') {
+      if (sectionData.sectionType?.str.toLowerCase() === 'cdata') {
          parseCdata(source, sectionData, deliverSection);
       } else {
          parseConditional(source, sectionData, deliverSection);
@@ -58,7 +58,7 @@ function parseSection(source: STokenSource, openSToken: SToken, deliverSection: 
    };
    source.extractToObject('space', sectionData, 'openSpace');
    source.extract('peekChar', (charSToken) => {
-      if (charSToken && charSToken.str === '%') {
+      if (charSToken?.str === '%') {
          parseParameterEntityReference(source, (result) => {
             const extra = !result
                ? {}

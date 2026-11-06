@@ -27,8 +27,10 @@ class XmlDeclarationXToken {
       standalone?: boolean,
    ) {
       this.version = 1.0;
+      // An empty encoding name must fall back to the default too, so this must stay `||`.
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
       this.encoding = encoding || DEFAULT_ENCODING;
-      this.standalone = standalone || false;
+      this.standalone = standalone ?? false;
 
       if (typeof versionOrPToken === 'number') {
          this.version = versionOrPToken;

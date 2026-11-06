@@ -76,7 +76,7 @@ class FieldedInstruction {
          this.close = base.close;
       }
 
-      this.fields = 'fields' in other ? other.fields || [] : this.fields;
+      this.fields = 'fields' in other ? (other.fields ?? []) : this.fields;
       this.close = 'close' in other ? other.close : this.close;
    }
 }
@@ -126,7 +126,7 @@ function getNextField(
    source.extract('peekWord', DECL_NAME_TERMINATORS, (sToken) => {
       const word = strOrBlank(sToken).toLowerCase();
 
-      if (!sToken || allowedFieldNames.indexOf(word) === -1) {
+      if (!sToken || !allowedFieldNames.includes(word)) {
          deliverFields(fields);
          return;
       }

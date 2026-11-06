@@ -57,7 +57,7 @@ function elementDeclarationCheck(
 
       if (!pToken.contentSpec) {
          collector.report(WFEID.ELEMENTDECL_NO_SPEC, [nameText]);
-      } else if (ALLOWED_CONTENT_SPEC.indexOf(upperContentSpec) === -1) {
+      } else if (!ALLOWED_CONTENT_SPEC.includes(upperContentSpec)) {
          collector.report(WFEID.ELEMENTDECL_SPEC_UNKNOWN, [nameText, contentSpec]);
       } else if (contentSpec !== upperContentSpec) {
          collector.report(WFEID.ELEMENTDECL_SPEC_INVALID_CASE, [

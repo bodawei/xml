@@ -44,13 +44,7 @@ enum State {
 const WFEID = wellFormedErrorCodes.id;
 const NO_CHANGE = '---INTERNAL---MARKER---';
 
-interface StateTable {
-   [startState: string]:
-      | {
-           [tokenType: string]: State | typeof NO_CHANGE;
-        }
-      | undefined;
-}
+type StateTable = Record<string, Record<string, State | typeof NO_CHANGE> | undefined>;
 
 const WFID = wellFormedErrorCodes.id;
 const WID = warningCodes.id;
@@ -156,7 +150,7 @@ class ContentChecker implements IContentChecker {
    }
 
    get inSecondPassContxt(): boolean {
-      return this.inIngernalGeRef || this.embeddedChecker?.inSecondPassContxt || false;
+      return this.inIngernalGeRef || (this.embeddedChecker?.inSecondPassContxt ?? false);
    }
 
    check(pToken: ParseToken, collector: Collector): undefined | typeof CHECKER_DONE {
@@ -319,7 +313,7 @@ class ContentChecker implements IContentChecker {
 
       const transitions = transitionsByState[this.state];
 
-      newState = transitions && transitions[pToken.type];
+      newState = transitions?.[pToken.type];
 
       if (newState) {
          this.state = newState === NO_CHANGE ? this.state : newState;

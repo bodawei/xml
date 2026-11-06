@@ -90,9 +90,7 @@ function contentModelCheck(
       if (particle.delimiter) {
          const delimiterStr = strOrBlank(particle.delimiter);
 
-         if (!delimType) {
-            delimType = delimiterStr === ',' ? 'SEQUENCE' : 'CHOICE';
-         }
+         delimType ??= delimiterStr === ',' ? 'SEQUENCE' : 'CHOICE';
 
          if (delimType === 'SEQUENCE') {
             if (delimiterStr !== ',') {

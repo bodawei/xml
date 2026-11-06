@@ -30,7 +30,7 @@ import { EntityExpander } from '../EntityExpander';
 import { AttributeValueResults, ExpandToken, OpaqueEntityLoc, RetrieveResults } from '../types';
 
 describe('EntityExpander (integration)', () => {
-   const externalMap: { [publicName: string]: string } = {};
+   const externalMap: Record<string, string> = {};
 
    function parseBody(
       sTokenSource: STokenSource,

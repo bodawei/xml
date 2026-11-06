@@ -6,13 +6,9 @@ class STokenArrayBuilder {
    add(...values: Array<SToken | Array<SToken | undefined> | undefined>): Array<SToken> {
       const arr = this.sTokenArray;
 
-      for (let index = 0; index < values.length; index++) {
-         const value = values[index];
-
+      for (const value of values) {
          if (Array.isArray(value)) {
-            for (let index = 0; index < value.length; index++) {
-               const val = value[index];
-
+            for (const val of value) {
                if (val) {
                   arr.push(val);
                }
