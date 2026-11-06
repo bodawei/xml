@@ -34,16 +34,42 @@ The package dependencies and devDependencies are all about 4 years old. Bring th
 
 ### Done when
 
-`npm outdated` reports nothing out of date, and `npm audit` shows no errors
+`npm audit` reports no critical or high advisories, and `npm outdated` is empty
+except for `typescript` (held below 6.1 by `@typescript-eslint`'s peer range), with
+both suites still passing at their baseline counts. Full criteria in
+`doc/dependencyUpgrade.md`; the original "`npm outdated` reports nothing" is not
+reachable while that cap stands.
+
+Scope rule: P7 modernizes every dependency regardless of whether a later project
+(P8, P9, P10, P11) would replace the tool. Replacement is decided later, from a
+current baseline rather than a four-year-old one.
 
 ### Current state
 
-This is unstarted
+Evaluated, not yet started. `doc/dependencyUpgrade.md` holds the staged plan
+(DEP-1 … DEP-12), the measured baseline, and the peer-range constraints that fix
+the ordering.
+
+Baseline as of 2026-11-05: 930 packages, 59 audit advisories (27 critical), 29 of 43
+direct deps behind. Both suites pass (265 Jest suites / 9768 tests, 336 Jasmine
+specs). 26 of the 27 criticals sit in unreferenced Babel 6 packages, so DEP-1 removes
+them with no version changes.
+
+Three stages can each take a session or more: DEP-3 (TypeScript 4.6 → 6.0, unknown
+type errors), DEP-6 (ESLint 10 + flat config, which also means dropping both airbnb
+configs) and DEP-11 (Jasmine 7, which removed the `jsLoader` option this repo depends
+on — the alias-resolution mechanism has to be replaced, not reconfigured).
+
+One decision is open: whether TypeScript 7 is in scope. It is published but not
+lintable, since `@typescript-eslint` caps at `<6.1.0` and has no newer major. The
+recommendation is to cap P7 at 6.0.x and track TypeScript 7 as its own item.
 
 ### Next actions
 
--  [ ] Evaluate all the packages and put together a proposed order for upgrading
--  [ ] Upgrade each, as atomically as possible (e.g. try not to need to upgrade a bunch of unrelated packages at once). Run linting, testing and formatting after each change.
+-  [x] Evaluate all the packages and put together a proposed order for upgrading
+-  [ ] Confirm the TypeScript 7 recommendation in `doc/dependencyUpgrade.md`
+-  [ ] Work the stages in order, one PR each, re-measuring the baseline table in every
+       PR description. Start with DEP-1 (dead dependency removal).
 
 ## P8: Try swapping oxfmt in for prettier
 
