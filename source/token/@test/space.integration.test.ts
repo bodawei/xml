@@ -1,5 +1,4 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
 import { EntityId, Range } from 'basic';
 import { SToken, STokenSource } from 'basic';

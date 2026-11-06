@@ -1,5 +1,4 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
 import { Token, Range, EntityId, ENTITY_ID, Problem } from 'basic';
 import {

@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
 
 import { defineConfig } from 'eslint/config';
-import importPlugin from 'eslint-plugin-import';
+import importPlugin from 'eslint-plugin-import-x';
 import prettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
@@ -19,7 +19,7 @@ const TS_PARSER_OPTIONS = {
    tsconfigRootDir: import.meta.dirname,
 };
 
-// Modules held to the `import/` rules and typescript-eslint's `recommended-type-checked` set.
+// Modules held to the `import-x/` rules and typescript-eslint's `recommended-type-checked` set.
 const FOUNDATION_DIRS = ['basic', 'valid'];
 
 // Modules (and individual files) held to the full recommended + stylistic + strict sets.
@@ -78,18 +78,18 @@ export default defineConfig([
       files: FOUNDATION_FILES,
       extends: [
          prettierRecommended, // https://github.com/prettier/eslint-plugin-prettier
-         importPlugin.flatConfigs.recommended, // https://www.npmjs.com/package/eslint-plugin-import
+         importPlugin.flatConfigs.recommended, // https://www.npmjs.com/package/eslint-plugin-import-x
          // recommended-type-checked already includes `recommended` and `eslint-recommended`.
          tseslint.configs.recommendedTypeChecked,
       ],
       // These were supplied by eslint-config-airbnb-typescript/base, which DEP-5 removed.
       settings: {
-         'import/extensions': ['.js', '.mjs', '.jsx', '.ts', '.tsx', '.d.ts'],
-         'import/external-module-folders': ['node_modules', 'node_modules/@types'],
-         'import/parsers': {
+         'import-x/extensions': ['.js', '.mjs', '.jsx', '.ts', '.tsx', '.d.ts'],
+         'import-x/external-module-folders': ['node_modules', 'node_modules/@types'],
+         'import-x/parsers': {
             '@typescript-eslint/parser': ['.ts', '.tsx', '.d.ts'],
          },
-         'import/resolver': {
+         'import-x/resolver': {
             node: {
                extensions: ['.mjs', '.js', '.json', '.ts', '.d.ts'],
             },
@@ -97,11 +97,11 @@ export default defineConfig([
       },
       rules: {
          // Also supplied by airbnb-typescript/base for .ts files: TypeScript already checks these.
-         'import/named': 'off',
-         'import/no-named-as-default-member': 'off',
-         'import/no-unresolved': 'off',
+         'import-x/named': 'off',
+         'import-x/no-named-as-default-member': 'off',
+         'import-x/no-unresolved': 'off',
 
-         'import/order': [
+         'import-x/order': [
             'error',
             {
                alphabetize: { caseInsensitive: true, order: 'asc' },
@@ -129,7 +129,7 @@ export default defineConfig([
          '@typescript-eslint/no-unsafe-argument': 'off',
          '@typescript-eslint/no-unsafe-call': 'off',
          // Don't let the @jest/globals import mess up the reporting.
-         'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
+         'import-x/no-extraneous-dependencies': ['error', { devDependencies: true }],
       },
    },
 
