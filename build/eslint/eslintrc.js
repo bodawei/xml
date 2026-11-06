@@ -1,8 +1,4 @@
 /* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
-const { rules: baseBestPracticesRules } = require('eslint-config-airbnb-base/rules/best-practices');
-const { rules: baseES6Rules } = require('eslint-config-airbnb-base/rules/es6');
-const { rules: baseStyleRules } = require('eslint-config-airbnb-base/rules/style');
-const { rules: baseVariablesRules } = require('eslint-config-airbnb-base/rules/variables');
 
 const path = require('path');
 
@@ -680,6 +676,8 @@ module.exports = {
 
            //
            // Extension Rules
+           // Option values were copied verbatim from eslint-config-airbnb-base@15 when that
+           // package was removed (P7 DEP-6); the airbnb URLs below are provenance only.
            // In some cases, ESLint provides a rule itself, but it doesn't support TypeScript syntax;
            // either it crashes, or it ignores the syntax, or it falsely reports against it. In these
            // cases, we create what we call an extension rule; a rule within our plugin that has the
@@ -690,82 +688,82 @@ module.exports = {
            // https://eslint.org/docs/rules/default-param-last
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
            'default-param-last': 'off',
-           '@typescript-eslint/default-param-last': baseBestPracticesRules['default-param-last'],
+           '@typescript-eslint/default-param-last': 'error',
 
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/dot-notation.md
            // https://eslint.org/docs/rules/dot-notation
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
            'dot-notation': 'off',
-           '@typescript-eslint/dot-notation': baseBestPracticesRules['dot-notation'],
+           '@typescript-eslint/dot-notation': ['error', { allowKeywords: true }],
 
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/init-declarations.md
            // https://eslint.org/docs/rules/init-declarations
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/variables.js
            'init-declarations': 'off',
-           '@typescript-eslint/init-declarations': baseVariablesRules['init-declarations'],
+           '@typescript-eslint/init-declarations': 'off',
 
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-array-constructor.md
            // https://eslint.org/docs/rules/no-array-constructor
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/style.js
            'no-array-constructor': 'off',
-           '@typescript-eslint/no-array-constructor': baseStyleRules['no-array-constructor'],
+           '@typescript-eslint/no-array-constructor': 'error',
 
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-dupe-class-members.md
            // https://eslint.org/docs/rules/no-dupe-class-members
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/es6.js
            'no-dupe-class-members': 'off',
-           '@typescript-eslint/no-dupe-class-members': baseES6Rules['no-dupe-class-members'],
+           '@typescript-eslint/no-dupe-class-members': 'error',
 
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-empty-function.md
            // https://eslint.org/docs/rules/no-empty-function
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
            'no-empty-function': 'off',
-           '@typescript-eslint/no-empty-function': baseBestPracticesRules['no-empty-function'],
+           '@typescript-eslint/no-empty-function': ['error', { allow: ['arrowFunctions', 'functions', 'methods'] }],
 
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-invalid-this.md
            // https://eslint.org/docs/rules/no-invalid-this
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
            'no-invalid-this': 'off',
-           '@typescript-eslint/no-invalid-this': baseBestPracticesRules['no-invalid-this'],
+           '@typescript-eslint/no-invalid-this': 'off',
 
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-magic-numbers.md
            // https://eslint.org/docs/rules/no-magic-numbers
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
            'no-magic-numbers': 'off',
-           '@typescript-eslint/no-magic-numbers': baseBestPracticesRules['no-magic-numbers'],
+           '@typescript-eslint/no-magic-numbers': 'off',
 
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unused-expressions.md
            // https://eslint.org/docs/rules/no-unused-expressions
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
            'no-unused-expressions': 'off',
-           '@typescript-eslint/no-unused-expressions': baseBestPracticesRules['no-unused-expressions'],
+           '@typescript-eslint/no-unused-expressions': ['error', { allowShortCircuit: false, allowTernary: false, allowTaggedTemplates: false }],
 
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unused-vars.md
            // https://eslint.org/docs/rules/no-unused-vars
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/variables.js
            'no-unused-vars': 'off',
-           '@typescript-eslint/no-unused-vars': baseVariablesRules['no-unused-vars'],
+           '@typescript-eslint/no-unused-vars': ['error', { vars: 'all', args: 'after-used', ignoreRestSiblings: true }],
 
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-use-before-define.md
            // https://eslint.org/docs/rules/no-use-before-define
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/variables.js
            'no-use-before-define': 'off',
-           '@typescript-eslint/no-use-before-define': baseVariablesRules['no-use-before-define'],
+           '@typescript-eslint/no-use-before-define': ['error', { functions: true, classes: true, variables: true }],
 
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-useless-constructor.md
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/es6.js
            'no-useless-constructor': 'off',
-           '@typescript-eslint/no-useless-constructor': baseES6Rules['no-useless-constructor'],
+           '@typescript-eslint/no-useless-constructor': 'error',
 
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/require-await.md
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
            'require-await': 'off',
-           '@typescript-eslint/require-await': baseBestPracticesRules['require-await'],
+           '@typescript-eslint/require-await': 'off',
 
            // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/return-await.md
            // https://github.com/airbnb/javascript/blob/master/packages/eslint-config-airbnb-base/rules/best-practices.js
            'no-return-await': 'off',
-           '@typescript-eslint/return-await': baseBestPracticesRules['no-return-await'],
+           '@typescript-eslint/return-await': 'error',
          },
          overrides: [ {
             files: [
