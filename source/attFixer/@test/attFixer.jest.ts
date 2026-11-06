@@ -1,4 +1,4 @@
-/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
 import {

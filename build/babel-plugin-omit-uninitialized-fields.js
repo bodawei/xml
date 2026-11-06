@@ -1,4 +1,4 @@
-/* Copyright ® 2022 by 柏大衛. All rights reserved. */
+/* Copyright ® 2026 by 柏大衛. All rights reserved. */
 
 // Babel 8's TypeScript transform initializes every field that has no initializer to `undefined`
 // (as `useDefineForClassFields: true` does). This project compiles with `tsc` and

@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
 import { CHARREF_PTOKEN, PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXT_PTOKEN } from 'pToken';
 import { PARAMETER_ENTITY_START_PTOKEN, EntityValuePToken } from 'token';
