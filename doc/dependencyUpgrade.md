@@ -819,3 +819,20 @@ Translation notes:
    They remain in git history.
 -  The 45 `/* eslint-env jasmine */` comments are ignored by flat config (ESLint 9 prints a
    warning; ESLint 10 reports them as errors). They are removed in DEP-6d.
+
+### DEP-6d — ESLint 10 and `import-x` (stacked on DEP-6c)
+
+`eslint` 9.39.5 → 10.14.0. `eslint-plugin-import` and `eslint-import-resolver-typescript` removed
+(the resolver was configured nowhere; the `node` resolver settings were what applied, and
+`no-unresolved` is off); `eslint-plugin-import-x` 4.17.1 added. All `import/*` rule names and
+settings became `import-x/*`; the rule options are unchanged.
+
+The 45 `/* eslint-env jasmine */` comments were deleted (ESLint 10 reports them as errors). The
+rules in use do not depend on the jasmine globals (`no-undef` is not active for TypeScript), so
+nothing else changed. The 11 core formatting rules the plan listed were already gone after DEP-5/6b.
+
+**Verified identical.** The same 3313 findings as the ESLint 8 baseline, matched by (file, line,
+column, rule, severity), after mapping `import-x/` to `import/` and allowing for the one-line shift
+in the 45 files that lost a comment line. No new warnings on stderr. `lint:ci`, `check:types`, Jest
+(265 suites / 9768 tests) and Jasmine (336 specs) all pass. Prettier-non-conforming status of the
+45 touched files is unchanged (42 before and after).

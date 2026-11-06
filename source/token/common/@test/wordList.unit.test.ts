@@ -1,5 +1,4 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
-/* eslint-env jasmine */
 
 import { toSToken } from 'basic';
 import { MockSTokenSource } from 'pToken-test';
