@@ -20,7 +20,7 @@ interface ContentNameX {
    readonly repeat: CpRepeat;
 }
 
-const REPEAT_MAP: { [key: string]: CpRepeat | undefined } = {
+const REPEAT_MAP: Record<string, CpRepeat | undefined> = {
    '*': CpRepeat.ZEROPLUS,
    '+': CpRepeat.ONEPLUS,
    '?': CpRepeat.ZEROONE,
@@ -55,13 +55,13 @@ class ContentModelX {
          } else {
             protoParticle.push({
                name: strOrBlank(particle.name),
-               repeat: REPEAT_MAP[strOrBlank(particle.repeat)] || CpRepeat.ONE,
+               repeat: REPEAT_MAP[strOrBlank(particle.repeat)] ?? CpRepeat.ONE,
             });
          }
       }
 
-      this.listType = listType || CpType.CHOICE;
-      this.repeat = REPEAT_MAP[repeatStr] || CpRepeat.ONE;
+      this.listType = listType ?? CpType.CHOICE;
+      this.repeat = REPEAT_MAP[repeatStr] ?? CpRepeat.ONE;
       this.particles = protoParticle;
    }
 }

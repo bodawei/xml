@@ -9,9 +9,7 @@ import { literalToSTokens } from './literalToSTokens';
 function attributeToSTokens(attributes: AttributesPToken = []): Array<SToken> {
    const builder = new STokenArrayBuilder();
 
-   for (let index = 0; index < attributes.length; index++) {
-      const attr = attributes[index];
-
+   for (const attr of attributes) {
       builder.add(
          attr.name,
          attr.postNameSpace,

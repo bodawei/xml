@@ -63,7 +63,7 @@ class XmlDeclarationPToken {
          this.close = base.close;
       }
 
-      this.fields = 'fields' in other ? other.fields || [] : this.fields;
+      this.fields = 'fields' in other ? (other.fields ?? []) : this.fields;
       this.close = 'close' in other ? other.close : this.close;
    }
 }

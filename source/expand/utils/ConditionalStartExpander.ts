@@ -80,7 +80,7 @@ class ConditionalStartExpander {
          const entityDetails = this.expandParams.entityDetails.getPEDetails(entityName);
          // const alreadyInEntity = this.entityContextStack.hasName(peRef);
 
-         if (!entityDetails || !entityDetails.protoReplacementText) {
+         if (!entityDetails?.protoReplacementText) {
             done({ done: true, newStart: this.start, extraText: this.source });
             return;
          }

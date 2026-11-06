@@ -754,3 +754,23 @@ decision for the maintainer, not part of a no-behaviour-change prune. Rules in n
 `import/order` configuration.
 
 The ~250 lines of commented-out rule documentation are untouched.
+
+### DEP-6e — stylistic-type-checked preset adopted (maintainer decision, outside the DEP-6 scope)
+
+`plugin:@typescript-eslint/stylistic-type-checked` added to the main override and the 7
+explicit entries it duplicates removed. 129 new findings, all resolved in code, so the lint
+total stays at 3313 with an unchanged per-rule distribution (nothing new is left to
+clean up). By rule: `prefer-nullish-coalescing` 50, `consistent-indexed-object-style` 31,
+`prefer-optional-chain` 18, `prefer-includes` 16, `prefer-for-of` 11, `prefer-function-type`
+2, `non-nullable-type-assertion-style` 1.
+
+`||` → `??` was reviewed per site rather than auto-applied: it differs only when the left
+operand can be falsy but not nullish. Every site involves an object, an array, a string enum
+(non-empty) or `ParseType.DOCUMENT` (0, which is also the fallback), so they are
+equivalent. Two sites were *not* converted: the `encoding || DEFAULT_ENCODING` defaults in
+`xmlDeclarationXToken` and `textDeclarationXToken`, where an empty encoding name should
+still fall back to the default; they carry a documented `eslint-disable`. A third,
+`inIngernalGeRef || embeddedChecker?.inSecondPassContxt || false`, was rewritten to
+`a || (b ?? false)` to keep boolean semantics.
+
+The first override (`basic`, `valid`) was left on `recommended-type-checked` only.

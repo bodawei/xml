@@ -59,7 +59,7 @@ class ContentModelP {
    constructor(props: ContentModelP | ContentModelProps = {}, other?: ContentModelProps) {
       this.open = props.open;
       this.openSpace = props.openSpace;
-      this.delimitedParticles = props.delimitedParticles || [];
+      this.delimitedParticles = props.delimitedParticles ?? [];
       this.close = props.close;
       this.closeSpace = props.closeSpace;
       this.repeat = props.repeat;
@@ -70,7 +70,7 @@ class ContentModelP {
          this.openSpace = 'openSpace' in other ? other.openSpace : this.openSpace;
          this.delimitedParticles =
             'delimitedParticles' in other
-               ? other.delimitedParticles || []
+               ? (other.delimitedParticles ?? [])
                : this.delimitedParticles;
          this.close = 'close' in other ? other.close : this.close;
          this.closeSpace = 'closeSpace' in other ? other.closeSpace : this.closeSpace;
@@ -250,7 +250,7 @@ function parseContentModel(source: STokenSource, deliverDelimiteds: DeliverConte
 }
 
 function hasSomeClose(cm: ContentModelProps): boolean {
-   return !!(cm.close || cm.closeSpace || cm.repeat || cm.repeatSpace);
+   return !!(cm.close ?? cm.closeSpace ?? cm.repeat ?? cm.repeatSpace);
 }
 
 function isIncompleteParticle(item: ContentDelimitedParticleProps): boolean {

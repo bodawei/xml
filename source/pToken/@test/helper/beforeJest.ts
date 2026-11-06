@@ -89,8 +89,8 @@ expect.extend({
 
       let pass = true;
       const def = 'Expected properties not to be found in callback, but they were.';
-      const actual: Props = makeRangeless(getTheOneArg(callbackSpy)) || {};
-      const expected: Props = makeRangeless(expectedProps) || {};
+      const actual: Props = makeRangeless(getTheOneArg(callbackSpy)) ?? {};
+      const expected: Props = makeRangeless(expectedProps) ?? {};
       let message = '';
 
       Object.keys(expected).forEach((propName) => {

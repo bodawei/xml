@@ -90,7 +90,7 @@ class AttListDeclarationPToken {
    ) {
       let attDefs: Array<AttDefinitionProps> = [];
 
-      this.open = other.open || base.open;
+      this.open = other.open ?? base.open;
       this.openSpace = 'openSpace' in other ? other.openSpace : base.openSpace;
       this.declType = 'declType' in other ? other.declType : base.declType;
       this.declTypeSpace = 'declTypeSpace' in other ? other.declTypeSpace : base.declTypeSpace;
@@ -107,7 +107,7 @@ class AttListDeclarationPToken {
       this.elementName = 'elementName' in other ? other.elementName : this.elementName;
       this.elementNameSpace =
          'elementNameSpace' in other ? other.elementNameSpace : this.elementNameSpace;
-      attDefs = 'attDefs' in other ? other.attDefs || [] : attDefs;
+      attDefs = 'attDefs' in other ? (other.attDefs ?? []) : attDefs;
       this.unexpanded = 'unexpanded' in other ? other.unexpanded : this.unexpanded;
       this.extra = 'extra' in other ? other.extra : this.extra;
       this.close = 'close' in other ? other.close : this.close;
@@ -235,7 +235,7 @@ function parseFullAttType(
    done: (withAttrs: AttListDeclarationProps, attr: AttDefinitionProps) => void,
 ): void {
    parseAttType(source, protoAttr, (attWithType) => {
-      if (attWithType.type && attWithType.type.str.toUpperCase() === 'NOTATION') {
+      if (attWithType.type?.str.toUpperCase() === 'NOTATION') {
          parseUnexpanded(source, 'notation', (unexpanded) => {
             if (unexpanded) {
                protoToken.unexpanded = unexpanded;

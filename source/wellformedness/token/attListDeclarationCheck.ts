@@ -56,8 +56,7 @@ function attListDeclarationCheck(
       collector.check(!pToken.elementNameSpace, WFEID.ATTLISTDECL_ELEMENT_NAME_NO_TRAILING_SPACE);
    }
 
-   for (let index = 0; index < pToken.attDefs.length; index++) {
-      const attDef = pToken.attDefs[index];
+   for (const attDef of pToken.attDefs) {
       const attName = strOrBlank(attDef.name);
 
       collector.setPos(attDef.name);
@@ -86,7 +85,7 @@ function attListDeclarationCheck(
       collector.setPos(attDef.type);
       const attType = strOrBlank(attDef.type);
       const upperAttType = attType.toLocaleUpperCase();
-      const knownType = ATTR_TYPES.indexOf(upperAttType) !== -1;
+      const knownType = ATTR_TYPES.includes(upperAttType);
 
       if (knownType) {
          collector.check(attType !== upperAttType, WFEID.ATTLISTDECL_ATTR_TYPE_INVALID, [
@@ -140,7 +139,7 @@ function attListDeclarationCheck(
 
       if (attDef.defaultType) {
          collector.setPos(attDef.defaultType);
-         const knownDefType = DEF_TYPES.indexOf(upperDefType) !== -1;
+         const knownDefType = DEF_TYPES.includes(upperDefType);
 
          collector.check(!knownDefType, WFEID.ATTLISTDECL_ATTR_DEFAULT_UNKNOWN, [
             attName,

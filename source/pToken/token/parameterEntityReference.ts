@@ -32,11 +32,11 @@ class ParameterEntityReferencePToken {
       param: ParameterEntityReferencePToken | MutableParameterEntityReference,
       extras?: MutableParameterEntityReference,
    ) {
-      this.open = extras?.open || param.open;
-      this.openSpace = extras?.openSpace || param.openSpace;
-      this.name = extras?.name || param.name;
-      this.nameSpace = extras?.nameSpace || param.nameSpace;
-      this.close = extras?.close || param.close;
+      this.open = extras?.open ?? param.open;
+      this.openSpace = extras?.openSpace ?? param.openSpace;
+      this.name = extras?.name ?? param.name;
+      this.nameSpace = extras?.nameSpace ?? param.nameSpace;
+      this.close = extras?.close ?? param.close;
    }
 }
 

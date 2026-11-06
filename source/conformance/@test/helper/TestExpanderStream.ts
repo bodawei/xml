@@ -92,7 +92,7 @@ function findEntityContent(cases: Array<TestCases>, docDir: string, entitySubPat
    // console.log('name', name);
 
    for (const testcase of cases) {
-      if (testcase.entityPaths[dir] && testcase.entityPaths[dir][name]) {
+      if (testcase.entityPaths[dir]?.[name]) {
          return testcase.entityPaths[dir][name];
       }
    }

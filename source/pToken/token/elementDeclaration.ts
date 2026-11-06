@@ -190,7 +190,7 @@ function resumeParseProperties(
       case 'midSpec':
          resumeParseContentModel(
             source,
-            props.contentModel || { delimitedParticles: [] },
+            props.contentModel ?? { delimitedParticles: [] },
             preSpace,
             (contentModel) => {
                deliverPToken({

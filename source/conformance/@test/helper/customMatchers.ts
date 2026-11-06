@@ -68,7 +68,7 @@ function toHaveXmlConfErrors(
          let foundMessage = true;
 
          if (typeof details.message === 'string') {
-            foundMessage = err.message.indexOf(details.message) !== -1;
+            foundMessage = err.message.includes(details.message);
          } else if (details.message instanceof RegExp) {
             foundMessage = details.message.test(err.message);
          }

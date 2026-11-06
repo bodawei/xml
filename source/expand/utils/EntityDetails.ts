@@ -41,13 +41,9 @@ interface PrivatePEDetails {
    entityLoc: OpaqueEntityLoc; // id of the entity that contains this entity's replacement text.
 }
 
-interface GeneralEntityMap {
-   [entityName: string]: PrivateGEDetails;
-}
+type GeneralEntityMap = Record<string, PrivateGEDetails>;
 
-interface ParameterEntityMap {
-   [entityName: string]: PrivatePEDetails;
-}
+type ParameterEntityMap = Record<string, PrivatePEDetails>;
 
 // No reason for anyone externally to see the waiters property.
 type PEDetails = Readonly<Omit<PrivatePEDetails, 'waiters'>>;
@@ -179,7 +175,7 @@ class EntityDetails {
    ): void {
       const details = this.getContentDetails(declaration);
 
-      if (!details || !details.isLoading) {
+      if (!details?.isLoading) {
          setTimeout(() => callback({ details, byproducts: [] }), 0);
          return;
       }

@@ -20,7 +20,7 @@ class TextPToken {
    constructor(base: TextPToken | TextProps | SToken, other: RawTextProps = {}) {
       const newText = 'str' in base ? base : base.text;
 
-      this.text = other.text ? other.text : newText;
+      this.text = other.text ?? newText;
    }
 }
 

@@ -39,7 +39,7 @@ function attributeCheck(
    checkName?: CheckAttName,
    checkValue?: CheckAttValue,
 ): void {
-   const seenAttrNames: { [attrName: string]: true | undefined } = {};
+   const seenAttrNames: Record<string, true | undefined> = {};
 
    for (let index = 0; index < attributes.length; index++) {
       const attr = attributes[index];
@@ -103,11 +103,9 @@ function attributeCheck(
          //   (Note that while the text speaks of only the replacement text of
          //   entity values, the syntax of AttValue doesn't allow it anywhere).
          if (type === WFEID.NOUN_ATTRIBUTE) {
-            for (let index = 0; index < attr.value.length; index++) {
-               const valuePart = attr.value[index];
-
+            for (const valuePart of attr.value) {
                if (isTextPToken(valuePart)) {
-                  if (valuePart.text.str.indexOf('<') !== -1) {
+                  if (valuePart.text.str.includes('<')) {
                      collector.report(WFEID.ATTRIBUTE_INVALID_VALUE, [nameText]);
                   }
                }

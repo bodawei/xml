@@ -21,7 +21,7 @@ function constructErrorInfo(
    expected: IdToErrorMap | undefined,
    errorId: string,
 ): undefined | ErrorDetails {
-   if (!expected || !expected[errorId]) {
+   if (!expected?.[errorId]) {
       return undefined;
    }
 

@@ -82,7 +82,7 @@ class PTokenParser {
       this.inContent = options.parseType === ParseType.GENERAL_ENTITY;
       this.isConfVerDelivered = !!options.confVer;
       this.isEntityIdDelivered = false;
-      this.parseType = options.parseType || ParseType.DOCUMENT;
+      this.parseType = options.parseType ?? ParseType.DOCUMENT;
       this.sTokenSource = sTokenSource;
       // We should always get a confVer if we are not the document type.
       this.confVer = new ConformanceVersion(options.confVer);

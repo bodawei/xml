@@ -80,13 +80,14 @@ class PTokenParser {
 
    private docStart?: DocTypeStartPToken;
 
-   private markupMap: {
-      [markupPRefix: string]: (
+   private markupMap: Record<
+      string,
+      (
          source: STokenSource,
          start: SToken,
          processor: (token: ReadonlyArray<ParseToken> | ParseToken | undefined) => void,
-      ) => void;
-   };
+      ) => void
+   >;
 
    constructor(
       sTokenSource: STokenSource,

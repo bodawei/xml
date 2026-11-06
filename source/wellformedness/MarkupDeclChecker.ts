@@ -65,13 +65,7 @@ const WFEID = wellFormedErrorCodes.id;
 const WID = warningCodes.id;
 const NO_CHANGE = '---INTERNAL---MARKER---';
 
-interface StateTable {
-   [startState: string]:
-      | {
-           [tokenType: string]: States | typeof NO_CHANGE;
-        }
-      | undefined;
-}
+type StateTable = Record<string, Record<string, States | typeof NO_CHANGE> | undefined>;
 
 const transitionsByState: StateTable = {
    [States.PRE]: {
@@ -179,13 +173,13 @@ const transitionsByState: StateTable = {
    [States.DONE]: {},
 };
 
-interface DeclarationInfo {
-   [declName: string]:
-      | {
-           referenceTokens: Array<ParameterEntityReferencePToken>;
-        }
-      | undefined;
-}
+type DeclarationInfo = Record<
+   string,
+   | {
+        referenceTokens: Array<ParameterEntityReferencePToken>;
+     }
+   | undefined
+>;
 
 /*
  * Extract information out of a declaration that we will need to do other
@@ -602,7 +596,7 @@ class MarkupDeclChecker implements MarkupChecker {
 
       if (!newState) {
          const transitions = transitionsByState[this.state];
-         newState = transitions && transitions[pToken.type];
+         newState = transitions?.[pToken.type];
       }
 
       if (newState) {
