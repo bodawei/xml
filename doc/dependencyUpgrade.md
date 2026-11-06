@@ -619,3 +619,45 @@ three that can each consume a session or more** — unknown type errors, a confi
 and a loader replacement respectively. DEP-13 is small in diff and large in
 verification: one import, one dependency swap, and a rule-by-rule comparison of the
 whole lint baseline under a different type checker.
+
+## Progress log
+
+### DEP-1 — done
+
+59 → 31 advisories, critical 27 → 1. `@types/jest` was **kept**: the plan listed it as dead,
+but non-test helpers use the ambient `jest` namespace and the Jasmine specs fail to
+compile under `ts-node` without it. Found only by running Jasmine after removal.
+
+### DEP-2 — done
+
+Prettier 3.9.10. Non-conforming files back to 91, eslint total unchanged at 3292.
+
+### DEP-3 — done (5.9.3, then 6.0.3)
+
+Findings the plan did not anticipate:
+
+-  **The 4.6 type-check baseline was masking real errors.** `tsc` reports no semantic
+   errors while any syntax error exists, and `flatDocs.json` is a syntax error. About
+   70 genuine type errors (mostly in tests) surfaced and were fixed.
+-  **Import-path casing bugs** (33 errors, 10 files): imports that only resolved on a
+   case-insensitive filesystem (`AttFixer`, `Warning`, `spaceXToken`, `wordListCheck`,
+   ...). Fixed to match the tracked file names. These would have failed on Linux CI.
+-  `tsconfig.json` changes: `skipLibCheck` (`@types/jest` and `@types/jasmine` conflict
+   under TS 5.x), explicit `types` (TS 6 no longer auto-includes `@types/*`),
+   `target` es5 → es2022 with **`useDefineForClassFields: false`** (the TS 6 default
+   changes class-field semantics and broke 16 Jasmine specs), `ts-node.files: true` (so
+   `bcp47-validate.d.ts` is seen), `baseUrl` and `downlevelIteration` removed.
+   Two `paths` values (`attFixer`, `node`) lacked the leading `./` the plan assumed they
+   had; fixed.
+-  `source/basic/extractor/*New.ts` is excluded from type-checking: it is the unfinished
+   P1 rewrite and does not type-check.
+-  After TS 6.0 the `flatDocs.json` errors no longer appear. Cause not isolated. That
+   file is expected to be unclean, so `AGENTS.md`'s known-failure note is left as is
+   until this is understood.
+-  Lint total 3292 → 3287 (basic −5, conformance −2, wellformedness +2 from new casts);
+   `valid`, `token`, `node`, `demo` still clean.
+
+### DEP-4 — done
+
+`@types/node` 26.6.6. Zero new errors; it also cleared the one `Buffer` overload error
+that 5.9 raised against `@types/node` 17.
