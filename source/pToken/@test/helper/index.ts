@@ -312,7 +312,7 @@ class MockSTokenSource extends STokenSource {
          calls.forEach((qc) => {
             if (qc.obj) {
                if (this.expectedValues.length === 0) {
-                  throw new Error(`NO value provided to "${qc.name}" in MockSTokenSource.`);
+                  throw new Error(`NO value provided to "${String(qc.name)}" in MockSTokenSource.`);
                }
 
                qc.obj[qc.name] = this._getAdjustedValue(qc);
@@ -321,7 +321,7 @@ class MockSTokenSource extends STokenSource {
             } else {
                if (this.expectedValues.length === 0) {
                   throw new Error(
-                     `NO value provided for extraction type "${qc.type}" in MockSTokenSource.`,
+                     `NO value provided for extraction type "${String(qc.type)}" in MockSTokenSource.`,
                   );
                }
 
@@ -337,7 +337,7 @@ class MockSTokenSource extends STokenSource {
       if (expected.type !== ANY && expected.type !== actualCall.type) {
          throw new Error(
             'Type of call did not match expectation. ' +
-               `Mock setup hed ${expected.type} (${expected.token?.str}, ${expected.param}) but got "${actualCall.type}"  (${actualCall.token?.str}, ${actualCall.param}).`,
+               `Mock setup hed ${expected.type} (${String(expected.token?.str)}, ${String(expected.param)}) but got "${String(actualCall.type)}"  (${String(actualCall.token?.str)}, ${String(actualCall.param)}).`,
          );
       }
 
@@ -347,7 +347,7 @@ class MockSTokenSource extends STokenSource {
                throw new Error(
                   'Parameters passed to STokenSource did not match expectation. ' +
                      `Expected "['${expected.param.join("', '")}']" but got ` +
-                     `"['${actualCall.params.join("', '")}']".`,
+                     `"['${String(actualCall.params.join("', '"))}']".`,
                );
             }
 
@@ -355,14 +355,14 @@ class MockSTokenSource extends STokenSource {
                if (expected.param[paramIndex] !== actualCall.params[paramIndex]) {
                   throw new Error(
                      'Parameters passed to STokenSource did not match expectation. ' +
-                        `Expected "${expected.param[paramIndex]}" but got "${actualCall.params[paramIndex]}".`,
+                        `Expected "${String(expected.param[paramIndex])}" but got "${String(actualCall.params[paramIndex])}".`,
                   );
                }
             }
          } else if (expected.param !== actualCall.params) {
             throw new Error(
                'Parameters passed to STokenSource did not match expectation. ' +
-                  `Expected "${expected.param}" but got "${actualCall.params}".`,
+                  `Expected "${String(expected.param)}" but got "${String(actualCall.params)}".`,
             );
          }
       }

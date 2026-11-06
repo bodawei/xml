@@ -375,7 +375,9 @@ describe('EntityDetails (unit)', () => {
       });
 
       it('throws an error if you try to state that you are loading an entity that has not been added', () => {
-         expect(() => entityDetails.loadingEntity(geDecl1)).toThrowError(
+         expect(() => {
+            entityDetails.loadingEntity(geDecl1);
+         }).toThrowError(
             'Internal error: Trying to load the value of a declaration that has not been seen.',
          );
       });
@@ -447,9 +449,9 @@ describe('EntityDetails (unit)', () => {
       });
 
       it('throws an error if the declartion has not been added', () => {
-         expect(() => entityDetails.updateDeclaredValue(geDecl1, [], [])).toThrowError(
-            'Internal error: A value was loaded for an unknown entity.',
-         );
+         expect(() => {
+            entityDetails.updateDeclaredValue(geDecl1, [], []);
+         }).toThrowError('Internal error: A value was loaded for an unknown entity.');
       });
    });
 });

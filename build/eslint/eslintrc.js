@@ -131,10 +131,23 @@ module.exports = {
             // Includes `recommended` and `eslint-recommended`, the parser and the plugin.
             'plugin:@typescript-eslint/recommended-type-checked',
             'plugin:@typescript-eslint/stylistic-type-checked',
+            'plugin:@typescript-eslint/strict-type-checked',
          ],
          rules: {
             // https://eslint.org/docs/rules/sort-keys
             'sort-keys': ['error', 'asc', { caseSensitive: false, minKeys: 2, natural: true }],
+
+            // strict-type-checked: numbers in template strings are harmless.
+            '@typescript-eslint/restrict-template-expressions': [
+               'error',
+               // The strict-type-checked options, except for allowNumber.
+               { allowAny: false, allowBoolean: false, allowNullish: false, allowNumber: true, allowRegExp: false },
+            ],
+
+            // strict-type-checked: this codebase deliberately spreads token (class instance) data
+            // into a modified props object, e.g. `{ ...pToken, externalId }`. The token classes are
+            // plain data holders, so losing the prototype is the intent.
+            '@typescript-eslint/no-misused-spread': 'off',
 
             '@typescript-eslint/array-type': [ 'error', { default: 'generic' } ],
             // , {
@@ -415,32 +428,14 @@ module.exports = {
             //    },
             //  ],
      
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-dynamic-delete.md
-             "@typescript-eslint/no-dynamic-delete": ["error"],
-     
              // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-empty-interface.md
              "@typescript-eslint/no-empty-interface": ["error"],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-extraneous-class.md
-             "@typescript-eslint/no-extraneous-class": ["error"],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-invalid-void-type.md
-             "@typescript-eslint/no-invalid-void-type": ["error"],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-non-null-assertion.md
-             "@typescript-eslint/no-non-null-assertion": ["error"],
      
              // https://github.com/typescript-eslint/typescript-eslint/blob/main/packages/eslint-plugin/docs/rules/parameter-properties.md
              "@typescript-eslint/parameter-properties": ["error"],
      
             //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-type-alias.md
             //  "@typescript-eslint/no-type-alias": ["error"],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unnecessary-boolean-literal-compare.md
-             "@typescript-eslint/no-unnecessary-boolean-literal-compare": ["error"],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unnecessary-condition.md
-             '@typescript-eslint/no-unnecessary-condition': ['error'],
      
             //  // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/no-unnecessary-qualifier.md
             //  '@typescript-eslint/no-unnecessary-qualifier': ['error'],
@@ -499,9 +494,6 @@ module.exports = {
             //      checkParameterProperties: true,
             //    },
             //  ],
-     
-             // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/prefer-reduce-type-parameter.md
-             '@typescript-eslint/prefer-reduce-type-parameter': ['error'],
      
              // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/prefer-ts-expect-error.md
              '@typescript-eslint/prefer-ts-expect-error': ['error'],
@@ -591,9 +583,6 @@ module.exports = {
             },
           ],
 
-          // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/docs/rules/unified-signatures.md
-          '@typescript-eslint/unified-signatures': ['error'],
-
            //
            // Extension Rules
            // Option values were copied verbatim from eslint-config-airbnb-base@15 when that
@@ -615,8 +604,6 @@ module.exports = {
            '@typescript-eslint/no-unused-vars': ['error', { vars: 'all', args: 'after-used', ignoreRestSiblings: true }],
 
            '@typescript-eslint/no-use-before-define': ['error', { functions: true, classes: true, variables: true }],
-
-           '@typescript-eslint/no-useless-constructor': 'error',
 
            '@typescript-eslint/require-await': 'off',
 

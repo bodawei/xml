@@ -53,7 +53,9 @@ function addProtoReplacementText(
    }
 
    if (details.isLoading) {
-      entityDetails.waitForLoading(details.token, () => done({ byproducts: [] }));
+      entityDetails.waitForLoading(details.token, () => {
+         done({ byproducts: [] });
+      });
       return;
    }
 
@@ -66,11 +68,11 @@ function addProtoReplacementText(
    sTokenSource.setConfVer(expandParams.confVer);
 
    entityDetails.loadingEntity(details.token);
-   entityDetails.waitForLoading(details.token, (info) =>
+   entityDetails.waitForLoading(details.token, (info) => {
       done({
          byproducts: info.byproducts,
-      }),
-   );
+      });
+   });
 
    utils.parseEntityValue(sTokenSource, (entityValuePToken: EntityValuePToken | void) => {
       const newStack = entityContextStack.cloneWithRef(reference, details.entityLoc);

@@ -83,7 +83,7 @@ describe('EntityExpander (integration)', () => {
    ): OpaqueEntityLoc {
       const base = baseEntity.type === ENTITY_ID ? baseEntity.systemId : baseEntity;
 
-      return `${base}/${relativeEntity.systemId}`;
+      return `${String(base)}/${relativeEntity.systemId}`;
    }
 
    function retrieveExternalEntity(entityLoc: OpaqueEntityLoc): RetrieveResults {
