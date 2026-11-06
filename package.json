@@ -14,7 +14,9 @@
       "check:types": "./node_modules/typescript/bin/tsc",
       "lint": "eslint --fix --config ./.eslintrc.json source/**/*.ts",
       "lint:all": "eslint --fix --config ./.eslintrc.json source/basic source/valid",
+      "lint:ci": "eslint --config ./.eslintrc.json --ext .ts --max-warnings 0 source/valid source/token source/node source/demo",
       "jest:all": "jest --config ./jest.config.js --coverage",
+      "test:jasmine": "ts-node -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/jasmine.json",
       "jest": "jest --config ./jest.config.js --watch --coverage",
       "test": "nodemon --ext ts --exec  './node_modules/.bin/ts-node -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/jasmine.json' "
    },

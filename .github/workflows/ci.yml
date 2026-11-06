@@ -1,0 +1,65 @@
+name: CI
+
+on:
+   pull_request:
+
+permissions:
+   contents: read
+
+concurrency:
+   group: ci-${{ github.ref }}
+   cancel-in-progress: true
+
+# Four independent jobs, run in parallel, so each shows up as its own check on the PR
+# and a failure points straight at the command that failed.
+jobs:
+   lint:
+      name: Lint
+      runs-on: ubuntu-latest
+      steps:
+         - uses: actions/checkout@v4
+         - uses: actions/setup-node@v4
+           with:
+              node-version: 26
+              cache: npm
+         - run: npm ci
+         # Non-fixing lint of the modules that are lint-clean today (see ROADMAP P5).
+         # `npm run lint` is not used: it passes --fix and the rest of the tree has a
+         # large pre-existing error baseline.
+         - run: npm run lint:ci
+
+   types:
+      name: Type check
+      runs-on: ubuntu-latest
+      steps:
+         - uses: actions/checkout@v4
+         - uses: actions/setup-node@v4
+           with:
+              node-version: 26
+              cache: npm
+         - run: npm ci
+         - run: npm run check:types
+
+   jest:
+      name: Jest
+      runs-on: ubuntu-latest
+      steps:
+         - uses: actions/checkout@v4
+         - uses: actions/setup-node@v4
+           with:
+              node-version: 26
+              cache: npm
+         - run: npm ci
+         - run: npm run jest:all
+
+   jasmine:
+      name: Jasmine
+      runs-on: ubuntu-latest
+      steps:
+         - uses: actions/checkout@v4
+         - uses: actions/setup-node@v4
+           with:
+              node-version: 26
+              cache: npm
+         - run: npm ci
+         - run: npm run test:jasmine
