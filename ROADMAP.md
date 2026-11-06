@@ -34,11 +34,11 @@ The package dependencies and devDependencies are all about 4 years old. Bring th
 
 ### Done when
 
-`npm audit` reports no critical or high advisories, and `npm outdated` is empty
-except for `typescript` (held below 6.1 by `@typescript-eslint`'s peer range), with
+`npm outdated` is empty and `npm audit` reports no critical or high advisories, with
 both suites still passing at their baseline counts. Full criteria in
-`doc/dependencyUpgrade.md`; the original "`npm outdated` reports nothing" is not
-reachable while that cap stands.
+`doc/dependencyUpgrade.md`. The only relaxation from the original goal is the audit
+line: a clean audit including moderate and low advisories is not reliably achievable
+in a dev-only toolchain.
 
 Scope rule: P7 modernizes every dependency regardless of whether a later project
 (P8, P9, P10, P11) would replace the tool. Replacement is decided later, from a
@@ -47,7 +47,7 @@ current baseline rather than a four-year-old one.
 ### Current state
 
 Evaluated, not yet started. `doc/dependencyUpgrade.md` holds the staged plan
-(DEP-1 … DEP-12), the measured baseline, and the peer-range constraints that fix
+(DEP-1 … DEP-13), the measured baseline, and the peer-range constraints that fix
 the ordering.
 
 Baseline as of 2026-11-05: 930 packages, 59 audit advisories (27 critical), 29 of 43
@@ -56,18 +56,22 @@ specs). 26 of the 27 criticals sit in unreferenced Babel 6 packages, so DEP-1 re
 them with no version changes.
 
 Three stages can each take a session or more: DEP-3 (TypeScript 4.6 → 6.0, unknown
-type errors), DEP-6 (ESLint 10 + flat config, which also means dropping both airbnb
-configs) and DEP-11 (Jasmine 7, which removed the `jsLoader` option this repo depends
-on — the alias-resolution mechanism has to be replaced, not reconfigured).
+type errors), DEP-6 (ESLint 10 + ESM flat config, which also means dropping both
+airbnb configs) and DEP-11 (Jasmine 7, which removed the `jsLoader` option this repo
+depends on — the alias-resolution mechanism has to be replaced, not reconfigured).
 
-One decision is open: whether TypeScript 7 is in scope. It is published but not
-lintable, since `@typescript-eslint` caps at `<6.1.0` and has no newer major. The
-recommendation is to cap P7 at 6.0.x and track TypeScript 7 as its own item.
+TypeScript 7 is in scope, and is decided. It ships no programmatic compiler API, so
+typescript-eslint refuses it outright; DEP-13 therefore replaces typescript-eslint
+with `ts7-eslint`, which reruns the published 8.66.0 rules unmodified over a rebuilt
+compiler layer. That makes DEP-6 a hard prerequisite, since `ts7-eslint` needs
+ESLint 9 or 10. Alternatives considered (oxlint + tsgolint, staying at 6.0.x, a
+`@typescript/typescript6` hybrid) are recorded in the plan so the choice is not
+relitigated from memory.
 
 ### Next actions
 
 -  [x] Evaluate all the packages and put together a proposed order for upgrading
--  [ ] Confirm the TypeScript 7 recommendation in `doc/dependencyUpgrade.md`
+-  [x] Decide the TypeScript 7 approach (`ts7-eslint`, DEP-13)
 -  [ ] Work the stages in order, one PR each, re-measuring the baseline table in every
        PR description. Start with DEP-1 (dead dependency removal).
 

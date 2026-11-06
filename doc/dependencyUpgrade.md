@@ -57,8 +57,10 @@ peer range, an engine field, or a directly measured result — not a guess.
 -  **C1** — `@types/node@26` declares `typeScriptVersion: "5.6"`. It cannot be used
    with TypeScript 4.6. TypeScript moves first.
 -  **C2** — `@typescript-eslint@8` (latest) peers `typescript: ">=4.8.4 <6.1.0"`.
-   TypeScript 7.0.2 is published and is _not_ lintable. The TypeScript ceiling for P7
-   is **6.0.x**. This is an external blocker, not a sequencing preference.
+   TypeScript 7.0.2 is published and is _not_ lintable by it — it refuses at import
+   with "typescript-eslint does not support TS 7.0." So **6.0.x is the ceiling for as
+   long as typescript-eslint is in the tree.** P7 resolves this by replacing it in
+   DEP-13; see **C11**.
 -  **C3** — `eslint-plugin-prettier@5` peers `prettier: ">=3.0.0"`. Prettier,
    `eslint-plugin-prettier` and `eslint-config-prettier` must move in one commit.
 -  **C4** — `eslint-config-airbnb-typescript@18` (latest) peers
@@ -86,6 +88,15 @@ peer range, an engine field, or a directly measured result — not a guess.
    `ERR_MODULE_NOT_FOUND`, with `-r tsconfig-paths/register` making no difference
    because it is a CJS require hook. This is the single largest piece of hidden work in
    P7 — see DEP-11.
+-  **C11** — `ts7-eslint@0.2.1` (the chosen TypeScript 7 linter, DEP-13) peers
+   `eslint: "^9.0.0 || ^10.0.0"` and `typescript: "^7.0.0"`, engines `node >=22.15`
+   (for `module.registerHooks`; Node 26 is fine). **It cannot run on ESLint 8**, so
+   DEP-6 is a hard prerequisite for TypeScript 7, not merely a desirable cleanup. It is
+   also `"type": "module"`, so the flat config has to be ESM.
+-  **C12** — TypeScript 7 ships **no programmatic compiler API**: the `typescript`
+   package root export is a version stub and only `./unstable/*` is exported. This is
+   why typescript-eslint cannot simply widen its range, and why the swap in DEP-13 is a
+   replacement rather than a version bump.
 
 ## Per-stage plan
 
@@ -161,11 +172,19 @@ most the `prettier/prettier` delta and the four clean modules stay clean.
 `typescript >=2.7`).
 
 Land 5.9 green as its own commit before going to 6.0.x — two hops in one PR, so that a
-failure has an obvious bisect point. 6.0.x is the ceiling, per **C2**.
+failure has an obvious bisect point. 6.0.x is as far as this stage goes, per **C2**;
+TypeScript 7 arrives in DEP-13, coupled to the linter swap that makes it possible.
 
 This is the stage with real unknown work in it. Going 4.6 → 6.0 crosses five majors
 under `"strict": true` over 649 files; budget for new type errors rather than assuming
 none.
+
+While here, delete `"baseUrl": "./"` from `tsconfig.json`. Measured: removing it
+produces byte-identical `tsc` output — the same 144 `flatDocs.json` errors and zero
+`TS2307` module-resolution errors — because TypeScript has resolved `paths` relative to
+the config file without `baseUrl` since 4.1, and this repo's 18 alias values are already
+written that way. `baseUrl` is a legacy option on its way out, and dropping it now while
+the type-check baseline is being re-verified is cheaper than doing it later.
 
 Specific things to check, not assume:
 
@@ -244,13 +263,23 @@ not the same rule set as `recommended-requiring-type-checking`. Re-baseline the
 per-module table in the PR description and state which modules changed and why. The
 four clean modules must stay clean.
 
-Optional: v8 is distributed as a single `typescript-eslint` package that re-exports
-parser and plugin. Switching to it is tidier, but it only pays off with flat config —
-do it as part of DEP-6.
+**Switch to the single `typescript-eslint` meta-package** (which re-exports parser and
+plugin) rather than keeping `parser` and `eslint-plugin` as separate dependencies. This
+is no longer a tidiness preference: `ts7-eslint` deliberately mirrors that package's
+flat API — `tseslint.config(...)`, `tseslint.configs.recommendedTypeChecked` — so
+building DEP-6's config against it reduces DEP-13 to changing one import line. Do the
+package switch here and the config shape in DEP-6.
+
+One version note for DEP-13: `ts7-eslint@0.2.1` bundles the published
+`@typescript-eslint/eslint-plugin@8.66.0`, not 8.72.1. The rule set therefore steps
+slightly back at DEP-13. Check the 8.66 → 8.72 changelog for anything touching the 70
+rules configured here; nothing in the current violation profile looks exposed, but it
+should be a deliberate check rather than a surprise.
 
 ### DEP-6 — ESLint 10 and flat config
 
-The largest stage.
+The largest stage, and now a **hard prerequisite for TypeScript 7**: `ts7-eslint`
+requires ESLint 9 or 10 (**C11**), so DEP-13 cannot happen until this lands.
 
 -  `eslint` 8.15.0 → 10.14.0 (engines `^20.19.0 || ^22.13.0 || >=24`; fine on Node 26).
 -  **Remove `eslint-config-airbnb-base`** (**C5**) and inline the literal option values
@@ -260,10 +289,18 @@ The largest stage.
 -  **Replace `eslint-plugin-import` with `eslint-plugin-import-x@4`** (**C6**) and drop
    `eslint-import-resolver-typescript@2` in favour of `import-x`'s own TypeScript
    resolver. `plugin:import/recommended` becomes the `import-x` flat equivalent.
--  Convert `.eslintrc.json` + `build/eslint/eslintrc.js` to `eslint.config.js`. The
+-  Convert `.eslintrc.json` + `build/eslint/eslintrc.js` to **`eslint.config.mjs`**. The
    existing config is already structured as `overrides` blocks, which map onto flat
    config's array of config objects fairly directly; the `env` block becomes
    `languageOptions.globals` from the `globals` package.
+-  **Write it as ESM, in the `tseslint.config(...)` idiom**, not as CJS. `ts7-eslint` is
+   `"type": "module"` and is consumed as
+   `import tseslint from "ts7-eslint"` /
+   `export default tseslint.config(tseslint.configs.recommendedTypeChecked, …)`
+   (**C11**). Writing DEP-6's config that way against the `typescript-eslint`
+   meta-package means DEP-13 is a one-line import change instead of a second rewrite.
+   Note that `build/eslint/eslintrc.js` is CJS today and uses `require` for the airbnb
+   rule values — those are being inlined in this stage anyway.
 -  ESLint 10 removes the core formatting rules. The config currently sets 26 core rules,
    of which these 11 are formatting rules set to `'off'`: `brace-style`,
    `comma-spacing`, `func-call-spacing`, `indent`, `keyword-spacing`,
@@ -284,7 +321,7 @@ so a regression points at one of them rather than both.
 
 **Note the `--fix` hazard.** `AGENTS.md` warns that `npm run lint` is configured with
 `--fix` and rewrites files. Validate every step of this stage with a bare
-`npx eslint --config ./eslint.config.js source`, never through the npm script.
+`npx eslint --config ./eslint.config.mjs source`, never through the npm script.
 
 ### DEP-7 — Jest 30 and Babel 7 latest
 
@@ -407,40 +444,131 @@ P5 separately questions whether `build:locale` is still live. That question does
 block this swap — do the swap, and if P5 later deletes the script, the dependency goes
 with it.
 
-## Open decision
+### DEP-13 — TypeScript 7, via `ts7-eslint`
 
-One decision remains, and it is forced by an external constraint rather than by
-sequencing.
+**Decided.** TypeScript 7 is not a version bump in this project; it is a decision about
+which linter reads the type graph (**C12**), and the decision is to keep ESLint and
+replace only typescript-eslint's compiler-facing layer with `ts7-eslint`.
 
-**TypeScript 7.** Published as 7.0.2, and not lintable: `@typescript-eslint@8` caps at
-`<6.1.0` (**C2**), and there is no newer typescript-eslint major — `latest` is 8.72.1,
-with no `next` tag. Installing TypeScript 7 alongside it means an `ERESOLVE` peer
-conflict to be forced with `--legacy-peer-deps` or an `overrides` entry, and a linter
-running outside its supported range against 649 strict-mode files. TypeScript 7 also
-appears to be a different compiler build rather than a routine major: its package ships
-only a `tsc` bin, where 6.0.3 still ships `tsserver`.
+This stage swaps `typescript-eslint` for `ts7-eslint@0.2.1` and takes `typescript`
+6.0.3 → 7.0.2 **in one commit**. They are not separable: typescript-eslint refuses TS 7
+at import, and `ts7-eslint` peers `typescript: "^7.0.0"`.
 
-Recommendation: cap P7 at TypeScript 6.0.x (DEP-3) and open a separate roadmap item for
-TypeScript 7, gated on typescript-eslint support. That is not a decision to defer
-modernization — it is the one place where "as modern as possible" and "lintable" are
-genuinely incompatible today, and the lint baseline is worth more than the version
-number.
+Prerequisites: DEP-3 (TypeScript 6.0.x green), DEP-5 (v8 rule names, meta-package) and
+**DEP-6 (ESLint 9/10 + ESM flat config)** — the last is hard, per **C11**.
+
+What `ts7-eslint` actually is, which is the reason it is a tolerable risk at 0.2.1: it
+does not fork or patch anything. `@typescript-eslint/eslint-plugin`, `type-utils`,
+`utils`, `scope-manager`, `types` and `visitor-keys` are the **published 8.66.0
+packages, used unmodified**. What it rebuilds is the layers that touch the compiler —
+a `ts-api` over `typescript/unstable/*`, a TSESTree converter, a parser, a `ts` namespace
+shim of 168 members, and a module-resolution hook scoped to `@typescript-eslint` and
+`ts-api-utils`. The project's own `import ts from "typescript"` is unaffected.
+
+Its published verification is strong for a package this young, and is worth repeating
+locally rather than trusting: an AST differential against `typescript@6.0.3` matching
+1081 of 1081 nodes across 23 fixtures including the awkward constructs, and a
+five-codebase lint benchmark of 5,686 findings with **100% agreement and 0
+disagreements**. Performance is roughly at parity (1.03x faster overall).
+
+Steps:
+
+1. `npm i -D ts7-eslint typescript@7` and remove the `typescript-eslint` /
+   `@typescript-eslint/*` direct dependencies. **Do not install
+   `@typescript-eslint/eslint-plugin` separately** — `ts7-eslint` brings it and it has
+   to load after the resolution hook, which the entry point arranges.
+2. Add the documented peer-warning fix to `package.json`, because the bundled
+   `@typescript-eslint/eslint-plugin@8.66.0` still declares `typescript <6.1.0`:
+
+   ```json
+   { "overrides": { "@typescript-eslint/parser": { "typescript": "$typescript" } } }
+   ```
+
+   The resolution is correct — one TypeScript on disk, no nested copy — but it fails
+   under `--strict-peer-deps`.
+
+3. In `eslint.config.mjs`, change the import from the `typescript-eslint` meta-package to
+   `ts7-eslint`. The API is deliberately the same shape
+   (`tseslint.config(...)`, `tseslint.configs.recommendedTypeChecked`, plus `base`,
+   `recommended`, `strict`, `strictTypeChecked`, `stylistic`, `stylisticTypeChecked`),
+   so if DEP-6 was written in that idiom this is one line.
+4. Keep `parserOptions.project: "./tsconfig.json"` with
+   `tsconfigRootDir: import.meta.dirname`. A `tsconfig.json` is **required** — TypeScript 7
+   has no standalone parser, so there is no project-less mode.
+5. Pin `typescript` to an exact version, not a range. `ts7-eslint` builds on
+   `typescript/unstable/*`, which is explicitly expected to change.
+
+Verification, beyond the usual definition of done:
+
+-  **The lint count must be compared rule by rule against the DEP-6 baseline**, not just
+   totalled. This is the one stage where the linter's view of the code changes rather
+   than the code or the rules.
+-  **Check the five promise/await rules specifically.** `ts7-eslint` reimplements
+   `getAwaitedType` (neither TS 7.0 nor the 7.1 dev builds expose it), and a union mixing
+   promises and non-promises comes back unchanged — a potential false _negative_. This
+   repo enables `await-thenable`, `no-floating-promises`, `no-misused-promises`,
+   `require-await` and `return-await`, and all five currently report **0** violations, so
+   the check is simply that they still report 0 and that nothing was silently lost.
+-  **Watch for the unknown-type-query warning.** A type query the compiler cannot answer
+   is reported as unknown rather than aborting the run, and the first one prints a
+   warning. That is the right trade, but it means a quiet degradation is possible — treat
+   any such warning as a finding.
+-  Lint **message text** can order union members differently, because TypeScript 7 prints
+   types in its own order (`string | (string | Query)[] | Query` where 6 wrote
+   `string | Query | (string | Query)[]`). Same rule, same location, same finding. Nothing
+   here snapshots lint output, so this should be cosmetic — but it is why a rule-by-rule
+   count comparison is more trustworthy than a text diff.
+-  `check:types` now runs the native compiler. Confirm it still fails **only** on
+   `flatDocs.json`. The error count may legitimately differ from 144, since this is a
+   different compiler implementation — if so, record the new baseline and say so
+   explicitly rather than treating it as noise.
+
+**Keep the retreat cheap.** Because the rules and their configuration are identical
+either way, reverting to `typescript-eslint` + TypeScript 6.0.x should stay a
+dependency-and-one-import change rather than a config rewrite. Do not let
+TS7-specific workarounds leak into the rule configuration; if something needs a
+workaround, comment it with why, so the revert is mechanical.
+
+### Alternatives considered for DEP-13
+
+Recorded so the decision is not relitigated from memory.
+
+-  **oxlint + `oxlint-tsgolint`** (oxlint 1.91.0, oxlint-tsgolint 7.0.2006). Requires
+   TS 7.0+, runs type-aware rules in a Go binary on typescript-go, and is the only option
+   where TS 7 is a supported configuration rather than a worked-around one. Checked
+   against this repo and viable: the documented `baseUrl` restriction is a one-line
+   deletion here (see DEP-3), `eslint/sort-keys` exists (2351 violations, 71% of the
+   baseline), and `typescript/no-explicit-any` exists (187). Not chosen because it
+   replaces the whole linter — absorbing P9, forcing P8's Prettier-vs-oxfmt question
+   early, and discarding the rule configuration this repo has accumulated. Type-aware
+   coverage is also incomplete and upstream's own counts disagree (docs say 59 of 61, the
+   tsgolint README says 60 of 62, neither names the gaps). Note that `@oxlint/migrate`
+   reads only flat configs, so DEP-6 remains the prerequisite if this is ever revisited.
+-  **Stay at TypeScript 6.0.x.** The safe default: typescript-eslint stays official and
+   supported, waiting for TS 7.1 support (typescript-eslint #12803). Still the fallback
+   if DEP-13's verification does not come back clean.
+-  **Hybrid: `typescript@7` for `tsc` plus `@typescript/typescript6` (6.0.2) for
+   typescript-eslint's type information.** Unverified whether typescript-eslint can be
+   pointed at it, and it would mean type-checking and linting reading two different
+   compilers. Not pursued.
 
 ## Exit criteria
 
-These replace P7's original "`npm outdated` reports nothing out of date, and `npm audit`
-shows no errors", which is not reachable as written.
+With DEP-11 upgrading Jasmine and DEP-13 taking TypeScript to 7, **P7's original
+"`npm outdated` reports nothing out of date" becomes reachable after all** — there is no
+longer an exception list. Only the audit criterion needs restating.
 
--  `npm audit` reports **0 critical and 0 high** advisories. A fully clean audit
-   including moderate and low is not reliably achievable in a dev-only toolchain and
-   should not gate the project.
--  `npm outdated` is empty **except** for `typescript`, held at 6.0.x by
-   `@typescript-eslint`'s peer range (**C2**), with that exception recorded here and in
-   `ROADMAP.md`. Every other direct dependency is at latest.
+-  `npm audit` reports **0 critical and 0 high** advisories. This is the one relaxation
+   from the original wording: a fully clean audit including moderate and low is not
+   reliably achievable in a dev-only toolchain and should not gate the project.
+-  `npm outdated` is **empty**. Every direct dependency is at latest, TypeScript
+   included.
 -  Both suites still pass at their baseline counts: 265 Jest suites / 9768 tests, 336
    Jasmine specs. Counts, not just exit codes.
 -  `check:types` still fails **only** on `source/node/@test/data/flatDocs.json` (P5's
-   baseline), with the same 144 errors.
+   baseline). The error count was 144 under TypeScript 4.6; if the native compiler
+   reports a different number for the same file (DEP-13), record the new baseline
+   explicitly rather than letting it drift.
 -  `npx eslint source` reports no new errors against the per-stage re-baseline, and
    `valid`, `token`, `node` and `demo` are still clean.
 -  Every removed dependency is accounted for: dead (DEP-1), replaced, or deliberately
@@ -456,20 +584,30 @@ DEP-2  prettier 3           2 files to reformat   (independent)
 DEP-3  typescript 5.9 → 6.0 unknown type errors  ← gates DEP-4, DEP-5, DEP-11
 DEP-4  @types/node 26       unknown type errors
 DEP-5  typescript-eslint 8  16 rules to rewrite  ← gates DEP-6
-DEP-6  eslint 10 + flat     largest stage
+DEP-6  eslint 10 + ESM flat largest stage        ← gates DEP-13 (hard, per C11)
 DEP-7  jest 30 + babel 7.x  68 snapshots          (independent of the TS/ESLint chain)
 DEP-8  babel 8              after DEP-7
 DEP-9  iconv-lite           only runtime change  ← own PR, conformance suite
 DEP-10 nodemon 3            trivial; pairs with DEP-11
 DEP-11 jasmine 7            loader replacement   ← biggest hidden cost; see C10
 DEP-12 properties-parser    small, independent
+DEP-13 typescript 7         linter swap          ← last; ts7-eslint + TS 7 in one commit
 ```
 
-Dependency edges: DEP-3 → DEP-4, DEP-3 → DEP-5 → DEP-6, DEP-3 → DEP-11, DEP-7 → DEP-8,
-DEP-11 ↔ DEP-10. DEP-1, DEP-2, DEP-9 and DEP-12 are independent of everything and can
-land in any order.
+The TypeScript/ESLint chain is strict and now ends at DEP-13:
+
+```
+DEP-3 → DEP-5 → DEP-6 → DEP-13
+   └──→ DEP-4
+   └──→ DEP-11 ↔ DEP-10
+DEP-7 → DEP-8        (parallel to the whole chain)
+```
+
+DEP-1, DEP-2, DEP-9 and DEP-12 are independent of everything and can land in any order.
 
 Rough effort shape, for scheduling: DEP-1, DEP-2, DEP-9, DEP-10, DEP-12 are small.
 DEP-4, DEP-5, DEP-7, DEP-8 are medium and bounded. **DEP-3, DEP-6 and DEP-11 are the
-three that can each consume a session or more** — unknown type errors, a config
-rewrite, and a loader replacement respectively.
+three that can each consume a session or more** — unknown type errors, a config rewrite,
+and a loader replacement respectively. DEP-13 is small in diff and large in
+verification: one import, one dependency swap, and a rule-by-rule comparison of the
+whole lint baseline under a different type checker.
