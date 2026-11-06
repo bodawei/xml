@@ -331,6 +331,21 @@ so a regression points at one of them rather than both.
 `--fix` and rewrites files. Validate every step of this stage with a bare
 `npx eslint --config ./eslint.config.mjs source`, never through the npm script.
 
+#### DEP-6 is delivered in parts
+
+Decided after DEP-5, so each part is a reviewable PR with its own verification. Part IDs
+are stable like stage IDs.
+
+-  **DEP-6a** — Remove `eslint-config-airbnb-base` by inlining its option values. No
+   behaviour change; verified by an identical finding-by-finding lint result.
+-  **DEP-6b** — Prune the config: use the plugins' `recommended` sets and delete rules
+   that merely restate them, so the config that gets converted is as small as possible.
+   Do this _before_ the format conversion so there is less to port.
+-  **DEP-6c** — Convert to `eslint.config.mjs` flat config on ESLint 9.
+-  **DEP-6d** — ESLint 10, and `eslint-plugin-import` → `import-x`.
+
+The bullet list above remains the full scope; 6a covers its airbnb item.
+
 ### DEP-7 — Jest 30 and Babel 7 latest
 
 `jest` 28.1.0 → 30.5.2 and `@jest/globals` ^28.1.0 → ^30.5.2 together (engines
@@ -694,3 +709,10 @@ migration; `sort-keys` (2351) and `prettier/prettier` (454) are unchanged.
 exit criteria. `source/basic/extractor/*New.ts` (excluded from `tsconfig.json` in DEP-3)
 now reports "file not found in project" under type-aware lint; it did before too and is
 part of the baseline.
+
+### DEP-6a — done
+
+`eslint-config-airbnb-base` removed; the 14 extension rules now carry literal values
+(four of them are `'off'` upstream: `init-declarations`, `no-invalid-this`,
+`no-magic-numbers` and `require-await`). Lint result is identical
+to the pre-change run on every one of the 3313 findings (file, line, column, rule).
