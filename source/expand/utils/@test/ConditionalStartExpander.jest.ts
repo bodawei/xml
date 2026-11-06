@@ -4,7 +4,7 @@ import { describe, expect, it } from '@jest/globals';
 
 import { ConformanceVersion, EntityId, Problem } from 'basic';
 import { ParameterEntityReferencePToken, TextPToken } from 'pToken';
-import { ExpandParams, RetrieveResults } from 'source/expand/types';
+import { ExpandParams, RetrieveResults } from '../../types';
 import { STokenSource, toSToken } from 'basic';
 import { ConditionalStartPToken, resumeParseConditional } from 'token';
 import { makeParameterEntityDeclaration, makeParameterEntityReference } from 'token-test';
