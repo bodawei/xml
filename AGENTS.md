@@ -76,9 +76,13 @@ Do not treat these as regressions, and do not fix them as part of unrelated work
 -  Jest specs live in `source/**/@test/**/*.jest.ts`. Add new tests as Jest.
 -  Jasmine specs live in `source/**/*test.ts` and are run by `npm test`.
 -  Do not add new Jasmine specs unless you are extending an existing Jasmine file.
--  `build/jasmine.json` sets `"jsLoader": "require"`. Keep it: Jasmine 4 otherwise
-   loads specs with dynamic `import()`, which on Node >= 22.6 bypasses `ts-node` and
-   `tsconfig-paths`, breaking aliases such as `basic`.
+-  The Jasmine scripts run `node --no-experimental-strip-types .../ts-node/dist/bin.js -r tsconfig-paths/register`.
+   Keep `--no-experimental-strip-types`: Jasmine 7 always tries `import()` first, and
+   Node's native type stripping would load the `.ts` specs itself, bypassing `ts-node`
+   and `tsconfig-paths` (aliases such as `basic` then fail). With it off, `import()`
+   fails with `ERR_UNKNOWN_FILE_EXTENSION` and Jasmine falls back to `require()`.
+-  Jasmine 7 throws on duplicate suite or spec names within a parent. Give each a
+   unique name.
 -  Import through the `tsconfig.json` path aliases rather than long relative paths.
    If you move a module, update the alias and the relevant `index.ts` export.
 

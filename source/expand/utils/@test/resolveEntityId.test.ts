@@ -42,7 +42,7 @@ describe('resolveEntityId()', () => {
       );
    });
 
-   it('produces a resolved ID that is just the child when the child is http://', () => {
+   it('produces a resolved ID that is just the child when the child is http:// and the parent is a string', () => {
       expect(
          resolveEntityId(
             'http://one.com/two/parent.xml',
@@ -51,13 +51,13 @@ describe('resolveEntityId()', () => {
       ).toEqual('http://foo.com/system.xml');
    });
 
-   it('produces a resolved ID using the parent protocol when the child is protocol relative', () => {
+   it('produces a resolved ID using the parent protocol when the child is protocol relative and the parent is a string', () => {
       expect(
          resolveEntityId('https://one.com/two/parent.xml', new EntityId('//foo.com/system.xml')),
       ).toEqual('https://foo.com/system.xml');
    });
 
-   it('produces a resolved ID even when parent, oddly, just points to a directory', () => {
+   it('produces a resolved ID even when parent, oddly, just points to a directory (string parent)', () => {
       expect(resolveEntityId('http://one.com/two/', new EntityId('system.xml'))).toEqual(
          'http://one.com/two/system.xml',
       );

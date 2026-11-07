@@ -46,8 +46,8 @@ current baseline rather than a four-year-old one.
 
 ### Current state
 
-DEP-1 … DEP-5 are done (see the progress log in `doc/dependencyUpgrade.md`); DEP-6 onward
-is not started. `doc/dependencyUpgrade.md` holds the staged plan
+DEP-1 … DEP-11 are done (see the progress log in `doc/dependencyUpgrade.md`); DEP-12
+(`properties-parser`) and DEP-13 (TypeScript 7) remain. `doc/dependencyUpgrade.md` holds the staged plan
 (DEP-1 … DEP-13), the measured baseline, and the peer-range constraints that fix
 the ordering.
 
@@ -76,8 +76,10 @@ relitigated from memory.
 -  [x] DEP-1 … DEP-5 (dead deps, Prettier 3, TypeScript 6.0, `@types/node` 26, typescript-eslint 8)
 -  [x] DEP-6a (remove airbnb-base)
 -  [x] DEP-6b (prune config; decisions on adopting stylistic/strict presets left open)
--  [ ] DEP-6c (flat config on ESLint 9), 6d (ESLint 10 + import-x); see the plan. Continue in order, one PR each, re-measuring the
-       baseline table in every PR description.
+-  [x] DEP-6c (flat config on ESLint 9), 6d (ESLint 10 + import-x)
+-  [x] DEP-7 … DEP-11 (Jest 30, Babel 8, iconv-lite, nodemon 3, Jasmine 7)
+-  [ ] DEP-12, DEP-13; see the plan. One PR each, re-measuring the baseline table in
+       every PR description.
 
 ## P8: Try swapping oxfmt in for prettier
 
@@ -168,12 +170,10 @@ still runs 336 specs via `npm test` and nodemon.
 
 -  [ ] Inventory the remaining Jasmine files and their helpers.
 -  [ ] Port them to `@test/*.jest.ts`, keeping the existing coverage.
--  [ ] Remove the Jasmine config, nodemon script, and `jsLoader` workaround.
+-  [ ] Remove the Jasmine config, nodemon script, and the `--no-experimental-strip-types` workaround.
 -  [ ] Update `AGENTS.md` and the README once the switch is complete.
 
-**Notes:** `build/jasmine.json` references
-`source/wellformedness/@test/beforeJasmine.ts`, which does not exist; Jasmine
-currently tolerates the missing helper.
+**Notes:** none outstanding.
 
 ## P5: Toolchain modernization
 

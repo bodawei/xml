@@ -5,7 +5,7 @@ import { makeSTokenMaker, MockSTokenSource } from 'pToken-test';
 
 import declaration, { DeclarationPToken } from '../baseDeclaration';
 
-describe('declaration (unit)', () => {
+describe('baseDeclaration (unit)', () => {
    let declarationPToken: DeclarationPToken;
    let confVer: ConformanceVersion;
 
