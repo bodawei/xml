@@ -972,3 +972,14 @@ tests, Jasmine 336 specs, `lint:ci` clean, `npm ci` dry run clean. `@types/jest`
 `expect` 30.5.2, which dedupes against Jest's own copy, and the lockfile shrinks by 24 packages.
 After this, `npm outdated` lists only `eslint-plugin-import-x`, `globals` and `typescript` 7
 (DEP-13).
+
+### DEP-12 — `properties-parser` (stacked on `@types/jest` 30)
+
+`node-properties-parser` 0.0.2 (deprecated) → `properties-parser` 0.6.0, pinned exactly, in
+`devDependencies`. The one reference, `build/tool/deriveLocale.js`, changed only its `require`
+(and its copyright year). `parse()` is the same call.
+
+**Verified by output, not just by exit code:** `npm run build:locale` was run before and after
+the swap and left `source/wellformedness/error/derive/` byte-identical to what is committed
+(`git status` clean both times). `npm ci` dry run clean. P5 may still delete `build:locale`;
+the dependency goes with it if so.

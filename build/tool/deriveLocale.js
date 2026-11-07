@@ -1,9 +1,9 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 /* eslint-env node */
 /* eslint-disable no-console, no-process-exit */
 
 const fs = require('fs');
-const propertiesParser = require('node-properties-parser');
+const propertiesParser = require('properties-parser');
 
 const CODE_FILE = 'code.properties';
 const BASE_FILE = 'base.properties';

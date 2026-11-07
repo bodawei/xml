@@ -46,8 +46,8 @@ current baseline rather than a four-year-old one.
 
 ### Current state
 
-DEP-1 … DEP-11 are done (see the progress log in `doc/dependencyUpgrade.md`); DEP-12
-(`properties-parser`) and DEP-13 (TypeScript 7) remain. `doc/dependencyUpgrade.md` holds the staged plan
+DEP-1 … DEP-12 are done (see the progress log in `doc/dependencyUpgrade.md`); DEP-13
+(TypeScript 7) remains. `doc/dependencyUpgrade.md` holds the staged plan
 (DEP-1 … DEP-13), the measured baseline, and the peer-range constraints that fix
 the ordering.
 
@@ -78,7 +78,8 @@ relitigated from memory.
 -  [x] DEP-6b (prune config; decisions on adopting stylistic/strict presets left open)
 -  [x] DEP-6c (flat config on ESLint 9), 6d (ESLint 10 + import-x)
 -  [x] DEP-7 … DEP-11 (Jest 30, Babel 8, iconv-lite, nodemon 3, Jasmine 7)
--  [ ] DEP-12, DEP-13; see the plan. One PR each, re-measuring the baseline table in
+-  [x] DEP-12 (`properties-parser`)
+-  [ ] DEP-13; see the plan. One PR each, re-measuring the baseline table in
        every PR description.
 
 ## P8: Try swapping oxfmt in for prettier
