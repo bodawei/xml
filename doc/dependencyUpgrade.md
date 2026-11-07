@@ -732,7 +732,7 @@ lines that the presets or defaults supply, the duplicate `eslint-recommended` / 
 / `prettier` entries in `extends` (`recommended-type-checked` and `prettier/recommended`
 include them), and the stale airbnb-base comment.
 
-What remains in the main override are rules that *do* something: `sort-keys`, the five
+What remains in the main override are rules that *do* something: `sort-keys`, the six
 that change a preset option (`triple-slash-reference`, `unbound-method`,
 `no-unused-expressions`, `no-unused-vars`, and `require-await: off`), and 28 that
 add a rule the `recommended` set lacks. Of those 28, these are available in other
@@ -925,3 +925,40 @@ moderate 32 → 28, critical 0).
 The plan suggested doing this alongside or after DEP-11 because DEP-11 rewrites the command
 nodemon executes. That ordering still holds for the command itself, but nothing here depends on
 it: the current command works on nodemon 3, and DEP-11 will re-verify it.
+
+### DEP-11 — Jasmine 7 (stacked on DEP-10)
+
+`jasmine` 4.1.0 → 7.0.0, `jasmine-core` 4.1.1 → 7.0.2, `@types/jasmine` 4.0.3 → 7.0.0.
+
+**The plan's `tsx` fix was tried and rejected.** `tsx` resolved the aliases, but 74 specs
+failed: they `spyOn` functions on `import * as` module namespaces, and `tsx` (esbuild) emits
+getter-only exports, so Jasmine reports "not declared writable or has no setter". `ts-node`
+emits plain `exports.x = x` assignments, which is what the specs rely on. `tsx` was
+uninstalled again.
+
+**What was done instead:** keep `ts-node` + `tsconfig-paths` and turn off Node's native type
+stripping for the Jasmine process (`node --no-experimental-strip-types .../ts-node/dist/bin.js
+-r tsconfig-paths/register .../jasmine`). Jasmine 7's `import()` then fails with
+`ERR_UNKNOWN_FILE_EXTENSION` and falls back to `require()`, which the existing hooks handle.
+Both the `test` and `test:jasmine` scripts changed; nodemon wraps the same command.
+
+**`build/jasmine.json`:**
+-  `jsLoader` removed (no longer exists).
+-  `stopSpecOnExpectationFailure` and `random` moved under an `env` key. At the top level
+   Jasmine 7 silently ignores them (a run came out randomized until this was noticed).
+-  The nonexistent `source/wellformedness/@test/beforeJasmine.ts` helper was dropped.
+
+**Duplicate names.** Jasmine 7 throws on duplicate suite/spec names within a parent. Fixed 8
+by renaming (`baseDeclaration (unit|integration)` suites in `source/token/bridge/@test/`; six
+specs in `EntityContextStack.test.ts` and `resolveEntityId.test.ts`). One of those, a
+`popName()` spec, was an exact copy of another and was retitled to what it does
+(returns the popped name) rather than deleted, to keep the count. The `forbidDuplicateNames:
+false` opt-out exists but is deprecated, so it was not used. Jasmine reports only the first
+duplicate per suite, so renames had to be repeated until clean.
+
+**Verified:** Jasmine 336 specs, 0 failures (count unchanged; a run that silently collects
+nothing was the risk named above); Jest 265 suites / 9768 tests; `check:types` 0 errors outside
+`flatDocs.json`; `npm ci` dry run clean; the `npm test` watch loop ran, then restarted on a
+touched file with the same result. `npm audit`: 33, unchanged. `npm outdated` is now only
+`@types/jest` (27.5.1 → 30, which is not in the plan), `eslint-plugin-import-x`, `globals`
+and `typescript` 7 (DEP-13).

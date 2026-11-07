@@ -5,7 +5,7 @@ import { makeSTokenMaker } from 'pToken-test';
 
 import declaration, { DeclarationPToken } from '../baseDeclaration';
 
-describe('declaration (integration)', () => {
+describe('baseDeclaration (integration)', () => {
    let declarationPToken: DeclarationPToken;
 
    beforeEach(() => {

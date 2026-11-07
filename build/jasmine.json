@@ -1,18 +1,12 @@
 {
    "spec_dir": ".",
- 
-   "spec_files": [
-      "source/**/*test.ts"
-   ],
- 
-   "helpers": [
-      "source/token/@test/beforeJasmine.ts",
-      "source/wellformedness/@test/beforeJasmine.ts"
-   ],
- 
-   "stopSpecOnExpectationFailure": false,
- 
-   "random": false,
- 
-   "jsLoader": "require"
- }
+
+   "spec_files": ["source/**/*test.ts"],
+
+   "helpers": ["source/token/@test/beforeJasmine.ts"],
+
+   "env": {
+      "stopSpecOnExpectationFailure": false,
+      "random": false
+   }
+}

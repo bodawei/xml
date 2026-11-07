@@ -1,5 +1,5 @@
 import { EntityId } from 'basic';
-/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
 import { toSToken } from 'basic';
 import { GeneralEntityReferencePToken, ParameterEntityReferencePToken } from 'pToken';
@@ -156,7 +156,7 @@ describe('EntityContextStack (unit)', () => {
          expect(entityNameStack.hasName(peRef)).toEqual(true);
       });
 
-      it('returns false if the name is not in the stack', () => {
+      it('returns false if the name is not in the stack (parameter entity)', () => {
          entityNameStack.pushName(peRef, '');
 
          expect(entityNameStack.hasName(barPERef)).toEqual(false);
@@ -174,7 +174,7 @@ describe('EntityContextStack (unit)', () => {
          expect(entityNameStack.hasName(geRef)).toEqual(true);
       });
 
-      it('returns false if the name is not in the stack', () => {
+      it('returns false if the name is not in the stack (general entity)', () => {
          entityNameStack.pushName(geRef, '');
 
          expect(entityNameStack.hasName(barGERef)).toEqual(false);
@@ -206,7 +206,7 @@ describe('EntityContextStack (unit)', () => {
          expect(entityNameStack.hasName(peRef)).toEqual(false);
       });
 
-      it('removes the parameter entity reference name from the stack', () => {
+      it('returns the name of the popped parameter entity reference', () => {
          entityNameStack.pushName(peRef, '');
 
          const result = entityNameStack.popName(peRef);
