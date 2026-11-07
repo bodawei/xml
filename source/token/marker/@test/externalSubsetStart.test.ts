@@ -1,4 +1,4 @@
-/* Copyright ® 2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
 import {
    ExternalSubsetStartToken,

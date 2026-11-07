@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 /* istanbul ignore */ // For some reason istanbul with Safari is picking up this file
 
 import { EntityId, Range } from 'basic';

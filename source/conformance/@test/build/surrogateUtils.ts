@@ -1,4 +1,4 @@
-/* Copyright ® 2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
 /*
  * This is a set of utilities that collectively are build to solve the problem of loading

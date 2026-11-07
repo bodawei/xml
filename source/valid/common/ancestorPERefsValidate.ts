@@ -1,4 +1,4 @@
-/* Copyright ® 2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
 import { Collector, SToken, strOrBlank } from 'basic';
 import { ParameterEntityReferencePToken, PARAMETER_ENTITY_REFERENCE_PTOKEN } from 'pToken';

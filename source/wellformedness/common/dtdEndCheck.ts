@@ -1,4 +1,4 @@
-/* Copyright ® 2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, Collector } from 'basic';
 import { TEXT_PTOKEN } from 'pToken';

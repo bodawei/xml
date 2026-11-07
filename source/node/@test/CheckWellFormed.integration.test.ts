@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { Offset, EntityId, } from 'basic';
 import { STokenSource } from 'basic';

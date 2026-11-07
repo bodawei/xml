@@ -1,4 +1,4 @@
-/* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
 import { Extractor } from './Extractor';
 
