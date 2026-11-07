@@ -8,22 +8,23 @@
    "private": true,
    "scripts": {
       "build:locale": "node ./build/tool/doDerive.js",
-      "build:xmlconf": "ts-node -r tsconfig-paths/register ./source/conformance/@test/build/buildTestData.ts ./source/conformance/xmlts20130923/xmlconf/ ./source/conformance/@test/data/xmlconf.json",
-      "build:flat": "ts-node -r tsconfig-paths/register ./source/node/@test/build/buildFlatDocs.ts ./source/conformance/@test/data/xmlconf.json ./source/node/@test/data/flatDocs.json",
+      "build:xmlconf": "node --no-experimental-strip-types --import ./build/babelRegister.mjs -r tsconfig-paths/register ./build/runTs.cjs ./source/conformance/@test/build/buildTestData.ts ./source/conformance/xmlts20130923/xmlconf/ ./source/conformance/@test/data/xmlconf.json",
+      "build:flat": "node --no-experimental-strip-types --import ./build/babelRegister.mjs -r tsconfig-paths/register ./build/runTs.cjs ./source/node/@test/build/buildFlatDocs.ts ./source/conformance/@test/data/xmlconf.json ./source/node/@test/data/flatDocs.json",
       "check": "prettier --write  'source/attFixer/**/*.ts' 'source/conformance/**/*.ts' 'source/expand/**/*.ts' 'source/pToken/**/*.ts' 'source/wellformedness/**/*.ts' 'source/stringify/**/*.ts' 'source/xToken/**/*.ts'",
       "check:types": "./node_modules/typescript/bin/tsc",
       "lint": "eslint --fix --config ./eslint.config.mjs source",
       "lint:all": "eslint --fix --config ./eslint.config.mjs source/basic source/valid",
       "lint:ci": "eslint --config ./eslint.config.mjs --max-warnings 0 source/valid source/token source/node source/demo",
       "jest:all": "jest --config ./jest.config.js --coverage",
-      "test:jasmine": "node --no-experimental-strip-types ./node_modules/ts-node/dist/bin.js -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/jasmine.json",
+      "test:jasmine": "node --no-experimental-strip-types --import ./build/babelRegister.mjs -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/jasmine.json",
       "jest": "jest --config ./jest.config.js --watch --coverage",
-      "test": "nodemon --ext ts --exec  'node --no-experimental-strip-types ./node_modules/ts-node/dist/bin.js -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/jasmine.json' "
+      "test": "nodemon --ext ts --exec  'node --no-experimental-strip-types --import ./build/babelRegister.mjs -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/jasmine.json' "
    },
    "devDependencies": {
       "@babel/core": "8.1.0",
       "@babel/preset-env": "8.0.7",
       "@babel/preset-typescript": "8.0.7",
+      "@babel/register": "8.0.6",
       "@jest/globals": "30.5.2",
       "@types/jasmine": "7.0.0",
       "@types/jest": "30.0.0",
@@ -40,7 +41,6 @@
       "nodemon": "3.1.14",
       "prettier": "3.9.10",
       "properties-parser": "0.6.0",
-      "ts-node": "10.9.2",
       "tsconfig-paths": "4.2.0",
       "typescript": "6.0.3",
       "typescript-eslint": "8.72.1"

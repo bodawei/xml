@@ -983,3 +983,26 @@ After this, `npm outdated` lists only `eslint-plugin-import-x`, `globals` and `t
 the swap and left `source/wellformedness/error/derive/` byte-identical to what is committed
 (`git status` clean both times). `npm ci` dry run clean. P5 may still delete `build:locale`;
 the dependency goes with it if so.
+
+### `ts-node` → `@babel/register` (prepares DEP-13)
+
+Not a numbered stage. `ts-node` needs the TypeScript compiler API, which TypeScript 7 does not
+ship (it dies at startup on `ts.sys`), so it had to go before DEP-13. It was done on TypeScript
+6.0.3 so the change is isolated from the compiler swap.
+
+`@babel/register` 8.0.6 (ESM-only in Babel 8, so it is loaded with `--import`, via
+`build/babelRegister.mjs`) plus the existing `tsconfig-paths/register` replaces `ts-node` in the
+`test`, `test:jasmine`, `build:xmlconf` and `build:flat` scripts. It reuses the Babel setup Jest
+already runs on, which emits plain `exports.x = x` assignments (the property the Jasmine `spyOn`
+specs need, and the reason `tsx` was rejected in DEP-11). `tsconfig.json`'s `ts-node` key is gone.
+
+A `.ts` file run as the Node entry point is sent through the ESM loader, which has no `require`
+fallback (unlike Jasmine's spec loading), so the two build scripts go through a four-line
+`build/runTs.cjs` that preserves `process.argv` as `ts-node` did.
+
+**Trade-off:** specs are no longer type-checked as they run. `check:types` still covers them.
+
+**Verified:** Jasmine 336 specs, 0 failures. `build:xmlconf` and `build:flat` produce output
+byte-identical to what `ts-node` produced (compared against a saved copy; the committed
+`xmlconf.json` was already out of sync with its fixtures before this change, so it was not the
+comparison target). Jest, `check:types`, and an `npm ci` dry run are unchanged.
