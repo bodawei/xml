@@ -69,6 +69,32 @@ ESLint 9 or 10. Alternatives considered (oxlint + tsgolint, staying at 6.0.x, a
 `@typescript/typescript6` hybrid) are recorded in the plan so the choice is not
 relitigated from memory.
 
+**DEP-13 was attempted on 2026-11-06 and is blocked** (WIP on branch `bodawei/dep-13-wip`,
+details in the DEP-13 section of `doc/dependencyUpgrade.md`). `tsc` on TS 7 is clean, but
+three independent problems stand in the way:
+
+1. `ts-node` cannot run on TS 7, so Jasmine dies. **Solved:** `@babel/register` (ESM-only in
+   Babel 8, loaded with `--import`) plus `tsconfig-paths/register` ran all 336 specs on TS 7.
+   Not yet tried on TS 6. Node's own type stripping alone is *not* an option (no path aliases).
+2. `import-x` loads `@typescript-eslint/parser` by name and gets the real TS 7. **Solved:** drop
+   `import-x/parsers` and turn off `namespace`, `export`, `default`, `no-named-as-default`. All had
+   0 findings on TS 6 and `tsc` covers the same ground.
+3. Three `ts7-eslint@0.2.1` rules crash (upstream bugs): `no-deprecated` (115 files, 0 baseline
+   findings, so safe to turn off), `no-unnecessary-condition` (2 files, 49 baseline findings) and
+   `no-unnecessary-type-assertion` (1 file, 15 findings). Open.
+
+With those three rules and the `import-x` settings off, every other rule reproduces the TS 6
+counts exactly (3264 = 3313 − 49). Also learned: the peer-warning override must cover
+`@typescript-eslint/eslint-plugin` as well as the parser, and `ts7-eslint` must load before
+`eslint-plugin-import-x` (top-level await, so use dynamic imports in `eslint.config.mjs`).
+
+Plan to increment toward TS 7, each step its own PR on TS 6: (a) swap `ts-node` for
+`@babel/register`; (b) the `import-x` cleanup; (c) fix the 64 existing `no-unnecessary-*`
+findings by hand so those rules report 0 (35 are an unneeded `?.`; list reproduced by
+`npx eslint --config ./eslint.config.mjs source --format unix | grep -E "no-unnecessary-(condition|type-assertion)"`);
+(d) the TS 7 swap, turning off the three rules with a comment each so re-enabling is mechanical.
+Fallback if (d) stays blocked: remain on TypeScript 6.0.x.
+
 ### Next actions
 
 -  [x] Evaluate all the packages and put together a proposed order for upgrading
@@ -79,7 +105,10 @@ relitigated from memory.
 -  [x] DEP-6c (flat config on ESLint 9), 6d (ESLint 10 + import-x)
 -  [x] DEP-7 … DEP-11 (Jest 30, Babel 8, iconv-lite, nodemon 3, Jasmine 7)
 -  [x] DEP-12 (`properties-parser`)
--  [ ] DEP-13; see the plan. One PR each, re-measuring the baseline table in
+-  [ ] Swap `ts-node` for `@babel/register` for Jasmine (verify 336 specs on TS 6 first)
+-  [ ] `import-x` cleanup (drop 4 parsing rules and the parsers setting; counts must not change)
+-  [ ] Hand-fix the 64 `no-unnecessary-condition` / `no-unnecessary-type-assertion` findings
+-  [ ] DEP-13 (TS 7 swap); see the plan. One PR each, re-measuring the baseline table in
        every PR description.
 
 ## P8: Try swapping oxfmt in for prettier
