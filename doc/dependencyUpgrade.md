@@ -858,7 +858,7 @@ What Jest 30 broke, and what was done:
    against `{}` is unchanged), and a spy-typing `Array<never>` in `DocumentChecker.jest.ts`
    became `Array<unknown>`.
 
-`@types/jest` stays at 27.5.1: Jasmine specs under ts-node need the `jest` namespace (see
+`@types/jest` stayed at 27.5.1 here (bumped later, see the end of this log): Jasmine specs under ts-node need the `jest` namespace (see
 DEP-4), and the types check clean against Jest 30.
 
 **Verified.** Jest with coverage: 265 suites / 9768 tests / 68 snapshots, all passing; coverage
@@ -962,3 +962,13 @@ nothing was the risk named above); Jest 265 suites / 9768 tests; `check:types` 0
 touched file with the same result. `npm audit`: 33, unchanged. `npm outdated` is now only
 `@types/jest` (27.5.1 → 30, which is not in the plan), `eslint-plugin-import-x`, `globals`
 and `typescript` 7 (DEP-13).
+
+### `@types/jest` 27.5.1 → 30.0.0 (stacked on DEP-11)
+
+Not a numbered stage; it was held back at 27.5.1 during DEP-7 because the Jasmine specs need
+the `jest` namespace under `ts-node` (see DEP-4). With Jest 30 already in place, the bump needed
+**no source changes**: `check:types` 0 errors outside `flatDocs.json`, Jest 265 suites / 9768
+tests, Jasmine 336 specs, `lint:ci` clean, `npm ci` dry run clean. `@types/jest` 30 pulls in
+`expect` 30.5.2, which dedupes against Jest's own copy, and the lockfile shrinks by 24 packages.
+After this, `npm outdated` lists only `eslint-plugin-import-x`, `globals` and `typescript` 7
+(DEP-13).
