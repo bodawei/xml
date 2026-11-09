@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
 import { defineConfig } from 'eslint/config';
-import prettierRecommended from 'eslint-plugin-prettier/recommended';
+import prettierConfig from 'eslint-config-prettier';
 import globals from 'globals';
 
 // ts7-eslint (DEP-13) has to finish loading before anything else loads @typescript-eslint,
@@ -87,7 +87,7 @@ export default defineConfig([
    {
       files: FOUNDATION_FILES,
       extends: [
-         prettierRecommended, // https://github.com/prettier/eslint-plugin-prettier
+         prettierConfig, // https://github.com/prettier/eslint-config-prettier; oxfmt owns formatting
          importPlugin.flatConfigs.recommended, // https://www.npmjs.com/package/eslint-plugin-import-x
          // recommended-type-checked already includes `recommended` and `eslint-recommended`.
          tseslint.configs.recommendedTypeChecked,
@@ -154,8 +154,8 @@ export default defineConfig([
    {
       files: STRICT_FILES,
       extends: [
-         // Includes the `prettier` plugin, `eslint-config-prettier` and `prettier/prettier`.
-         prettierRecommended,
+         // Turns off rules that conflict with the formatter (oxfmt).
+         prettierConfig,
          // Each includes the ones before it; `recommended` and `eslint-recommended` come first.
          tseslint.configs.recommendedTypeChecked,
          tseslint.configs.stylisticTypeChecked,

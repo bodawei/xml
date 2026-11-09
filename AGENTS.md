@@ -29,7 +29,7 @@ pipeline: `basic` → `pToken` → `token` / `xToken` / `flat` → `wellformedne
 | One Jest spec      | `npx jest --config ./jest.config.js <path> --coverage=false` |
 | Type-check         | `npm run check:types` (TypeScript 7; should report no errors) |
 | Lint touched files | `npx eslint --config ./eslint.config.mjs <files>`            |
-| Format check       | `npx prettier --check <files>`                               |
+| Format check       | `npx oxfmt --check <files>`                                  |
 
 ## Known pre-existing failures
 
@@ -66,7 +66,7 @@ Do not treat these as regressions, and do not fix them as part of unrelated work
    Do this for files you edit by hand; do not mass-update untouched files.
 -  `source/basic/extractor/*New.ts` is a mid-rewrite experiment; use completed files
    as the design model, not unfinished ones.
--  Prettier and ESLint are authoritative for formatting. Run them on the files you
+-  oxfmt (config in `.oxfmtrc.json`, Prettier-compatible) and ESLint are authoritative for formatting. Run them on the files you
    touch before finishing.
 -  If the exemplar and `doc/codingStyle.md` disagree, the written doc wins.
 -  Error and problem tokens must cite spec sections at the end of the message in the
@@ -96,7 +96,7 @@ Do not treat these as regressions, and do not fix them as part of unrelated work
 -  Relevant specs pass: `npm run jest:all` and/or `npm test`.
 -  `npx eslint --config ./eslint.config.mjs` passes for the files you touched (no new
    errors or warnings).
--  `npx prettier --check` passes for the files you touched.
+-  `npx oxfmt --check` passes for the files you touched.
 -  Type-check your changes: `npm run check:types` should report no errors.
 -  `ROADMAP.md` is updated if the work changed a project's state.
 -  Commit messages follow the existing `fix(Area): ...` / `feat(Area): ...` pattern.
