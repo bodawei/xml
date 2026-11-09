@@ -1022,3 +1022,59 @@ them. `no-duplicates` and `order`, which do not parse imports, stay on.
 
 **Verified:** the per-rule lint counts over `source` are identical before and after (3313 total;
 the four rules had 0 findings), and `lint:ci` is clean.
+
+### DEP-13 — TypeScript 7 via `ts7-eslint` (stacked on the three prep PRs)
+
+`typescript` 6.0.3 → 7.0.2 (pinned), `typescript-eslint` 8.72.1 → `ts7-eslint` 0.2.1 (pinned), in one
+commit, as planned. Three things in the plan needed adding, found by trying it:
+
+-  **`ts-node` cannot run on TS 7**, so Jasmine and the two build scripts moved to
+   `@babel/register` first (the `ts-node` section above).
+-  **`import-x` cannot parse TypeScript under TS 7** because it loads the parser by name outside
+   `ts7-eslint`'s resolution hook, so its parsing rules were turned off first (the `import-x`
+   section above).
+-  **Three `ts7-eslint` rules crash** (see below), so they are off.
+
+Changes in this commit: the dependency swap; `overrides` that set `typescript` to `$typescript` on
+**both** `@typescript-eslint/parser` **and** `@typescript-eslint/eslint-plugin` (the plan listed only
+the parser; the bundled 8.66.0 plugin also declares `typescript <6.1.0`, and `npm ls` showed 15
+invalid peers with the parser override alone); and `eslint.config.mjs` loading `ts7-eslint` and then
+`eslint-plugin-import-x` with dynamic `await import()`. `ts7-eslint` has top-level await, so with static
+imports the sibling `import-x` import starts evaluating while it is still awaiting and loads
+`@typescript-eslint` before the resolution hook exists ("loaded before the resolution hook was
+installed"). The comment in the config says how to revert.
+
+**The three crashing rules.** Each is an uncaught exception in `ts7-eslint` that aborts the whole
+lint run with a stack trace; `eslint-disable` comments do not help because the rule still runs.
+They are turned off (a separate prep commit), with a comment in the config:
+
+| Rule | Crash | Files | Findings on TS 6 |
+|---|---|---|---|
+| `no-deprecated` | `getNodeId requires a RemoteNode` | 115 | 0 |
+| `no-unnecessary-condition` | `checker.getTypeOfPropertyOfType is not a function` | 2 | 49 |
+| `no-unnecessary-type-assertion` | `ts.canHaveModifiers is not a function` | 1 | 15 |
+
+The findings were deliberately not hand-fixed (verifying the types is expensive). **Re-enable the
+three rules when `ts7-eslint` fixes the crashes** or, if we go back to TS 6, delete the block.
+
+**Verified on TypeScript 7.0.2**
+-  `check:types` (`tsc`): 0 errors. (The `flatDocs.json` failure listed in `AGENTS.md` no longer
+   occurs; the baseline is now clean on both 6 and 7.)
+-  Lint, rule by rule: 3249 problems, identical per rule to TS 6 with the same three rules off
+   (3313 − 49 − 15 = 3249). The five promise/await rules still report 0. Nothing on stderr, so no
+   unknown-type-query warning. `lint:ci` clean.
+-  Jest 265 suites / 9768 tests; Jasmine 336 specs, 0 failures; `build:xmlconf` and `build:flat`
+   output unchanged.
+-  `npm ls` reports no invalid, missing or extraneous packages. `npm ci --strict-peer-deps` still
+   fails, but identically on `main`: it is Babel 8 against Jest's Babel 7 plugins, not TypeScript.
+
+**`tsc` timing** (whole repo, `tsconfig.json`, no incremental build, 5 runs each, wall-clock
+`real` from `/usr/bin/time -p`, macOS, 10 cores):
+
+| Command | TypeScript 6.0.3 | TypeScript 7.0.2 | Speed-up |
+|---|---|---|---|
+| `tsc` (the `check:types` script) | 2.39 s median (2.33–2.43) | 0.37 s median (0.36–0.41) | 6.5× |
+| `tsc --noEmit` | 1.79 s median (1.77–1.82) | 0.28 s median (0.27–0.30) | 6.4× |
+
+Lint took about 9 s wall-clock for `eslint source` on TS 7; I did not take a matching TS 6 timing,
+so no lint speed comparison is claimed.
