@@ -69,7 +69,7 @@ ESLint 9 or 10. Alternatives considered (oxlint + tsgolint, staying at 6.0.x, a
 `@typescript/typescript6` hybrid) are recorded in the plan so the choice is not
 relitigated from memory.
 
-**DEP-13 (TypeScript 7), done 2026-11-08.** `tsc` on TS 7 is clean. `ts7-eslint@0.2.1` (the
+`tsc` on TS 7 is clean. `ts7-eslint@0.2.1` (the
 replacement for typescript-eslint, since TS 7 ships no compiler API) had three independent
 problems, details in `doc/dependencyUpgrade.md`:
 
