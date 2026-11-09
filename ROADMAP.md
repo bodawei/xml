@@ -46,8 +46,10 @@ current baseline rather than a four-year-old one.
 
 ### Current state
 
-DEP-1 … DEP-13 are done (see the progress log in `doc/dependencyUpgrade.md`); only
-re-enabling three lint rules remains. `doc/dependencyUpgrade.md` holds the staged plan
+**P7 is complete as of 2026-11-08:** DEP-1 … DEP-13 and the final bumps are done (see the
+progress log in `doc/dependencyUpgrade.md`), `npm outdated` is empty, and `npm audit` has 0
+critical and 0 high. One follow-up remains, and it does not block closing P7: re-enabling three
+lint rules that crash `ts7-eslint` (see below). `doc/dependencyUpgrade.md` holds the staged plan
 (DEP-1 … DEP-13), the measured baseline, and the peer-range constraints that fix
 the ordering.
 
@@ -104,7 +106,9 @@ on TypeScript 6.0.x.
 -  [x] `import-x` cleanup (dropped 4 parsing rules and the parsers setting; per-rule counts unchanged)
 -  [x] Turn off `no-deprecated`, `no-unnecessary-condition`, `no-unnecessary-type-assertion` (they crash ts7-eslint)
 -  [x] DEP-13 (TS 7 swap): `tsc` 6.5× faster (2.39 s → 0.37 s); details in `doc/dependencyUpgrade.md`
--  [ ] Re-enable those three rules once `ts7-eslint` stops crashing in them (or if we stay on TS 6, delete the block)
+-  [x] Final bumps: `eslint-plugin-import-x` 4.18.1, `globals` 17.14.0; cleared the 2 high advisories (`braces`, `picomatch`)
+-  [ ] Follow-up, not blocking P7: re-enable `no-deprecated`, `no-unnecessary-condition` and `no-unnecessary-type-assertion`
+       if `ts7-eslint` is fixed. If the linter is replaced first (P9), this item goes away with it.
 
 ## P8: Try swapping oxfmt in for prettier
 
