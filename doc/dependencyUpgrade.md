@@ -1006,3 +1006,19 @@ fallback (unlike Jasmine's spec loading), so the two build scripts go through a 
 byte-identical to what `ts-node` produced (compared against a saved copy; the committed
 `xmlconf.json` was already out of sync with its fixtures before this change, so it was not the
 comparison target). Jest, `check:types`, and an `npm ci` dry run are unchanged.
+
+### `import-x` parsing rules off (prepares DEP-13)
+
+Not a numbered stage. `import-x` loads a TypeScript parser for the files it inspects by the name
+`@typescript-eslint/parser` (`import-x/parsers`), outside `ts7-eslint`'s resolution hook, so under
+TypeScript 7 it gets the real parser and fails (`ts.createSourceFile is not a function`). Without
+the setting, the rules that parse imports give false positives instead (`import-x/namespace` 491,
+`import-x/export` 26).
+
+Done on TypeScript 6 so it is separate from the compiler swap: the `import-x/parsers` setting is
+removed and `import-x/default`, `export`, `namespace` and `no-named-as-default` are turned off
+(`named`, `no-named-as-default-member` and `no-unresolved` already were). TypeScript checks all of
+them. `no-duplicates` and `order`, which do not parse imports, stay on.
+
+**Verified:** the per-rule lint counts over `source` are identical before and after (3313 total;
+the four rules had 0 findings), and `lint:ci` is clean.

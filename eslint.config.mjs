@@ -86,9 +86,6 @@ export default defineConfig([
       settings: {
          'import-x/extensions': ['.js', '.mjs', '.jsx', '.ts', '.tsx', '.d.ts'],
          'import-x/external-module-folders': ['node_modules', 'node_modules/@types'],
-         'import-x/parsers': {
-            '@typescript-eslint/parser': ['.ts', '.tsx', '.d.ts'],
-         },
          'import-x/resolver': {
             node: {
                extensions: ['.mjs', '.js', '.json', '.ts', '.d.ts'],
@@ -100,6 +97,16 @@ export default defineConfig([
          'import-x/named': 'off',
          'import-x/no-named-as-default-member': 'off',
          'import-x/no-unresolved': 'off',
+
+         // These rules parse each imported file, which needs a TypeScript parser that import-x
+         // loads by name (`import-x/parsers`). That cannot work with ts7-eslint (DEP-13): the name
+         // resolves to the real typescript-eslint parser, which fails on TypeScript 7. TypeScript
+         // already checks all of them, and they reported nothing here. `import-x/no-duplicates`
+         // and `import-x/order` do not parse imports and stay on.
+         'import-x/default': 'off',
+         'import-x/export': 'off',
+         'import-x/namespace': 'off',
+         'import-x/no-named-as-default': 'off',
 
          'import-x/order': [
             'error',
