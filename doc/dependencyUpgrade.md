@@ -1078,3 +1078,24 @@ three rules when `ts7-eslint` fixes the crashes** or, if we go back to TS 6, del
 
 Lint took about 9 s wall-clock for `eslint source` on TS 7; I did not take a matching TS 6 timing,
 so no lint speed comparison is claimed.
+
+### Final bumps: `eslint-plugin-import-x`, `globals`, and the two high advisories
+
+`eslint-plugin-import-x` 4.17.1 → 4.18.1 and `globals` 16.5.0 → 17.14.0 (both pinned). Their
+peer ranges and engines already allowed it (`import-x` 4.18 still supports ESLint 10; `globals`
+needs Node 18+). Nothing in the lint output moved.
+
+The two high advisories were `braces` (<3.0.3) and `picomatch` (<=2.3.1), both reached through
+`nodemon` → `chokidar` 3.5.3. They were cleared with `npm update braces fill-range picomatch`,
+which touches exactly those three packages. `npm audit fix` was **not** used: it also reshuffles
+the `@typescript-eslint` packages that `ts7-eslint` depends on being laid out a particular way.
+
+**Result against the exit criteria:** `npm outdated` is empty. `npm audit`: 0 critical, **0 high**
+(was 2), 28 moderate, 3 low, 31 total (was 34). `check:types` 0 errors; lint 3249 problems,
+identical per rule; `lint:ci` clean; Jest 265 suites / 9768 tests; Jasmine 336 specs; the `npm test`
+watch loop ran and restarted on a touched file.
+
+**Deliberately left open:** `no-deprecated`, `no-unnecessary-condition` and
+`no-unnecessary-type-assertion` stay off because they crash `ts7-eslint`. Whether they are ever
+re-enabled depends on that package being fixed or on the linter being replaced (P9), so it is
+tracked as a follow-up in `ROADMAP.md`, not as a blocker for finishing P7.
