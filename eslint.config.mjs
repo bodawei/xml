@@ -1,10 +1,20 @@
 /* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
 import { defineConfig } from 'eslint/config';
-import importPlugin from 'eslint-plugin-import-x';
 import prettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
-import tseslint from 'typescript-eslint';
+
+// ts7-eslint (DEP-13) has to finish loading before anything else loads @typescript-eslint,
+// because it installs a module-resolution hook that cannot apply retroactively. It uses
+// top-level await, so a static import is not enough: the sibling static imports start evaluating
+// while it is still awaiting, and eslint-plugin-import-x loads @typescript-eslint first. Hence
+// these two dynamic imports, in this order.
+//
+// To revert to typescript-eslint, replace the first line with a static
+// `import tseslint from 'typescript-eslint'` and the second with a static
+// `import importPlugin from 'eslint-plugin-import-x'`, and reinstall typescript 6.0.x.
+const { default: tseslint } = await import('ts7-eslint');
+const { default: importPlugin } = await import('eslint-plugin-import-x');
 
 // Flat-config replacement for build/eslint/eslintrc.js (DEP-6c).
 //

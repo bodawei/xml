@@ -27,7 +27,7 @@ pipeline: `basic` → `pToken` → `token` / `xToken` / `flat` → `wellformedne
 | Jasmine specs      | `npm test` (nodemon; watches and reruns)                     |
 | All Jest specs     | `npm run jest:all`                                           |
 | One Jest spec      | `npx jest --config ./jest.config.js <path> --coverage=false` |
-| Type-check         | `npm run check:types` (see known failures below)             |
+| Type-check         | `npm run check:types` (TypeScript 7; should report no errors) |
 | Lint touched files | `npx eslint --config ./eslint.config.mjs <files>`            |
 | Format check       | `npx prettier --check <files>`                               |
 
@@ -35,10 +35,11 @@ pipeline: `basic` → `pToken` → `token` / `xToken` / `flat` → `wellformedne
 
 Do not treat these as regressions, and do not fix them as part of unrelated work:
 
--  `npm run check:types` fails in `source/node/@test/data/flatDocs.json` (TS1328 /
-   TS1005) because it is pulled in via `resolveJsonModule`.
 -  `npm run lint` reports pre-existing errors, notably in `source/wellformedness/`,
    and some in `source/basic/` and `source/valid/`.
+-  `@typescript-eslint/no-deprecated`, `no-unnecessary-condition` and
+   `no-unnecessary-type-assertion` are turned off in `eslint.config.mjs` because they crash
+   `ts7-eslint`. Do not "fix" that by turning them back on until `ts7-eslint` is fixed.
 -  Do not run repo-wide `npm run lint` casually: it is configured with `--fix` and
    rewrites files.
 
@@ -96,7 +97,7 @@ Do not treat these as regressions, and do not fix them as part of unrelated work
 -  `npx eslint --config ./eslint.config.mjs` passes for the files you touched (no new
    errors or warnings).
 -  `npx prettier --check` passes for the files you touched.
--  Type-check your changes; note the `flatDocs.json` baseline above.
+-  Type-check your changes: `npm run check:types` should report no errors.
 -  `ROADMAP.md` is updated if the work changed a project's state.
 -  Commit messages follow the existing `fix(Area): ...` / `feat(Area): ...` pattern.
 -  PRs target `main`.
