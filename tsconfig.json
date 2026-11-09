@@ -60,9 +60,6 @@
          "xTokenStream": ["./source/xTokenStream"]
       }
    },
-   "ts-node": {
-      "files": true // Load ambient declarations such as bcp47-validate.d.ts.
-   },
    "include": [
       "build/beforeJest.ts",
       "source/**/*.ts",

@@ -76,11 +76,15 @@ Do not treat these as regressions, and do not fix them as part of unrelated work
 -  Jest specs live in `source/**/@test/**/*.jest.ts`. Add new tests as Jest.
 -  Jasmine specs live in `source/**/*test.ts` and are run by `npm test`.
 -  Do not add new Jasmine specs unless you are extending an existing Jasmine file.
--  The Jasmine scripts run `node --no-experimental-strip-types .../ts-node/dist/bin.js -r tsconfig-paths/register`.
-   Keep `--no-experimental-strip-types`: Jasmine 7 always tries `import()` first, and
-   Node's native type stripping would load the `.ts` specs itself, bypassing `ts-node`
-   and `tsconfig-paths` (aliases such as `basic` then fail). With it off, `import()`
-   fails with `ERR_UNKNOWN_FILE_EXTENSION` and Jasmine falls back to `require()`.
+-  The Jasmine scripts (and `build:xmlconf` / `build:flat`) run
+   `node --no-experimental-strip-types --import ./build/babelRegister.mjs -r tsconfig-paths/register`.
+   `babelRegister.mjs` compiles each `.ts` file with Babel as it is required (types are
+   stripped, not checked; `npm run check:types` does that). Keep `--no-experimental-strip-types`:
+   Jasmine 7 always tries `import()` first, and Node's native type stripping would load the
+   `.ts` specs itself, bypassing the Babel hook and `tsconfig-paths` (aliases such as `basic`
+   then fail). With it off, `import()` fails with `ERR_UNKNOWN_FILE_EXTENSION` and Jasmine
+   falls back to `require()`. A `.ts` script run directly as the entry file has no such
+   fallback, so the build scripts go through `build/runTs.cjs`.
 -  Jasmine 7 throws on duplicate suite or spec names within a parent. Give each a
    unique name.
 -  Import through the `tsconfig.json` path aliases rather than long relative paths.
