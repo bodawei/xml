@@ -216,6 +216,13 @@ Two things were deliberately **not** done, to keep the cutover mechanical:
    (`respectEslintDisableDirectives` defaults to true); rewriting them to `oxlint-disable` would
    touch ~40 files for no behaviour change.
 
+One script change that is not a straight translation: `lint` and `lint:all` no longer pass
+`--fix`, and the fixing form moved to a new `lint:fix`. oxlint has fixers for rules ESLint only
+had suggestions for, so `oxlint --fix source` rewrites 140 files (1785 findings down to 712):
+`sort-keys` reorders object literals, and `no-unnecessary-type-assertion` strips `!` and
+`as any`. The result still type-checks and the suites still pass, but that is not a diff anyone
+should get from a `lint` command.
+
 ### Next actions
 
 -  [x] Measure eslint performance for the whole repo.

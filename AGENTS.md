@@ -36,10 +36,11 @@ pipeline: `basic` → `pToken` → `token` / `xToken` / `flat` → `wellformedne
 Do not treat these as regressions, and do not fix them as part of unrelated work:
 
 -  `npm run lint` reports pre-existing errors, notably in `source/wellformedness/`,
-   and some in `source/basic/` and `source/valid/`. `npx oxlint source` is the
-   non-rewriting way to see them.
--  Do not run repo-wide `npm run lint` casually: it is configured with `--fix` and
-   rewrites files.
+   and some in `source/basic/` and `source/valid/`.
+-  Do not run repo-wide `npm run lint:fix` casually. It rewrites 140 files: `sort-keys`
+   reorders object literals, and `no-unnecessary-type-assertion` strips `!` and `as any`
+   (the result still type-checks, but it is not a diff to make by accident, and it leaves
+   the matching `eslint-disable` comments stale). `npm run lint` does not fix anything.
 -  `sort-keys` accounts for most of the count (1285 of 1785 findings). oxlint reports one
    finding per unsorted object; ESLint reported one per misplaced key, so the same code used
    to count as 2351.
