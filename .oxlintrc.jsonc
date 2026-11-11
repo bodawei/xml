@@ -8,7 +8,9 @@
 // -  Rule names: '@typescript-eslint/x' is 'typescript/x', and 'import-x/x' is 'import/x'. Where
 //    typescript-eslint only extended a core rule (no-unused-vars, no-empty-function and the
 //    like), oxlint folds the TypeScript handling into the core rule, so the core name is used.
-// -  Three rules have no oxlint equivalent and are gone: 'import-x/order' (3 findings),
+// -  Three rules have no oxlint equivalent and are gone: 'import-x/order' (3 findings; oxc's
+//    stated reason is that oxfmt's 'sortImports' covers it, which is off by default here -
+//    see ROADMAP P9),
 //    'import-x/no-extraneous-dependencies' (0 findings) and '@typescript-eslint/typedef' (all of
 //    its options were false, so it reported nothing).
 // -  The three rules the old config had to switch off because ts7-eslint crashed in them

@@ -191,8 +191,11 @@ listed explicitly, extracted from `eslint --print-config` for one file per group
 TypeScript handling into `no-unused-vars`, `no-empty-function` and the like instead of shipping
 a typescript-eslint extension rule). Three have no equivalent:
 
--  `import-x/order` - "won't be implemented". The real loss; it was reporting 3 findings, and
-   import grouping is part of `doc/codingStyle.md`.
+-  `import-x/order` - "won't be implemented", and `@oxlint/migrate --details` gives the reason:
+   "Not implementing this in Oxlint as its behavior is covered very well by Oxfmt's import
+   sorting." So the replacement is the formatter's `sortImports` option, not a lint rule. It is
+   off by default and not enabled here; see the follow-up below. The rule was reporting 3
+   findings, and import grouping is part of `doc/codingStyle.md`.
 -  `import-x/no-extraneous-dependencies` - was on for the `basic`/`valid` Jest files only, 0 findings.
 -  `@typescript-eslint/typedef` - every one of its options was `false`, so it reported nothing.
 
@@ -230,8 +233,14 @@ should get from a `lint` command.
 -  [x] Explore the options (full cutover / stay / hybrid) and pick one: full cutover.
 -  [ ] Optional: decide whether to turn on `correctness`, `unicorn` and `oxc`, and triage what
        they report.
--  [ ] Optional: replace `import-x/order` - either a `jsPlugins` entry for `eslint-plugin-import-x`,
-       or wait for oxlint, or drop the rule and rely on review.
+-  [ ] Optional: replace `import-x/order` with oxfmt's `sortImports` (off by default; it takes
+       `groups`, `customGroups`, `internalPattern`, `newlinesBetween` and `partitionByNewline`,
+       and uses the `eslint-plugin-perfectionist/sort-imports` algorithm). It enforces the same
+       thing but as a format, so it rewrites rather than reports: `sortImports: true` changes
+       394 of 649 files, and `{ partitionByNewline: true, newlinesBetween: false }`, which keeps
+       the blank-line groups the code already has, changes 317. Note `partitionByNewline: true`
+       and `newlinesBetween: true` are rejected together. There is no zero-diff setting, so this
+       wants its own format-only commit, like the 91 files left over from P8.
 -  [ ] Optional: `oxlint --type-check` can also report TypeScript compiler diagnostics, which
        could merge the Lint and Type check CI jobs. Not done: `npm run check:types` is the
        documented command and `tsc` is already 0.8 s.
