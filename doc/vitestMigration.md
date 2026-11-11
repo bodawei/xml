@@ -10,9 +10,11 @@ same inline snapshots and the same coverage picture. The diff is large but almos
 entirely mechanical: imports, `jest.*` → `vi.*`, the removal of Jest's `done`
 callback in favour of promises, and four automock fixes.
 
-Vitest is **not faster than Jest here** on its default settings. On the default
-`forks` pool it is about twice as slow without coverage and about 50% slower with
-coverage. Switching to `pool: 'threads'` closes most of the gap; see the timings.
+Vitest is **not faster than Jest here on full runs** with its default settings. On
+the default `forks` pool it is about twice as slow without coverage and about 50%
+slower with coverage. Switching to `pool: 'threads'` closes most of the gap. For
+incremental watch runs the picture reverses, and Vitest is the faster runner; see
+`Watch mode` below.
 
 Whether that trade is worth it is the decision P10 is waiting for. The exploration
 branch can be merged as-is, or reverted, without affecting the rest of the roadmap.
@@ -50,6 +52,37 @@ because module state leaks between files.
 Coverage takes a bigger toll under Vitest's v8 provider than under Jest's Babel
 provider. With `threads`, coverage costs Vitest about 7 s; it costs Jest about 6 s.
 The suites are otherwise close.
+
+## Watch mode
+
+The picture reverses for incremental runs. These were measured with a small pty
+harness that writes a file, waits for the next run to finish, and records the wall
+clock from the write to the runner's completion line. Same machine, same edits;
+coverage rows use each runner's documented script.
+
+| Edit                           | Files rerun | Vitest      | Jest        |
+| ------------------------------ | ----------- | ----------- | ----------- |
+| one test file                  | 1           | 0.27-0.39 s | 0.52-0.68 s |
+| `xToken` source file           | 9           | 2.8-4.0 s   | 7.2-10.8 s  |
+| one test file, coverage        | 1           | 0.41-0.49 s | 3.5-6.9 s   |
+| `xToken` source file, coverage | 9           | 3.5-4.8 s   | 2.7-3.2 s   |
+| `basic` barrel export          | ~all        | 9.0-14.4 s  | 5.9-17.2 s  |
+
+Vitest keeps the Vite module graph and transformed modules hot, so a test-file edit
+is roughly twice as fast without coverage and much faster with coverage. A source
+edit stays fast while the affected subgraph is small. But most `basic` (and some
+`xToken`) modules are re-exported through a barrel, so editing one invalidates
+almost every test file (`basic` is imported by nearly the whole suite). There both
+runners behave like a full run and Vitest has no advantage.
+
+Startup differs too: `vitest --watch` runs the whole suite once when it starts
+(about 6-7 s here), while `jest --watch` on a clean tree starts idle with "No tests
+found related to files changed since last commit" and only runs suites related to
+changes.
+
+Caveat: these runs overlapped with heavy external load (load average above 50 for
+part of the session), so treat the figures as orders of magnitude. The direction was
+consistent across repeated edits and matches the public reports.
 
 ## Coverage
 

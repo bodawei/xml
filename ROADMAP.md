@@ -293,6 +293,12 @@ Measured on an M4 / 10-core, Node 26, wall clock including npm:
 | Vitest, `pool: 'threads'` | 20.6-22.4 s     | 13.5-14.6 s      |
 | Vitest, default `forks`   | 24.8-27.5 s     | 19.0-20.3 s      |
 
+Watch mode reverses the result: a single test-file edit reruns in 0.27-0.39 s
+under Vitest versus 0.52-0.68 s under Jest (0.41-0.49 s versus 3.5-6.9 s with
+coverage), and a 9-file source edit takes 2.8-4.0 s versus 7.2-10.8 s. Edits to a
+module re-exported through the `basic` barrel invalidate most of the suite for both
+runners, so full-run costs apply there.
+
 Vitest's default `forks` pool spawns a process per test file and is clearly slower
 than Jest. `pool: 'threads'`, now in `vitest.config.mts`, closes most of the gap;
 `isolate: false` is not usable (46 files fail from leaked module state).
