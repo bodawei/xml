@@ -1,9 +1,9 @@
 /* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { STokenSource, toSToken } from 'basic';
 import { UnexpandedMarkupDetails, TextPToken } from 'pToken';
 import { MockSTokenSource } from 'pToken-test';
+import { describe, expect, it, vi, type MockedFunction, type Mock } from 'vitest';
 
 import literal from '../../../token/common/literal';
 import { parseWordList } from '../../../token/common/wordList';
@@ -15,9 +15,9 @@ import {
    resumeParseAttListDeclaration,
 } from '../attListDeclaration';
 
-jest.mock('../../../token/common/literal');
-jest.mock('../../../token/common/wordList');
-jest.mock('../../common/parseUnexpanded');
+vi.mock('../../../token/common/literal');
+vi.mock('../../../token/common/wordList');
+vi.mock('../../common/parseUnexpanded');
 
 interface LiteralOptions {
    pToken: {
@@ -29,15 +29,17 @@ describe('AttListDeclaration (unit)', () => {
    let aldPToken: AttListDeclarationPToken;
    let actual: AttListDeclarationPToken | undefined;
    let parseCb: (result: AttListDeclarationPToken) => void;
-   let parseUnexpandedMock: jest.MockedFunction<typeof parseUnexpanded>;
+   let parseUnexpandedMock: MockedFunction<typeof parseUnexpanded>;
 
    beforeEach(() => {
-      parseUnexpandedMock = parseUnexpanded as jest.MockedFunction<typeof parseUnexpanded>;
+      parseUnexpandedMock = parseUnexpanded as MockedFunction<typeof parseUnexpanded>;
       parseUnexpandedMock.mockImplementation((source, name, cb: (value: undefined) => void) => {
          cb(undefined);
       });
 
-      (WordListPToken as jest.Mock).mockReturnValue({ type: 'WordListPToken' });
+      (WordListPToken as Mock).mockImplementation(function () {
+         return { type: 'WordListPToken' };
+      } as never);
 
       parseCb = (result: AttListDeclarationPToken) => {
          actual = result;
@@ -76,12 +78,12 @@ describe('AttListDeclaration (unit)', () => {
    });
 
    describe('parseAttListDeclaration()', () => {
-      let callback: jest.MockedFunction<(result: AttListDeclarationPToken) => void>;
+      let callback: MockedFunction<(result: AttListDeclarationPToken) => void>;
 
       beforeEach(() => {
-         callback = jest.fn();
+         callback = vi.fn();
 
-         (literal.parse as jest.Mock).mockImplementation((_1: any, _2: any, done: () => void) => {
+         (literal.parse as Mock).mockImplementation((_1: any, _2: any, done: () => void) => {
             done();
          });
       });
@@ -276,7 +278,7 @@ describe('AttListDeclaration (unit)', () => {
       });
 
       it('parses an attribute list with a literal even with #REQUIRED', () => {
-         (literal.parse as jest.Mock).mockImplementation(
+         (literal.parse as Mock).mockImplementation(
             (_1: any, options: LiteralOptions, done: () => void) => {
                options.pToken.value = [new TextPToken({ text: toSToken('dummyValue') })];
                done();
@@ -308,7 +310,7 @@ describe('AttListDeclaration (unit)', () => {
       });
 
       it('parses an attribute list with a literal with no defaultType at all', () => {
-         (literal.parse as jest.Mock).mockImplementation(
+         (literal.parse as Mock).mockImplementation(
             (_1: any, options: LiteralOptions, done: () => void) => {
                options.pToken.value = [new TextPToken({ text: toSToken('dummyValue') })];
                done();
@@ -352,7 +354,7 @@ describe('AttListDeclaration (unit)', () => {
 
       it('parses multiple attributes definitions with default values with space between them', () => {
          const DUMMY_VALUE = [new TextPToken({ text: toSToken('dummyValue') })];
-         (literal.parse as jest.Mock).mockImplementation(
+         (literal.parse as Mock).mockImplementation(
             (_1: any, options: LiteralOptions, done: () => void) => {
                options.pToken.value = DUMMY_VALUE;
                done();
@@ -410,7 +412,7 @@ describe('AttListDeclaration (unit)', () => {
 
       it('parses multiple attributes definitions with #FIXED values', () => {
          const DUMMY_VALUE = [new TextPToken({ text: toSToken('dummyValue') })];
-         (literal.parse as jest.Mock).mockImplementation(
+         (literal.parse as Mock).mockImplementation(
             (_1: any, options: LiteralOptions, done: () => void) => {
                options.pToken.value = DUMMY_VALUE;
                done();
@@ -484,7 +486,7 @@ describe('AttListDeclaration (unit)', () => {
             [undefined, 'word', ['>', '%']],
             ['>', 'match', '>'],
          ]);
-         (parseWordList as jest.Mock).mockImplementation(
+         (parseWordList as Mock).mockImplementation(
             (_1: any, _2: any, done: (pToken?: any) => void) => {
                done(new WordListPToken(WordListType.NOTATION, { open: toSToken('(') }));
             },
@@ -530,7 +532,7 @@ describe('AttListDeclaration (unit)', () => {
             [undefined, 'word', ['>', '%']],
             [undefined, 'match', '>'],
          ]);
-         (parseWordList as jest.Mock).mockImplementation(
+         (parseWordList as Mock).mockImplementation(
             (_1: any, _2: any, done: (pToken?: any) => void) => {
                done();
             },
@@ -564,7 +566,7 @@ describe('AttListDeclaration (unit)', () => {
             [undefined, 'word', ['>', '%']],
             [undefined, 'match', '>'],
          ]);
-         (parseWordList as jest.Mock).mockImplementation(
+         (parseWordList as Mock).mockImplementation(
             (_1: any, _2: any, done: (pToken?: any) => void) => {
                done();
             },
@@ -608,7 +610,7 @@ describe('AttListDeclaration (unit)', () => {
             [undefined, 'word', ['>', '%']],
             [undefined, 'match', '>'],
          ]);
-         (parseWordList as jest.Mock).mockImplementation(
+         (parseWordList as Mock).mockImplementation(
             (_1: any, _2: any, done: (pToken?: any) => void) => {
                done(new WordListPToken(WordListType.ENUMERATION, { open: toSToken('(') }));
             },
@@ -652,7 +654,7 @@ describe('AttListDeclaration (unit)', () => {
             [undefined, 'word', ['>', '%']],
             [undefined, 'match', '>'],
          ]);
-         (parseWordList as jest.Mock).mockImplementation(
+         (parseWordList as Mock).mockImplementation(
             (_1: any, _2: any, done: (pToken?: any) => void) => {
                done();
             },
@@ -966,30 +968,85 @@ describe('AttListDeclaration (unit)', () => {
       ];
 
       beforeEach(() => {
-         (literal.parse as jest.Mock).mockImplementation((_1: any, _2: any, done: () => void) => {
+         (literal.parse as Mock).mockImplementation((_1: any, _2: any, done: () => void) => {
             done();
          });
       });
 
-      it('returns original token unchanged if there is no unexpanded', (done) => {
-         const mockSource = new MockSTokenSource([]);
-         const pToken = new AttListDeclarationPToken({
-            open: toSToken('<!'),
-            declTypeSpace: toSToken(' '),
-            attDefs: [],
-         });
+      it('returns original token unchanged if there is no unexpanded', () =>
+         new Promise<void>((done) => {
+            const mockSource = new MockSTokenSource([]);
+            const pToken = new AttListDeclarationPToken({
+               open: toSToken('<!'),
+               declTypeSpace: toSToken(' '),
+               attDefs: [],
+            });
 
-         resumeParseAttListDeclaration(mockSource, pToken, (result) => {
-            expect(result).toBe(pToken);
-            done();
-         });
-         mockSource.respondInAsyncTime();
-      });
+            resumeParseAttListDeclaration(mockSource, pToken, (result) => {
+               expect(result).toBe(pToken);
+               done();
+            });
+            mockSource.respondInAsyncTime();
+         }));
 
       inputs.forEach(([sourceStr, doneStr, msg]: TestType) => {
-         it(`adds an elementName an attribue ${msg}`, (done) => {
+         it(`adds an elementName an attribue ${msg}`, () =>
+            new Promise<void>((done) => {
+               const mockSource = new MockSTokenSource([
+                  [sourceStr, 'space'],
+                  ['elName', 'word', ['>', '%']],
+                  [' ', 'space'],
+                  ['first', 'word', ['>', '%']],
+                  ['\n', 'space'],
+                  ['CDATA', 'word', ['>', '%', '(', '#', '"', "'"]],
+                  ['\t', 'space'],
+                  ['#', 'peekChar'],
+                  ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
+                  [' ', 'space'],
+                  // jump directly to the name
+                  [undefined, 'word'],
+                  [undefined, 'all'],
+               ]);
+               const pToken = new AttListDeclarationPToken({
+                  open: toSToken('<!'),
+                  declTypeSpace: toSToken(' '),
+                  attDefs: [],
+                  unexpanded: {
+                     propName: 'elementName',
+                     tokens: [],
+                  },
+               });
+
+               resumeParseAttListDeclaration(mockSource, pToken, (result) => {
+                  // @ts-expect-error 2329/matchers
+                  expect(result).toEqualRangeless(
+                     new AttListDeclarationPToken(pToken, {
+                        declTypeSpace: toSToken(doneStr),
+                        elementName: toSToken('elName'),
+                        elementNameSpace: toSToken(' '),
+                        attDefs: [
+                           {
+                              name: toSToken('first'),
+                              nameSpace: toSToken('\n'),
+                              type: toSToken('CDATA'),
+                              typeSpace: toSToken('\t'),
+                              defaultType: toSToken('#REQUIRED'),
+                              defaultTypeSpace: toSToken(' '),
+                              value: [],
+                           },
+                        ],
+                     }),
+                  );
+                  done();
+               });
+               mockSource.respondInAsyncTime();
+            }));
+      });
+
+      it('captures extra after processing from elementName on', () =>
+         new Promise<void>((done) => {
             const mockSource = new MockSTokenSource([
-               [sourceStr, 'space'],
+               [undefined, 'space'],
                ['elName', 'word', ['>', '%']],
                [' ', 'space'],
                ['first', 'word', ['>', '%']],
@@ -1001,7 +1058,7 @@ describe('AttListDeclaration (unit)', () => {
                [' ', 'space'],
                // jump directly to the name
                [undefined, 'word'],
-               [undefined, 'all'],
+               ['goodies', 'all'],
             ]);
             const pToken = new AttListDeclarationPToken({
                open: toSToken('<!'),
@@ -1017,7 +1074,7 @@ describe('AttListDeclaration (unit)', () => {
                // @ts-expect-error 2329/matchers
                expect(result).toEqualRangeless(
                   new AttListDeclarationPToken(pToken, {
-                     declTypeSpace: toSToken(doneStr),
+                     declTypeSpace: toSToken(' '),
                      elementName: toSToken('elName'),
                      elementNameSpace: toSToken(' '),
                      attDefs: [
@@ -1031,70 +1088,68 @@ describe('AttListDeclaration (unit)', () => {
                            value: [],
                         },
                      ],
+                     extra: toSToken('goodies'),
                   }),
                );
                done();
             });
             mockSource.respondInAsyncTime();
-         });
-      });
-
-      it('captures extra after processing from elementName on', (done) => {
-         const mockSource = new MockSTokenSource([
-            [undefined, 'space'],
-            ['elName', 'word', ['>', '%']],
-            [' ', 'space'],
-            ['first', 'word', ['>', '%']],
-            ['\n', 'space'],
-            ['CDATA', 'word', ['>', '%', '(', '#', '"', "'"]],
-            ['\t', 'space'],
-            ['#', 'peekChar'],
-            ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
-            [' ', 'space'],
-            // jump directly to the name
-            [undefined, 'word'],
-            ['goodies', 'all'],
-         ]);
-         const pToken = new AttListDeclarationPToken({
-            open: toSToken('<!'),
-            declTypeSpace: toSToken(' '),
-            attDefs: [],
-            unexpanded: {
-               propName: 'elementName',
-               tokens: [],
-            },
-         });
-
-         resumeParseAttListDeclaration(mockSource, pToken, (result) => {
-            // @ts-expect-error 2329/matchers
-            expect(result).toEqualRangeless(
-               new AttListDeclarationPToken(pToken, {
-                  declTypeSpace: toSToken(' '),
-                  elementName: toSToken('elName'),
-                  elementNameSpace: toSToken(' '),
-                  attDefs: [
-                     {
-                        name: toSToken('first'),
-                        nameSpace: toSToken('\n'),
-                        type: toSToken('CDATA'),
-                        typeSpace: toSToken('\t'),
-                        defaultType: toSToken('#REQUIRED'),
-                        defaultTypeSpace: toSToken(' '),
-                        value: [],
-                     },
-                  ],
-                  extra: toSToken('goodies'),
-               }),
-            );
-            done();
-         });
-         mockSource.respondInAsyncTime();
-      });
+         }));
 
       inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
-         it(`adds a name and following values ${msg}`, (done) => {
+         it(`adds a name and following values ${msg}`, () =>
+            new Promise<void>((done) => {
+               const mockSource = new MockSTokenSource([
+                  [sourceStr, 'space'],
+                  ['first', 'word', ['>', '%']],
+                  ['\n', 'space'],
+                  ['CDATA', 'word', ['>', '%', '(', '#', '"', "'"]],
+                  ['\t', 'space'],
+                  ['#', 'peekChar'],
+                  ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
+                  [' ', 'space'],
+                  // jump directly to the name
+                  [undefined, 'word'],
+                  [undefined, 'all'],
+               ]);
+               const pToken = new AttListDeclarationPToken({
+                  open: toSToken('<!'),
+                  elementNameSpace: toSToken(' '),
+                  attDefs: [],
+                  unexpanded: {
+                     propName: 'name',
+                     tokens: [],
+                  },
+               });
+
+               resumeParseAttListDeclaration(mockSource, pToken, (result) => {
+                  // @ts-expect-error 2329/matchers
+                  expect(result).toEqualRangeless(
+                     new AttListDeclarationPToken(pToken, {
+                        elementNameSpace: toSToken(destStr),
+                        attDefs: [
+                           {
+                              name: toSToken('first'),
+                              nameSpace: toSToken('\n'),
+                              type: toSToken('CDATA'),
+                              typeSpace: toSToken('\t'),
+                              defaultType: toSToken('#REQUIRED'),
+                              defaultTypeSpace: toSToken(' '),
+                              value: [],
+                           },
+                        ],
+                     }),
+                  );
+                  done();
+               });
+               mockSource.respondInAsyncTime();
+            }));
+      });
+
+      it('adds extra after processing for a name', () =>
+         new Promise<void>((done) => {
             const mockSource = new MockSTokenSource([
-               [sourceStr, 'space'],
+               [undefined, 'space'],
                ['first', 'word', ['>', '%']],
                ['\n', 'space'],
                ['CDATA', 'word', ['>', '%', '(', '#', '"', "'"]],
@@ -1104,7 +1159,7 @@ describe('AttListDeclaration (unit)', () => {
                [' ', 'space'],
                // jump directly to the name
                [undefined, 'word'],
-               [undefined, 'all'],
+               ['stuff', 'all'],
             ]);
             const pToken = new AttListDeclarationPToken({
                open: toSToken('<!'),
@@ -1120,7 +1175,7 @@ describe('AttListDeclaration (unit)', () => {
                // @ts-expect-error 2329/matchers
                expect(result).toEqualRangeless(
                   new AttListDeclarationPToken(pToken, {
-                     elementNameSpace: toSToken(destStr),
+                     elementNameSpace: toSToken(' '),
                      attDefs: [
                         {
                            name: toSToken('first'),
@@ -1132,515 +1187,525 @@ describe('AttListDeclaration (unit)', () => {
                            value: [],
                         },
                      ],
+                     extra: toSToken('stuff'),
                   }),
                );
                done();
             });
             mockSource.respondInAsyncTime();
-         });
-      });
+         }));
 
-      it('adds extra after processing for a name', (done) => {
-         const mockSource = new MockSTokenSource([
-            [undefined, 'space'],
-            ['first', 'word', ['>', '%']],
-            ['\n', 'space'],
-            ['CDATA', 'word', ['>', '%', '(', '#', '"', "'"]],
-            ['\t', 'space'],
-            ['#', 'peekChar'],
-            ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
-            [' ', 'space'],
-            // jump directly to the name
-            [undefined, 'word'],
-            ['stuff', 'all'],
-         ]);
-         const pToken = new AttListDeclarationPToken({
-            open: toSToken('<!'),
-            elementNameSpace: toSToken(' '),
-            attDefs: [],
-            unexpanded: {
-               propName: 'name',
-               tokens: [],
-            },
-         });
-
-         resumeParseAttListDeclaration(mockSource, pToken, (result) => {
-            // @ts-expect-error 2329/matchers
-            expect(result).toEqualRangeless(
-               new AttListDeclarationPToken(pToken, {
-                  elementNameSpace: toSToken(' '),
+      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
+         it(`adds a name when there is already an attribute ${msg}`, () =>
+            new Promise<void>((done) => {
+               const mockSource = new MockSTokenSource([
+                  [sourceStr, 'space'],
+                  ['first', 'word', ['>', '%']],
+                  ['\n', 'space'],
+                  ['CDATA', 'word', ['>', '%', '(', '#', '"', "'"]],
+                  ['\t', 'space'],
+                  ['#', 'peekChar'],
+                  ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
+                  [' ', 'space'],
+                  // jump directly to the name
+                  [undefined, 'word'],
+                  [undefined, 'all'],
+               ]);
+               const pToken = new AttListDeclarationPToken({
+                  open: toSToken('<!'),
                   attDefs: [
                      {
-                        name: toSToken('first'),
-                        nameSpace: toSToken('\n'),
-                        type: toSToken('CDATA'),
-                        typeSpace: toSToken('\t'),
-                        defaultType: toSToken('#REQUIRED'),
-                        defaultTypeSpace: toSToken(' '),
+                        name: toSToken('zeroth'),
+                        value: [],
+                        valueSpace: toSToken(' '),
+                     },
+                  ],
+                  unexpanded: {
+                     propName: 'name',
+                     tokens: [],
+                  },
+               });
+
+               resumeParseAttListDeclaration(mockSource, pToken, (result) => {
+                  // @ts-expect-error 2329/matchers
+                  expect(result).toEqualRangeless(
+                     new AttListDeclarationPToken(pToken, {
+                        attDefs: [
+                           {
+                              name: toSToken('zeroth'),
+                              value: [],
+                              valueSpace: toSToken(destStr),
+                           },
+                           {
+                              name: toSToken('first'),
+                              nameSpace: toSToken('\n'),
+                              type: toSToken('CDATA'),
+                              typeSpace: toSToken('\t'),
+                              defaultType: toSToken('#REQUIRED'),
+                              defaultTypeSpace: toSToken(' '),
+                              value: [],
+                           },
+                        ],
+                     }),
+                  );
+                  done();
+               });
+               mockSource.respondInAsyncTime();
+            }));
+      });
+
+      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
+         it(`adds from a name to multiple following attributes ${msg}`, () =>
+            new Promise<void>((done) => {
+               const mockSource = new MockSTokenSource([
+                  [sourceStr, 'space'],
+                  ['first', 'word', ['>', '%']],
+                  ['\n', 'space'],
+                  ['CDATA', 'word', ['>', '%', '(', '#', '"', "'"]],
+                  ['\t', 'space'],
+                  ['#', 'peekChar'],
+                  ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
+                  [' ', 'space'],
+                  // jump directly to the name
+                  ['second', 'word', ['>', '%']],
+                  ['\t', 'space'],
+                  ['CDATA', 'word', ['>', '%', '(', '#', '"', "'"]],
+                  ['\t', 'space'],
+                  [undefined, 'peekChar'],
+                  [undefined, 'space'],
+                  [undefined, 'word'],
+                  [undefined, 'all'],
+               ]);
+               const pToken = new AttListDeclarationPToken({
+                  open: toSToken('<!'),
+                  attDefs: [
+                     {
+                        name: toSToken('zeroth'),
+                        value: [],
+                        valueSpace: toSToken(' '),
+                     },
+                  ],
+                  unexpanded: {
+                     propName: 'name',
+                     tokens: [],
+                  },
+               });
+
+               resumeParseAttListDeclaration(mockSource, pToken, (result) => {
+                  // @ts-expect-error 2329/matchers
+                  expect(result).toEqualRangeless(
+                     new AttListDeclarationPToken(pToken, {
+                        attDefs: [
+                           {
+                              name: toSToken('zeroth'),
+                              value: [],
+                              valueSpace: toSToken(destStr),
+                           },
+                           {
+                              name: toSToken('first'),
+                              nameSpace: toSToken('\n'),
+                              type: toSToken('CDATA'),
+                              typeSpace: toSToken('\t'),
+                              defaultType: toSToken('#REQUIRED'),
+                              defaultTypeSpace: toSToken(' '),
+                              value: [],
+                           },
+                           {
+                              name: toSToken('second'),
+                              nameSpace: toSToken('\t'),
+                              type: toSToken('CDATA'),
+                              typeSpace: toSToken('\t'),
+                              defaultType: undefined,
+                              defaultTypeSpace: undefined,
+                              value: [],
+                           },
+                        ],
+                     }),
+                  );
+                  done();
+               });
+               mockSource.respondInAsyncTime();
+            }));
+      });
+
+      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
+         it(`adds a NOTATION type, calls parseWordList and following values ${msg}`, () =>
+            new Promise<void>((done) => {
+               const mockSource = new MockSTokenSource([
+                  [sourceStr, 'space'],
+                  ['NOTATION', 'word', ['>', '%', '(', '#', '"', "'"]],
+                  ['\t', 'space'],
+                  ['#', 'peekChar'],
+                  ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
+                  [' ', 'space'],
+                  // jump directly to the name
+                  [undefined, 'word'],
+                  [undefined, 'all'],
+               ]);
+               const pToken = new AttListDeclarationPToken({
+                  open: toSToken('<!'),
+                  attDefs: [
+                     {
+                        name: toSToken('foo'),
+                        nameSpace: toSToken(' '),
                         value: [],
                      },
                   ],
-                  extra: toSToken('stuff'),
-               }),
-            );
-            done();
-         });
-         mockSource.respondInAsyncTime();
-      });
-
-      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
-         it(`adds a name when there is already an attribute ${msg}`, (done) => {
-            const mockSource = new MockSTokenSource([
-               [sourceStr, 'space'],
-               ['first', 'word', ['>', '%']],
-               ['\n', 'space'],
-               ['CDATA', 'word', ['>', '%', '(', '#', '"', "'"]],
-               ['\t', 'space'],
-               ['#', 'peekChar'],
-               ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
-               [' ', 'space'],
-               // jump directly to the name
-               [undefined, 'word'],
-               [undefined, 'all'],
-            ]);
-            const pToken = new AttListDeclarationPToken({
-               open: toSToken('<!'),
-               attDefs: [
-                  {
-                     name: toSToken('zeroth'),
-                     value: [],
-                     valueSpace: toSToken(' '),
+                  unexpanded: {
+                     propName: 'type',
+                     tokens: [],
                   },
-               ],
-               unexpanded: {
-                  propName: 'name',
-                  tokens: [],
-               },
-            });
+               });
 
-            resumeParseAttListDeclaration(mockSource, pToken, (result) => {
-               // @ts-expect-error 2329/matchers
-               expect(result).toEqualRangeless(
-                  new AttListDeclarationPToken(pToken, {
-                     attDefs: [
-                        {
-                           name: toSToken('zeroth'),
-                           value: [],
-                           valueSpace: toSToken(destStr),
-                        },
-                        {
-                           name: toSToken('first'),
-                           nameSpace: toSToken('\n'),
-                           type: toSToken('CDATA'),
-                           typeSpace: toSToken('\t'),
-                           defaultType: toSToken('#REQUIRED'),
-                           defaultTypeSpace: toSToken(' '),
-                           value: [],
-                        },
-                     ],
-                  }),
-               );
-               done();
-            });
-            mockSource.respondInAsyncTime();
-         });
+               resumeParseAttListDeclaration(mockSource, pToken, (result) => {
+                  expect(parseWordList).toHaveBeenCalledWith(
+                     mockSource,
+                     WordListType.NOTATION,
+                     expect.any(Function),
+                  );
+                  // @ts-expect-error 2329/matchers
+                  expect(result).toEqualRangeless(
+                     new AttListDeclarationPToken(pToken, {
+                        attDefs: [
+                           {
+                              name: toSToken('foo'),
+                              nameSpace: toSToken(destStr),
+                              type: toSToken('NOTATION'),
+                              typeSpace: toSToken('\t'),
+                              defaultType: toSToken('#REQUIRED'),
+                              defaultTypeSpace: toSToken(' '),
+                              value: [],
+                           },
+                        ],
+                     }),
+                  );
+                  done();
+               });
+               mockSource.respondInAsyncTime();
+            }));
       });
 
       inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
-         it(`adds from a name to multiple following attributes ${msg}`, (done) => {
+         it(`adds a NOTATION list ${msg}`, () =>
+            new Promise<void>((done) => {
+               const mockSource = new MockSTokenSource([
+                  [sourceStr, 'space'],
+                  ['#', 'peekChar'],
+                  ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
+                  [' ', 'space'],
+                  // jump directly to the name
+                  [undefined, 'word'],
+                  [undefined, 'all'],
+               ]);
+               const pToken = new AttListDeclarationPToken({
+                  open: toSToken('<!'),
+                  attDefs: [
+                     {
+                        name: toSToken('foo'),
+                        nameSpace: toSToken(' '),
+                        type: toSToken('NOTATION'),
+                        typeSpace: toSToken(' '),
+                        value: [],
+                     },
+                  ],
+                  unexpanded: {
+                     propName: 'notation',
+                     tokens: [],
+                  },
+               });
+
+               resumeParseAttListDeclaration(mockSource, pToken, (result) => {
+                  expect(parseWordList).toHaveBeenCalledWith(
+                     mockSource,
+                     WordListType.NOTATION,
+                     expect.any(Function),
+                  );
+                  // @ts-expect-error 2329/matchers
+                  expect(result).toEqualRangeless(
+                     new AttListDeclarationPToken(pToken, {
+                        attDefs: [
+                           {
+                              name: toSToken('foo'),
+                              nameSpace: toSToken(' '),
+                              type: toSToken('NOTATION'),
+                              typeSpace: toSToken(destStr),
+                              defaultType: toSToken('#REQUIRED'),
+                              defaultTypeSpace: toSToken(' '),
+                              value: [],
+                           },
+                        ],
+                     }),
+                  );
+                  done();
+               });
+               mockSource.respondInAsyncTime();
+            }));
+      });
+
+      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
+         it(`adds an ENUMERATION type, calls parseWordList and following values ${msg}`, () =>
+            new Promise<void>((done) => {
+               const mockSource = new MockSTokenSource([
+                  [sourceStr, 'space'],
+                  [undefined, 'word', ['>', '%', '(', '#', '"', "'"]],
+                  ['(', 'peekChar'],
+                  ['#', 'peekChar'],
+                  ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
+                  [' ', 'space'],
+                  // jump directly to the name
+                  [undefined, 'word'],
+                  [undefined, 'all'],
+               ]);
+               const pToken = new AttListDeclarationPToken({
+                  open: toSToken('<!'),
+                  attDefs: [
+                     {
+                        name: toSToken('foo'),
+                        nameSpace: toSToken(' '),
+                        value: [],
+                     },
+                  ],
+                  unexpanded: {
+                     propName: 'type',
+                     tokens: [],
+                  },
+               });
+
+               resumeParseAttListDeclaration(mockSource, pToken, (result) => {
+                  expect(parseWordList).toHaveBeenCalledWith(
+                     mockSource,
+                     WordListType.ENUMERATION,
+                     expect.any(Function),
+                  );
+                  // @ts-expect-error 2329/matchers
+                  expect(result).toEqualRangeless(
+                     new AttListDeclarationPToken(pToken, {
+                        attDefs: [
+                           {
+                              name: toSToken('foo'),
+                              nameSpace: toSToken(destStr),
+                              type: undefined,
+                              typeSpace: undefined,
+                              defaultType: toSToken('#REQUIRED'),
+                              defaultTypeSpace: toSToken(' '),
+                              value: [],
+                           },
+                        ],
+                     }),
+                  );
+                  done();
+               });
+               mockSource.respondInAsyncTime();
+            }));
+      });
+
+      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
+         it(`adds a CDATA type and following values ${msg}`, () =>
+            new Promise<void>((done) => {
+               const mockSource = new MockSTokenSource([
+                  [sourceStr, 'space'],
+                  ['CDATA', 'word', ['>', '%', '(', '#', '"', "'"]],
+                  ['\t', 'space'],
+                  ['#', 'peekChar'],
+                  ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
+                  [' ', 'space'],
+                  // jump directly to the name
+                  [undefined, 'word'],
+                  [undefined, 'all'],
+               ]);
+               const pToken = new AttListDeclarationPToken({
+                  open: toSToken('<!'),
+                  attDefs: [
+                     {
+                        name: toSToken('foo'),
+                        nameSpace: toSToken(' '),
+                        value: [],
+                     },
+                  ],
+                  unexpanded: {
+                     propName: 'type',
+                     tokens: [],
+                  },
+               });
+
+               resumeParseAttListDeclaration(mockSource, pToken, (result) => {
+                  // @ts-expect-error 2329/matchers
+                  expect(result).toEqualRangeless(
+                     new AttListDeclarationPToken(pToken, {
+                        attDefs: [
+                           {
+                              name: toSToken('foo'),
+                              nameSpace: toSToken(destStr),
+                              type: toSToken('CDATA'),
+                              typeSpace: toSToken('\t'),
+                              defaultType: toSToken('#REQUIRED'),
+                              defaultTypeSpace: toSToken(' '),
+                              value: [],
+                           },
+                        ],
+                     }),
+                  );
+                  done();
+               });
+               mockSource.respondInAsyncTime();
+            }));
+      });
+
+      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
+         it(`adds a value with no defaultType ${msg}`, () =>
+            new Promise<void>((done) => {
+               const mockSource = new MockSTokenSource([
+                  [sourceStr, 'space'],
+                  [undefined, 'peekChar'],
+                  // parse the value
+                  ['\n', 'space'],
+                  [undefined, 'word'],
+                  [undefined, 'all'],
+               ]);
+               const pToken = new AttListDeclarationPToken({
+                  open: toSToken('<!'),
+                  attDefs: [
+                     {
+                        name: toSToken('foo'),
+                        typeSpace: toSToken(' '),
+                        value: [],
+                     },
+                  ],
+                  unexpanded: {
+                     propName: 'defaultType',
+                     tokens: [],
+                  },
+               });
+
+               resumeParseAttListDeclaration(mockSource, pToken, (result) => {
+                  // @ts-expect-error 2329/matchers
+                  expect(result).toEqualRangeless(
+                     new AttListDeclarationPToken(pToken, {
+                        attDefs: [
+                           {
+                              name: toSToken('foo'),
+                              typeSpace: toSToken(destStr),
+                              value: [],
+                              valueSpace: toSToken('\n'),
+                           },
+                        ],
+                     }),
+                  );
+                  done();
+               });
+               mockSource.respondInAsyncTime();
+            }));
+      });
+
+      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
+         it(`adds a defaultType of #required ${msg}`, () =>
+            new Promise<void>((done) => {
+               const mockSource = new MockSTokenSource([
+                  [sourceStr, 'space'],
+                  ['#', 'peekChar'],
+                  ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
+                  [' ', 'space'],
+                  // jump directly to the name
+                  [undefined, 'word'],
+                  [undefined, 'all'],
+               ]);
+               const pToken = new AttListDeclarationPToken({
+                  open: toSToken('<!'),
+                  attDefs: [
+                     {
+                        name: toSToken('foo'),
+                        typeSpace: toSToken(' '),
+                        value: [],
+                     },
+                  ],
+                  unexpanded: {
+                     propName: 'defaultType',
+                     tokens: [],
+                  },
+               });
+
+               resumeParseAttListDeclaration(mockSource, pToken, (result) => {
+                  // @ts-expect-error 2329/matchers
+                  expect(result).toEqualRangeless(
+                     new AttListDeclarationPToken(pToken, {
+                        attDefs: [
+                           {
+                              name: toSToken('foo'),
+                              typeSpace: toSToken(destStr),
+                              defaultType: toSToken('#REQUIRED'),
+                              defaultTypeSpace: toSToken(' '),
+                              value: [],
+                           },
+                        ],
+                     }),
+                  );
+                  done();
+               });
+               mockSource.respondInAsyncTime();
+            }));
+      });
+
+      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
+         it(`adds a defaultType of #fixed with a value ${msg}`, () =>
+            new Promise<void>((done) => {
+               const mockSource = new MockSTokenSource([
+                  [sourceStr, 'space'],
+                  ['#', 'peekChar'],
+                  ['#FIXED', 'word', ['>', '%', '"', "'"]],
+                  [' ', 'space'],
+                  // parse the value
+                  ['\t', 'space'],
+                  [undefined, 'word'],
+                  [undefined, 'all'],
+               ]);
+               const pToken = new AttListDeclarationPToken({
+                  open: toSToken('<!'),
+                  attDefs: [
+                     {
+                        name: toSToken('foo'),
+                        typeSpace: toSToken(' '),
+                        value: [],
+                     },
+                  ],
+                  unexpanded: {
+                     propName: 'defaultType',
+                     tokens: [],
+                  },
+               });
+
+               resumeParseAttListDeclaration(mockSource, pToken, (result) => {
+                  // @ts-expect-error 2329/matchers
+                  expect(result).toEqualRangeless(
+                     new AttListDeclarationPToken(pToken, {
+                        attDefs: [
+                           {
+                              name: toSToken('foo'),
+                              typeSpace: toSToken(destStr),
+                              defaultType: toSToken('#FIXED'),
+                              defaultTypeSpace: toSToken(' '),
+                              value: [],
+                              valueSpace: toSToken('\t'),
+                           },
+                        ],
+                     }),
+                  );
+                  done();
+               });
+               mockSource.respondInAsyncTime();
+            }));
+      });
+
+      it('adds extra after processing in the middle of attributes', () =>
+         new Promise<void>((done) => {
             const mockSource = new MockSTokenSource([
-               [sourceStr, 'space'],
-               ['first', 'word', ['>', '%']],
-               ['\n', 'space'],
-               ['CDATA', 'word', ['>', '%', '(', '#', '"', "'"]],
-               ['\t', 'space'],
-               ['#', 'peekChar'],
-               ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
-               [' ', 'space'],
-               // jump directly to the name
-               ['second', 'word', ['>', '%']],
-               ['\t', 'space'],
-               ['CDATA', 'word', ['>', '%', '(', '#', '"', "'"]],
-               ['\t', 'space'],
-               [undefined, 'peekChar'],
                [undefined, 'space'],
-               [undefined, 'word'],
-               [undefined, 'all'],
-            ]);
-            const pToken = new AttListDeclarationPToken({
-               open: toSToken('<!'),
-               attDefs: [
-                  {
-                     name: toSToken('zeroth'),
-                     value: [],
-                     valueSpace: toSToken(' '),
-                  },
-               ],
-               unexpanded: {
-                  propName: 'name',
-                  tokens: [],
-               },
-            });
-
-            resumeParseAttListDeclaration(mockSource, pToken, (result) => {
-               // @ts-expect-error 2329/matchers
-               expect(result).toEqualRangeless(
-                  new AttListDeclarationPToken(pToken, {
-                     attDefs: [
-                        {
-                           name: toSToken('zeroth'),
-                           value: [],
-                           valueSpace: toSToken(destStr),
-                        },
-                        {
-                           name: toSToken('first'),
-                           nameSpace: toSToken('\n'),
-                           type: toSToken('CDATA'),
-                           typeSpace: toSToken('\t'),
-                           defaultType: toSToken('#REQUIRED'),
-                           defaultTypeSpace: toSToken(' '),
-                           value: [],
-                        },
-                        {
-                           name: toSToken('second'),
-                           nameSpace: toSToken('\t'),
-                           type: toSToken('CDATA'),
-                           typeSpace: toSToken('\t'),
-                           defaultType: undefined,
-                           defaultTypeSpace: undefined,
-                           value: [],
-                        },
-                     ],
-                  }),
-               );
-               done();
-            });
-            mockSource.respondInAsyncTime();
-         });
-      });
-
-      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
-         it(`adds a NOTATION type, calls parseWordList and following values ${msg}`, (done) => {
-            const mockSource = new MockSTokenSource([
-               [sourceStr, 'space'],
-               ['NOTATION', 'word', ['>', '%', '(', '#', '"', "'"]],
-               ['\t', 'space'],
-               ['#', 'peekChar'],
-               ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
-               [' ', 'space'],
-               // jump directly to the name
-               [undefined, 'word'],
-               [undefined, 'all'],
-            ]);
-            const pToken = new AttListDeclarationPToken({
-               open: toSToken('<!'),
-               attDefs: [
-                  {
-                     name: toSToken('foo'),
-                     nameSpace: toSToken(' '),
-                     value: [],
-                  },
-               ],
-               unexpanded: {
-                  propName: 'type',
-                  tokens: [],
-               },
-            });
-
-            resumeParseAttListDeclaration(mockSource, pToken, (result) => {
-               expect(parseWordList).toHaveBeenCalledWith(
-                  mockSource,
-                  WordListType.NOTATION,
-                  expect.any(Function),
-               );
-               // @ts-expect-error 2329/matchers
-               expect(result).toEqualRangeless(
-                  new AttListDeclarationPToken(pToken, {
-                     attDefs: [
-                        {
-                           name: toSToken('foo'),
-                           nameSpace: toSToken(destStr),
-                           type: toSToken('NOTATION'),
-                           typeSpace: toSToken('\t'),
-                           defaultType: toSToken('#REQUIRED'),
-                           defaultTypeSpace: toSToken(' '),
-                           value: [],
-                        },
-                     ],
-                  }),
-               );
-               done();
-            });
-            mockSource.respondInAsyncTime();
-         });
-      });
-
-      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
-         it(`adds a NOTATION list ${msg}`, (done) => {
-            const mockSource = new MockSTokenSource([
-               [sourceStr, 'space'],
-               ['#', 'peekChar'],
-               ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
-               [' ', 'space'],
-               // jump directly to the name
-               [undefined, 'word'],
-               [undefined, 'all'],
-            ]);
-            const pToken = new AttListDeclarationPToken({
-               open: toSToken('<!'),
-               attDefs: [
-                  {
-                     name: toSToken('foo'),
-                     nameSpace: toSToken(' '),
-                     type: toSToken('NOTATION'),
-                     typeSpace: toSToken(' '),
-                     value: [],
-                  },
-               ],
-               unexpanded: {
-                  propName: 'notation',
-                  tokens: [],
-               },
-            });
-
-            resumeParseAttListDeclaration(mockSource, pToken, (result) => {
-               expect(parseWordList).toHaveBeenCalledWith(
-                  mockSource,
-                  WordListType.NOTATION,
-                  expect.any(Function),
-               );
-               // @ts-expect-error 2329/matchers
-               expect(result).toEqualRangeless(
-                  new AttListDeclarationPToken(pToken, {
-                     attDefs: [
-                        {
-                           name: toSToken('foo'),
-                           nameSpace: toSToken(' '),
-                           type: toSToken('NOTATION'),
-                           typeSpace: toSToken(destStr),
-                           defaultType: toSToken('#REQUIRED'),
-                           defaultTypeSpace: toSToken(' '),
-                           value: [],
-                        },
-                     ],
-                  }),
-               );
-               done();
-            });
-            mockSource.respondInAsyncTime();
-         });
-      });
-
-      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
-         it(`adds an ENUMERATION type, calls parseWordList and following values ${msg}`, (done) => {
-            const mockSource = new MockSTokenSource([
-               [sourceStr, 'space'],
-               [undefined, 'word', ['>', '%', '(', '#', '"', "'"]],
-               ['(', 'peekChar'],
-               ['#', 'peekChar'],
-               ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
-               [' ', 'space'],
-               // jump directly to the name
-               [undefined, 'word'],
-               [undefined, 'all'],
-            ]);
-            const pToken = new AttListDeclarationPToken({
-               open: toSToken('<!'),
-               attDefs: [
-                  {
-                     name: toSToken('foo'),
-                     nameSpace: toSToken(' '),
-                     value: [],
-                  },
-               ],
-               unexpanded: {
-                  propName: 'type',
-                  tokens: [],
-               },
-            });
-
-            resumeParseAttListDeclaration(mockSource, pToken, (result) => {
-               expect(parseWordList).toHaveBeenCalledWith(
-                  mockSource,
-                  WordListType.ENUMERATION,
-                  expect.any(Function),
-               );
-               // @ts-expect-error 2329/matchers
-               expect(result).toEqualRangeless(
-                  new AttListDeclarationPToken(pToken, {
-                     attDefs: [
-                        {
-                           name: toSToken('foo'),
-                           nameSpace: toSToken(destStr),
-                           type: undefined,
-                           typeSpace: undefined,
-                           defaultType: toSToken('#REQUIRED'),
-                           defaultTypeSpace: toSToken(' '),
-                           value: [],
-                        },
-                     ],
-                  }),
-               );
-               done();
-            });
-            mockSource.respondInAsyncTime();
-         });
-      });
-
-      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
-         it(`adds a CDATA type and following values ${msg}`, (done) => {
-            const mockSource = new MockSTokenSource([
-               [sourceStr, 'space'],
-               ['CDATA', 'word', ['>', '%', '(', '#', '"', "'"]],
-               ['\t', 'space'],
-               ['#', 'peekChar'],
-               ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
-               [' ', 'space'],
-               // jump directly to the name
-               [undefined, 'word'],
-               [undefined, 'all'],
-            ]);
-            const pToken = new AttListDeclarationPToken({
-               open: toSToken('<!'),
-               attDefs: [
-                  {
-                     name: toSToken('foo'),
-                     nameSpace: toSToken(' '),
-                     value: [],
-                  },
-               ],
-               unexpanded: {
-                  propName: 'type',
-                  tokens: [],
-               },
-            });
-
-            resumeParseAttListDeclaration(mockSource, pToken, (result) => {
-               // @ts-expect-error 2329/matchers
-               expect(result).toEqualRangeless(
-                  new AttListDeclarationPToken(pToken, {
-                     attDefs: [
-                        {
-                           name: toSToken('foo'),
-                           nameSpace: toSToken(destStr),
-                           type: toSToken('CDATA'),
-                           typeSpace: toSToken('\t'),
-                           defaultType: toSToken('#REQUIRED'),
-                           defaultTypeSpace: toSToken(' '),
-                           value: [],
-                        },
-                     ],
-                  }),
-               );
-               done();
-            });
-            mockSource.respondInAsyncTime();
-         });
-      });
-
-      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
-         it(`adds a value with no defaultType ${msg}`, (done) => {
-            const mockSource = new MockSTokenSource([
-               [sourceStr, 'space'],
-               [undefined, 'peekChar'],
-               // parse the value
-               ['\n', 'space'],
-               [undefined, 'word'],
-               [undefined, 'all'],
-            ]);
-            const pToken = new AttListDeclarationPToken({
-               open: toSToken('<!'),
-               attDefs: [
-                  {
-                     name: toSToken('foo'),
-                     typeSpace: toSToken(' '),
-                     value: [],
-                  },
-               ],
-               unexpanded: {
-                  propName: 'defaultType',
-                  tokens: [],
-               },
-            });
-
-            resumeParseAttListDeclaration(mockSource, pToken, (result) => {
-               // @ts-expect-error 2329/matchers
-               expect(result).toEqualRangeless(
-                  new AttListDeclarationPToken(pToken, {
-                     attDefs: [
-                        {
-                           name: toSToken('foo'),
-                           typeSpace: toSToken(destStr),
-                           value: [],
-                           valueSpace: toSToken('\n'),
-                        },
-                     ],
-                  }),
-               );
-               done();
-            });
-            mockSource.respondInAsyncTime();
-         });
-      });
-
-      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
-         it(`adds a defaultType of #required ${msg}`, (done) => {
-            const mockSource = new MockSTokenSource([
-               [sourceStr, 'space'],
-               ['#', 'peekChar'],
-               ['#REQUIRED', 'word', ['>', '%', '"', "'"]],
-               [' ', 'space'],
-               // jump directly to the name
-               [undefined, 'word'],
-               [undefined, 'all'],
-            ]);
-            const pToken = new AttListDeclarationPToken({
-               open: toSToken('<!'),
-               attDefs: [
-                  {
-                     name: toSToken('foo'),
-                     typeSpace: toSToken(' '),
-                     value: [],
-                  },
-               ],
-               unexpanded: {
-                  propName: 'defaultType',
-                  tokens: [],
-               },
-            });
-
-            resumeParseAttListDeclaration(mockSource, pToken, (result) => {
-               // @ts-expect-error 2329/matchers
-               expect(result).toEqualRangeless(
-                  new AttListDeclarationPToken(pToken, {
-                     attDefs: [
-                        {
-                           name: toSToken('foo'),
-                           typeSpace: toSToken(destStr),
-                           defaultType: toSToken('#REQUIRED'),
-                           defaultTypeSpace: toSToken(' '),
-                           value: [],
-                        },
-                     ],
-                  }),
-               );
-               done();
-            });
-            mockSource.respondInAsyncTime();
-         });
-      });
-
-      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
-         it(`adds a defaultType of #fixed with a value ${msg}`, (done) => {
-            const mockSource = new MockSTokenSource([
-               [sourceStr, 'space'],
                ['#', 'peekChar'],
                ['#FIXED', 'word', ['>', '%', '"', "'"]],
                [' ', 'space'],
                // parse the value
                ['\t', 'space'],
                [undefined, 'word'],
-               [undefined, 'all'],
+               ['xtra', 'all'],
             ]);
             const pToken = new AttListDeclarationPToken({
                open: toSToken('<!'),
@@ -1664,161 +1729,115 @@ describe('AttListDeclaration (unit)', () => {
                      attDefs: [
                         {
                            name: toSToken('foo'),
-                           typeSpace: toSToken(destStr),
+                           typeSpace: toSToken(' '),
                            defaultType: toSToken('#FIXED'),
                            defaultTypeSpace: toSToken(' '),
                            value: [],
                            valueSpace: toSToken('\t'),
                         },
                      ],
+                     extra: toSToken('xtra'),
                   }),
                );
                done();
             });
             mockSource.respondInAsyncTime();
-         });
-      });
+         }));
 
-      it('adds extra after processing in the middle of attributes', (done) => {
-         const mockSource = new MockSTokenSource([
-            [undefined, 'space'],
-            ['#', 'peekChar'],
-            ['#FIXED', 'word', ['>', '%', '"', "'"]],
-            [' ', 'space'],
-            // parse the value
-            ['\t', 'space'],
-            [undefined, 'word'],
-            ['xtra', 'all'],
-         ]);
-         const pToken = new AttListDeclarationPToken({
-            open: toSToken('<!'),
-            attDefs: [
-               {
-                  name: toSToken('foo'),
-                  typeSpace: toSToken(' '),
-                  value: [],
-               },
-            ],
-            unexpanded: {
-               propName: 'defaultType',
-               tokens: [],
-            },
-         });
-
-         resumeParseAttListDeclaration(mockSource, pToken, (result) => {
-            // @ts-expect-error 2329/matchers
-            expect(result).toEqualRangeless(
-               new AttListDeclarationPToken(pToken, {
+      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
+         it(`adds a value ${msg}`, () =>
+            new Promise<void>((done) => {
+               const mockSource = new MockSTokenSource([
+                  [sourceStr, 'space'],
+                  [' ', 'space'],
+                  [undefined, 'word'],
+                  [undefined, 'all'],
+               ]);
+               const pToken = new AttListDeclarationPToken({
+                  open: toSToken('<!'),
                   attDefs: [
                      {
                         name: toSToken('foo'),
-                        typeSpace: toSToken(' '),
-                        defaultType: toSToken('#FIXED'),
                         defaultTypeSpace: toSToken(' '),
                         value: [],
-                        valueSpace: toSToken('\t'),
                      },
                   ],
-                  extra: toSToken('xtra'),
-               }),
-            );
-            done();
-         });
-         mockSource.respondInAsyncTime();
+                  unexpanded: {
+                     propName: 'value',
+                     tokens: [],
+                  },
+               });
+
+               resumeParseAttListDeclaration(mockSource, pToken, (result) => {
+                  // @ts-expect-error 2329/matchers
+                  expect(result).toEqualRangeless(
+                     new AttListDeclarationPToken(pToken, {
+                        attDefs: [
+                           {
+                              name: toSToken('foo'),
+                              defaultTypeSpace: toSToken(destStr),
+                              value: [],
+                              valueSpace: toSToken(' '),
+                           },
+                        ],
+                     }),
+                  );
+                  done();
+               });
+               mockSource.respondInAsyncTime();
+            }));
       });
 
       inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
-         it(`adds a value ${msg}`, (done) => {
-            const mockSource = new MockSTokenSource([
-               [sourceStr, 'space'],
-               [' ', 'space'],
-               [undefined, 'word'],
-               [undefined, 'all'],
-            ]);
-            const pToken = new AttListDeclarationPToken({
-               open: toSToken('<!'),
-               attDefs: [
-                  {
-                     name: toSToken('foo'),
-                     defaultTypeSpace: toSToken(' '),
-                     value: [],
+         it(`adds a value while preserving any earlier entries ${msg}`, () =>
+            new Promise<void>((done) => {
+               const mockSource = new MockSTokenSource([
+                  [sourceStr, 'space'],
+                  [' ', 'space'],
+                  [undefined, 'word'],
+                  [undefined, 'all'],
+               ]);
+               const pToken = new AttListDeclarationPToken({
+                  open: toSToken('<!'),
+                  attDefs: [
+                     {
+                        name: toSToken('first'),
+                        value: [],
+                     },
+                     {
+                        name: toSToken('foo'),
+                        defaultTypeSpace: toSToken(' '),
+                        value: [],
+                     },
+                  ],
+                  unexpanded: {
+                     propName: 'value',
+                     tokens: [],
                   },
-               ],
-               unexpanded: {
-                  propName: 'value',
-                  tokens: [],
-               },
-            });
+               });
 
-            resumeParseAttListDeclaration(mockSource, pToken, (result) => {
-               // @ts-expect-error 2329/matchers
-               expect(result).toEqualRangeless(
-                  new AttListDeclarationPToken(pToken, {
-                     attDefs: [
-                        {
-                           name: toSToken('foo'),
-                           defaultTypeSpace: toSToken(destStr),
-                           value: [],
-                           valueSpace: toSToken(' '),
-                        },
-                     ],
-                  }),
-               );
-               done();
-            });
-            mockSource.respondInAsyncTime();
-         });
-      });
-
-      inputs.forEach(([sourceStr, destStr, msg]: TestType) => {
-         it(`adds a value while preserving any earlier entries ${msg}`, (done) => {
-            const mockSource = new MockSTokenSource([
-               [sourceStr, 'space'],
-               [' ', 'space'],
-               [undefined, 'word'],
-               [undefined, 'all'],
-            ]);
-            const pToken = new AttListDeclarationPToken({
-               open: toSToken('<!'),
-               attDefs: [
-                  {
-                     name: toSToken('first'),
-                     value: [],
-                  },
-                  {
-                     name: toSToken('foo'),
-                     defaultTypeSpace: toSToken(' '),
-                     value: [],
-                  },
-               ],
-               unexpanded: {
-                  propName: 'value',
-                  tokens: [],
-               },
-            });
-
-            resumeParseAttListDeclaration(mockSource, pToken, (result) => {
-               // @ts-expect-error 2329/matchers
-               expect(result).toEqualRangeless(
-                  new AttListDeclarationPToken(pToken, {
-                     attDefs: [
-                        {
-                           name: toSToken('first'),
-                           value: [],
-                        },
-                        {
-                           name: toSToken('foo'),
-                           defaultTypeSpace: toSToken(destStr),
-                           value: [],
-                           valueSpace: toSToken(' '),
-                        },
-                     ],
-                  }),
-               );
-               done();
-            });
-            mockSource.respondInAsyncTime();
-         });
+               resumeParseAttListDeclaration(mockSource, pToken, (result) => {
+                  // @ts-expect-error 2329/matchers
+                  expect(result).toEqualRangeless(
+                     new AttListDeclarationPToken(pToken, {
+                        attDefs: [
+                           {
+                              name: toSToken('first'),
+                              value: [],
+                           },
+                           {
+                              name: toSToken('foo'),
+                              defaultTypeSpace: toSToken(destStr),
+                              value: [],
+                              valueSpace: toSToken(' '),
+                           },
+                        ],
+                     }),
+                  );
+                  done();
+               });
+               mockSource.respondInAsyncTime();
+            }));
       });
    });
 });

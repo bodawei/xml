@@ -1,10 +1,10 @@
-/* Copyright ® 2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { NotationDeclarationPToken, ParameterEntityReferencePToken } from 'pToken';
 import { makeNotationDeclaration } from 'token-test';
+import { describe, expect, it } from 'vitest';
 
 import { ValidityState } from '../../common/validityState';
 import { validityErrorCodes } from '../../error/validityErrorCodes';

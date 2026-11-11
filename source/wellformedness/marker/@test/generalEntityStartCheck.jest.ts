@@ -1,15 +1,16 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { GeneralEntityReferencePToken } from 'pToken';
 import { GeneralEntityStartPToken } from 'token';
+import { vi } from 'vitest';
 
 import { generalEntityReferenceCheck } from '../../token/generalEntityReferenceCheck';
 import { generalEntityStartCheck } from '../generalEntityStartCheck';
 
-jest.mock('../../token/generalEntityReferenceCheck');
+vi.mock('../../token/generalEntityReferenceCheck');
 
 describe('generalEntityStartCheck (unit)', () => {
    it('calls generalEntityReferenceCheck on reference', () => {

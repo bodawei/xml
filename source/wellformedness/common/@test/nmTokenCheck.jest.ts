@@ -1,15 +1,15 @@
-/* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
+import { describe, expect, it, vi } from 'vitest';
 
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { nmTokenCheck } from '../nmTokenCheck';
 
-jest.mock('basic', () => {
-   const realBasic: Record<string, unknown> = jest.requireActual('basic');
+vi.mock('basic', async () => {
+   const realBasic = (await vi.importActual('basic')) as Record<string, unknown>;
    return {
       ...realBasic,
       isNmToken: (nmToken: string, version: number, edition: number) => {

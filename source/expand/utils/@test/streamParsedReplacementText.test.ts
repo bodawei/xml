@@ -1,4 +1,4 @@
-/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
 import { ENTITY_ID, ConformanceVersion, EntityId, Problem } from 'basic';
 import { toSToken, STokenSource } from 'basic';
@@ -247,7 +247,7 @@ describe('streamParsedReplacementText() (unit)', () => {
 
       const args = parseBodySpy.calls.argsFor(0);
       expect(args[0] instanceof STokenSource).toEqual(true);
-      expect(args[0].segments[0].text).toEqual('foo');
+      expect((args[0].segments[0] as { text: string }).text).toEqual('foo');
       expect(args[1]).toEqual(ParseType.GENERAL_ENTITY);
       expect(typeof args[2]).toEqual('function');
    });

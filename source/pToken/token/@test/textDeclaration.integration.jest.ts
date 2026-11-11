@@ -1,7 +1,7 @@
-/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { STokenSource, toSToken } from 'basic';
+import { describe, expect, it } from 'vitest';
 
 import { InstructionStart } from '../../bridge/instruction';
 import { parseTextDeclaration } from '../textDeclaration';
@@ -19,26 +19,28 @@ describe('textDeclaration (integration)', () => {
    });
 
    describe('parseXmlDeclaration()', () => {
-      it('parses the input, including the parameters which use literal.parse()', (done) => {
-         const source = new STokenSource();
-         source.addText('version="1.0" encoding="ascii" ?>');
-         source.endText();
+      it('parses the input, including the parameters which use literal.parse()', () =>
+         new Promise<void>((done) => {
+            const source = new STokenSource();
+            source.addText('version="1.0" encoding="ascii" ?>');
+            source.endText();
 
-         parseTextDeclaration(source, start, (parsing) => {
-            expect(parsing.fields[0].name.str).toEqual('version');
-            done();
-         });
-      });
+            parseTextDeclaration(source, start, (parsing) => {
+               expect(parsing.fields[0].name.str).toEqual('version');
+               done();
+            });
+         }));
 
-      it('converts the value from literal.parse() to a single SToken', (done) => {
-         const source = new STokenSource();
-         source.addText('version="1.0" encoding="ascii" ?>');
-         source.endText();
+      it('converts the value from literal.parse() to a single SToken', () =>
+         new Promise<void>((done) => {
+            const source = new STokenSource();
+            source.addText('version="1.0" encoding="ascii" ?>');
+            source.endText();
 
-         parseTextDeclaration(source, start, (parsing) => {
-            expect(parsing.fields[1].value!.str).toEqual('ascii');
-            done();
-         });
-      });
+            parseTextDeclaration(source, start, (parsing) => {
+               expect(parsing.fields[1].value!.str).toEqual('ascii');
+               done();
+            });
+         }));
    });
 });

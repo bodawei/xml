@@ -14,398 +14,445 @@ describe('STokenSource (integration)', () => {
    });
 
    describe('extract("all")', () => {
-      it('delivers all the text until the specified terminator', (done) => {
-         source.addText('test of\nall\r\nextractor', new Range(new EntityId()));
+      it('delivers all the text until the specified terminator', () =>
+         new Promise<void>((done) => {
+            source.addText('test of\nall\r\nextractor', new Range(new EntityId()));
 
-         source.extract('all', ['or'], (sToken) => {
-            expect(sToken).toEqual(
-               new SToken(
-                  'test of\nall\nextract',
-                  'test of\nall\r\nextract',
-                  new Range(new EntityId(), 0, 0, 0, 20, 2, 7),
-               ),
-            );
-            done();
-         });
-      });
-
-      it('all text to end if no terminators specified', (done) => {
-         source.addText('o', new Range(new EntityId()));
-         source.addText('ne');
-         source.endText();
-
-         source.extract('all', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken('one', 'one', new Range(new EntityId(), 0, 0, 0, 3, 0, 3)),
-            );
-            done();
-         });
-      });
-
-      it('delivers no SToken if there are no characters', (done) => {
-         source.extract('all', (sToken) => {
-            expect(sToken).toBeUndefined();
-            done();
-         });
-         source.endText();
-      });
-   });
-
-   describe('extract("char")', () => {
-      it('delivers the next character from a segment', (done) => {
-         source.addText('b', new Range(new EntityId()));
-
-         source.extract('char', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken('b', 'b', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
-            );
-            done();
-         });
-      });
-
-      it('delivers a newline from a CRLF across segments', (done) => {
-         source.addText('\r', new Range(new EntityId()));
-         source.addText('\nx');
-
-         source.extract('char', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken('\n', '\r\n', new Range(new EntityId(), 0, 0, 0, 2, 1, 0)),
-            );
-            done();
-         });
-      });
-
-      it('delivers no SToken if there are no characters', (done) => {
-         source.extract('char', (sToken) => {
-            expect(sToken).toBeUndefined();
-            done();
-         });
-         source.endText();
-      });
-   });
-
-   describe('extract("close")', () => {
-      it('identifies ]]> as a close', (done) => {
-         source.addText(']]>sdf', new Range(new EntityId()));
-
-         source.extract('close', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken(']]>', ']]>', new Range(new EntityId(), 0, 0, 0, 3, 0, 3)),
-            );
-            done();
-         });
-      });
-
-      it('identifies ]] as a close', (done) => {
-         source.addText(']foo', new Range(new EntityId()));
-
-         source.extract('close', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken(']', ']', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
-            );
-            done();
-         });
-      });
-   });
-
-   describe('extract("digit")', () => {
-      it('delivers the next digit from a segment', (done) => {
-         source.addText('123x', new Range(new EntityId()));
-
-         source.extract('digit', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken('123', '123', new Range(new EntityId(), 0, 0, 0, 3, 0, 3)),
-            );
-            done();
-         });
-      });
-
-      it('delivers no SToken if there are no digits', (done) => {
-         source.extract('digit', (sToken) => {
-            expect(sToken).toBeUndefined();
-            done();
-         });
-         source.endText();
-      });
-   });
-
-   describe('extract("markup")', () => {
-      it('delivers the next character from a segment', (done) => {
-         source.addText('<foo', new Range(new EntityId()));
-
-         source.extract('markup', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken('<', '<', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
-            );
-            done();
-         });
-      });
-
-      it('identifies <!-- as markup', (done) => {
-         source.addText('<!--foo', new Range(new EntityId()));
-
-         source.extract('markup', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken('<!--', '<!--', new Range(new EntityId(), 0, 0, 0, 4, 0, 4)),
-            );
-            done();
-         });
-      });
-
-      it('identifies <! as markup', (done) => {
-         source.addText('<!-foo', new Range(new EntityId()));
-
-         source.extract('markup', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken('<!', '<!', new Range(new EntityId(), 0, 0, 0, 2, 0, 2)),
-            );
-            done();
-         });
-      });
-
-      it('identifies <? as markup', (done) => {
-         source.addText('<?-foo', new Range(new EntityId()));
-
-         source.extract('markup', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken('<?', '<?', new Range(new EntityId(), 0, 0, 0, 2, 0, 2)),
-            );
-            done();
-         });
-      });
-
-      it('identifies & as markup', (done) => {
-         source.addText('&foo', new Range(new EntityId()));
-
-         source.extract('markup', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken('&', '&', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
-            );
-            done();
-         });
-      });
-
-      it('identifies &# as markup', (done) => {
-         source.addText('&#123', new Range(new EntityId()));
-
-         source.extract('markup', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken('&#', '&#', new Range(new EntityId(), 0, 0, 0, 2, 0, 2)),
-            );
-            done();
-         });
-      });
-
-      it('identifies </ as markup', (done) => {
-         source.addText('</foo', new Range(new EntityId()));
-
-         source.extract('markup', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken('</', '</', new Range(new EntityId(), 0, 0, 0, 2, 0, 2)),
-            );
-            done();
-         });
-      });
-
-      it('delivers no SToken if the next chars do not form markup', (done) => {
-         source.addText('foo', new Range(new EntityId()));
-
-         source.extract('markup', (sToken) => {
-            expect(sToken).toBeUndefined();
-            done();
-         });
-      });
-   });
-
-   describe('extract("match")', () => {
-      it('delivers the the matched text', (done) => {
-         source.addText('frogs and toads', new Range(new EntityId()));
-
-         source.extract('match', 'fro', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken('fro', 'fro', new Range(new EntityId(), 0, 0, 0, 3, 0, 3)),
-            );
-            done();
-         });
-      });
-
-      it('delivers no SToken if there is no match', (done) => {
-         source.addText('frogs and toads', new Range(new EntityId()));
-         source.extract('match', 'gorilla', (sToken) => {
-            expect(sToken).toBeUndefined();
-            done();
-         });
-      });
-
-      it('delivers no SToken if there is no content to match against', (done) => {
-         source.endText();
-         source.extract('match', 'gorilla', (sToken) => {
-            expect(sToken).toBeUndefined();
-            done();
-         });
-      });
-   });
-
-   describe('extract("peekChar")', () => {
-      it('delivers the next character from a segment', (done) => {
-         let first: SToken | undefined;
-         source.addText('b', new Range(new EntityId()));
-
-         source.extract('peekChar', (sToken) => (first = sToken));
-         source.extract('char', (sToken) => {
-            const expected = new SToken('b', 'b', new Range(new EntityId(), 0, 0, 0, 1, 0, 1));
-            expect(first).toEqual(expected);
-            expect(sToken).toEqual(expected);
-            done();
-         });
-      });
-   });
-
-   describe('extract("peekSpace")', () => {
-      it('delivers the next character from a segment', (done) => {
-         let first: SToken | undefined;
-         source.addText(' \t', new Range(new EntityId()));
-         source.endText();
-
-         source.extract('peekSpace', (sToken) => (first = sToken));
-         source.extract('space', (sToken) => {
-            const expected = new SToken(' \t', ' \t', new Range(new EntityId(), 0, 0, 0, 2, 0, 2));
-            expect(first).toEqual(expected);
-            expect(sToken).toEqual(expected);
-            done();
-         });
-      });
-   });
-
-   describe('extract("space")', () => {
-      it('delivers the a range of space characters', (done) => {
-         source.addText(' \t\n\r\n\rx', new Range(new EntityId()));
-
-         source.extract('space', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken(' \t\n\n\n', ' \t\n\r\n\r', new Range(new EntityId(), 0, 0, 0, 6, 3, 0)),
-            );
-            done();
-         });
-      });
-
-      it('delivers the a range of space characters to end of input if needed', (done) => {
-         source.addText(' \t\n\r\n\r', new Range(new EntityId()));
-         source.endText();
-
-         source.extract('space', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken(' \t\n\n\n', ' \t\n\r\n\r', new Range(new EntityId(), 0, 0, 0, 6, 3, 0)),
-            );
-            done();
-         });
-      });
-
-      it('delivers no SToken if there is no space', (done) => {
-         source.extract('space', (sToken) => {
-            expect(sToken).toBeUndefined();
-            done();
-         });
-         source.endText();
-      });
-   });
-
-   describe('extract("word")', () => {
-      it('delivers a word terminated by a whitespace', (done) => {
-         source.addText('word1\nx', new Range(new EntityId()));
-
-         source.extract('word', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken('word1', 'word1', new Range(new EntityId(), 0, 0, 0, 5, 0, 5)),
-            );
-            done();
-         });
-      });
-
-      it('delivers no SToken if there are no characters', (done) => {
-         source.extract('word', (sToken) => {
-            expect(sToken).toBeUndefined();
-            done();
-         });
-         source.endText();
-      });
-
-      it('locates a word while leaving the terminator across seguments untouched', (done) => {
-         source.addText('foo/');
-         source.addText('>');
-         source.endText();
-
-         source.extract('word', ['>', '/>'], (sToken) => {
-            expect(sToken?.str).toEqual('foo');
-            expect(source.segments as any).toEqualRangeless([
-               {
-                  type: SEGMENT_TYPE,
-                  text: 'foo/',
-                  index: 3,
-                  range: undefined,
-               },
-               {
-                  type: SEGMENT_TYPE,
-                  text: '>',
-                  index: 0,
-                  range: undefined,
-               },
-            ]);
-            done();
-         });
-      });
-   });
-
-   describe('multi match extractor', () => {
-      it('delivers a word terminated by a whitespace', (done) => {
-         source.addText('word1\n12');
-         source.addText('3 And this is\n until <things');
-
-         source.extract('word', (wordToken) => {
-            source.extract('char', (charToken) => {
-               source.extract('digit', (digitToken) => {
-                  source.extract('all', ['<'], (allToken) => {
-                     expect(wordToken).toEqual(
-                        new SToken('word1', 'word1', new Range(new EntityId(), 0, 0, 0, 5, 0, 5)),
-                     );
-                     expect(charToken).toEqual(
-                        new SToken('\n', '\n', new Range(new EntityId(), 5, 0, 5, 6, 1, 0)),
-                     );
-                     expect(digitToken).toEqual(
-                        new SToken('123', '123', new Range(new EntityId(), 6, 1, 0, 9, 1, 3)),
-                     );
-                     expect(allToken).toEqual(
-                        new SToken(
-                           ' And this is\n until ',
-                           ' And this is\n until ',
-                           new Range(new EntityId(), 9, 1, 3, 29, 2, 7),
-                        ),
-                     );
-                     done();
-                  });
-               });
-            });
-         });
-      });
-   });
-
-   describe('check()', () => {
-      it('pauses processing to allow other operations to happen', (done) => {
-         const obj: Record<string, SToken> = {};
-
-         source.extractToObject('char', obj, 'foo');
-         source.check(() => {
-            expect(obj).toEqual({
-               foo: new SToken('b', 'b', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
-            });
-            source.extract('char', (sToken) => {
+            source.extract('all', ['or'], (sToken) => {
                expect(sToken).toEqual(
-                  new SToken('c', 'c', new Range(new EntityId(), 1, 0, 1, 2, 0, 2)),
+                  new SToken(
+                     'test of\nall\nextract',
+                     'test of\nall\r\nextract',
+                     new Range(new EntityId(), 0, 0, 0, 20, 2, 7),
+                  ),
                );
                done();
             });
-         });
-         source.addText('bc', new Range(new EntityId()));
-      });
+         }));
+
+      it('all text to end if no terminators specified', () =>
+         new Promise<void>((done) => {
+            source.addText('o', new Range(new EntityId()));
+            source.addText('ne');
+            source.endText();
+
+            source.extract('all', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken('one', 'one', new Range(new EntityId(), 0, 0, 0, 3, 0, 3)),
+               );
+               done();
+            });
+         }));
+
+      it('delivers no SToken if there are no characters', () =>
+         new Promise<void>((done) => {
+            source.extract('all', (sToken) => {
+               expect(sToken).toBeUndefined();
+               done();
+            });
+            source.endText();
+         }));
+   });
+
+   describe('extract("char")', () => {
+      it('delivers the next character from a segment', () =>
+         new Promise<void>((done) => {
+            source.addText('b', new Range(new EntityId()));
+
+            source.extract('char', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken('b', 'b', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
+               );
+               done();
+            });
+         }));
+
+      it('delivers a newline from a CRLF across segments', () =>
+         new Promise<void>((done) => {
+            source.addText('\r', new Range(new EntityId()));
+            source.addText('\nx');
+
+            source.extract('char', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken('\n', '\r\n', new Range(new EntityId(), 0, 0, 0, 2, 1, 0)),
+               );
+               done();
+            });
+         }));
+
+      it('delivers no SToken if there are no characters', () =>
+         new Promise<void>((done) => {
+            source.extract('char', (sToken) => {
+               expect(sToken).toBeUndefined();
+               done();
+            });
+            source.endText();
+         }));
+   });
+
+   describe('extract("close")', () => {
+      it('identifies ]]> as a close', () =>
+         new Promise<void>((done) => {
+            source.addText(']]>sdf', new Range(new EntityId()));
+
+            source.extract('close', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken(']]>', ']]>', new Range(new EntityId(), 0, 0, 0, 3, 0, 3)),
+               );
+               done();
+            });
+         }));
+
+      it('identifies ]] as a close', () =>
+         new Promise<void>((done) => {
+            source.addText(']foo', new Range(new EntityId()));
+
+            source.extract('close', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken(']', ']', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
+               );
+               done();
+            });
+         }));
+   });
+
+   describe('extract("digit")', () => {
+      it('delivers the next digit from a segment', () =>
+         new Promise<void>((done) => {
+            source.addText('123x', new Range(new EntityId()));
+
+            source.extract('digit', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken('123', '123', new Range(new EntityId(), 0, 0, 0, 3, 0, 3)),
+               );
+               done();
+            });
+         }));
+
+      it('delivers no SToken if there are no digits', () =>
+         new Promise<void>((done) => {
+            source.extract('digit', (sToken) => {
+               expect(sToken).toBeUndefined();
+               done();
+            });
+            source.endText();
+         }));
+   });
+
+   describe('extract("markup")', () => {
+      it('delivers the next character from a segment', () =>
+         new Promise<void>((done) => {
+            source.addText('<foo', new Range(new EntityId()));
+
+            source.extract('markup', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken('<', '<', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
+               );
+               done();
+            });
+         }));
+
+      it('identifies <!-- as markup', () =>
+         new Promise<void>((done) => {
+            source.addText('<!--foo', new Range(new EntityId()));
+
+            source.extract('markup', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken('<!--', '<!--', new Range(new EntityId(), 0, 0, 0, 4, 0, 4)),
+               );
+               done();
+            });
+         }));
+
+      it('identifies <! as markup', () =>
+         new Promise<void>((done) => {
+            source.addText('<!-foo', new Range(new EntityId()));
+
+            source.extract('markup', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken('<!', '<!', new Range(new EntityId(), 0, 0, 0, 2, 0, 2)),
+               );
+               done();
+            });
+         }));
+
+      it('identifies <? as markup', () =>
+         new Promise<void>((done) => {
+            source.addText('<?-foo', new Range(new EntityId()));
+
+            source.extract('markup', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken('<?', '<?', new Range(new EntityId(), 0, 0, 0, 2, 0, 2)),
+               );
+               done();
+            });
+         }));
+
+      it('identifies & as markup', () =>
+         new Promise<void>((done) => {
+            source.addText('&foo', new Range(new EntityId()));
+
+            source.extract('markup', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken('&', '&', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
+               );
+               done();
+            });
+         }));
+
+      it('identifies &# as markup', () =>
+         new Promise<void>((done) => {
+            source.addText('&#123', new Range(new EntityId()));
+
+            source.extract('markup', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken('&#', '&#', new Range(new EntityId(), 0, 0, 0, 2, 0, 2)),
+               );
+               done();
+            });
+         }));
+
+      it('identifies </ as markup', () =>
+         new Promise<void>((done) => {
+            source.addText('</foo', new Range(new EntityId()));
+
+            source.extract('markup', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken('</', '</', new Range(new EntityId(), 0, 0, 0, 2, 0, 2)),
+               );
+               done();
+            });
+         }));
+
+      it('delivers no SToken if the next chars do not form markup', () =>
+         new Promise<void>((done) => {
+            source.addText('foo', new Range(new EntityId()));
+
+            source.extract('markup', (sToken) => {
+               expect(sToken).toBeUndefined();
+               done();
+            });
+         }));
+   });
+
+   describe('extract("match")', () => {
+      it('delivers the the matched text', () =>
+         new Promise<void>((done) => {
+            source.addText('frogs and toads', new Range(new EntityId()));
+
+            source.extract('match', 'fro', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken('fro', 'fro', new Range(new EntityId(), 0, 0, 0, 3, 0, 3)),
+               );
+               done();
+            });
+         }));
+
+      it('delivers no SToken if there is no match', () =>
+         new Promise<void>((done) => {
+            source.addText('frogs and toads', new Range(new EntityId()));
+            source.extract('match', 'gorilla', (sToken) => {
+               expect(sToken).toBeUndefined();
+               done();
+            });
+         }));
+
+      it('delivers no SToken if there is no content to match against', () =>
+         new Promise<void>((done) => {
+            source.endText();
+            source.extract('match', 'gorilla', (sToken) => {
+               expect(sToken).toBeUndefined();
+               done();
+            });
+         }));
+   });
+
+   describe('extract("peekChar")', () => {
+      it('delivers the next character from a segment', () =>
+         new Promise<void>((done) => {
+            let first: SToken | undefined;
+            source.addText('b', new Range(new EntityId()));
+
+            source.extract('peekChar', (sToken) => (first = sToken));
+            source.extract('char', (sToken) => {
+               const expected = new SToken('b', 'b', new Range(new EntityId(), 0, 0, 0, 1, 0, 1));
+               expect(first).toEqual(expected);
+               expect(sToken).toEqual(expected);
+               done();
+            });
+         }));
+   });
+
+   describe('extract("peekSpace")', () => {
+      it('delivers the next character from a segment', () =>
+         new Promise<void>((done) => {
+            let first: SToken | undefined;
+            source.addText(' \t', new Range(new EntityId()));
+            source.endText();
+
+            source.extract('peekSpace', (sToken) => (first = sToken));
+            source.extract('space', (sToken) => {
+               const expected = new SToken(
+                  ' \t',
+                  ' \t',
+                  new Range(new EntityId(), 0, 0, 0, 2, 0, 2),
+               );
+               expect(first).toEqual(expected);
+               expect(sToken).toEqual(expected);
+               done();
+            });
+         }));
+   });
+
+   describe('extract("space")', () => {
+      it('delivers the a range of space characters', () =>
+         new Promise<void>((done) => {
+            source.addText(' \t\n\r\n\rx', new Range(new EntityId()));
+
+            source.extract('space', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken(
+                     ' \t\n\n\n',
+                     ' \t\n\r\n\r',
+                     new Range(new EntityId(), 0, 0, 0, 6, 3, 0),
+                  ),
+               );
+               done();
+            });
+         }));
+
+      it('delivers the a range of space characters to end of input if needed', () =>
+         new Promise<void>((done) => {
+            source.addText(' \t\n\r\n\r', new Range(new EntityId()));
+            source.endText();
+
+            source.extract('space', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken(
+                     ' \t\n\n\n',
+                     ' \t\n\r\n\r',
+                     new Range(new EntityId(), 0, 0, 0, 6, 3, 0),
+                  ),
+               );
+               done();
+            });
+         }));
+
+      it('delivers no SToken if there is no space', () =>
+         new Promise<void>((done) => {
+            source.extract('space', (sToken) => {
+               expect(sToken).toBeUndefined();
+               done();
+            });
+            source.endText();
+         }));
+   });
+
+   describe('extract("word")', () => {
+      it('delivers a word terminated by a whitespace', () =>
+         new Promise<void>((done) => {
+            source.addText('word1\nx', new Range(new EntityId()));
+
+            source.extract('word', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken('word1', 'word1', new Range(new EntityId(), 0, 0, 0, 5, 0, 5)),
+               );
+               done();
+            });
+         }));
+
+      it('delivers no SToken if there are no characters', () =>
+         new Promise<void>((done) => {
+            source.extract('word', (sToken) => {
+               expect(sToken).toBeUndefined();
+               done();
+            });
+            source.endText();
+         }));
+
+      it('locates a word while leaving the terminator across seguments untouched', () =>
+         new Promise<void>((done) => {
+            source.addText('foo/');
+            source.addText('>');
+            source.endText();
+
+            source.extract('word', ['>', '/>'], (sToken) => {
+               expect(sToken?.str).toEqual('foo');
+               expect(source.segments as any).toEqualRangeless([
+                  {
+                     type: SEGMENT_TYPE,
+                     text: 'foo/',
+                     index: 3,
+                     range: undefined,
+                  },
+                  {
+                     type: SEGMENT_TYPE,
+                     text: '>',
+                     index: 0,
+                     range: undefined,
+                  },
+               ]);
+               done();
+            });
+         }));
+   });
+
+   describe('multi match extractor', () => {
+      it('delivers a word terminated by a whitespace', () =>
+         new Promise<void>((done) => {
+            source.addText('word1\n12');
+            source.addText('3 And this is\n until <things');
+
+            source.extract('word', (wordToken) => {
+               source.extract('char', (charToken) => {
+                  source.extract('digit', (digitToken) => {
+                     source.extract('all', ['<'], (allToken) => {
+                        expect(wordToken).toEqual(
+                           new SToken(
+                              'word1',
+                              'word1',
+                              new Range(new EntityId(), 0, 0, 0, 5, 0, 5),
+                           ),
+                        );
+                        expect(charToken).toEqual(
+                           new SToken('\n', '\n', new Range(new EntityId(), 5, 0, 5, 6, 1, 0)),
+                        );
+                        expect(digitToken).toEqual(
+                           new SToken('123', '123', new Range(new EntityId(), 6, 1, 0, 9, 1, 3)),
+                        );
+                        expect(allToken).toEqual(
+                           new SToken(
+                              ' And this is\n until ',
+                              ' And this is\n until ',
+                              new Range(new EntityId(), 9, 1, 3, 29, 2, 7),
+                           ),
+                        );
+                        done();
+                     });
+                  });
+               });
+            });
+         }));
+   });
+
+   describe('check()', () => {
+      it('pauses processing to allow other operations to happen', () =>
+         new Promise<void>((done) => {
+            const obj: Record<string, SToken> = {};
+
+            source.extractToObject('char', obj, 'foo');
+            source.check(() => {
+               expect(obj).toEqual({
+                  foo: new SToken('b', 'b', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
+               });
+               source.extract('char', (sToken) => {
+                  expect(sToken).toEqual(
+                     new SToken('c', 'c', new Range(new EntityId(), 1, 0, 1, 2, 0, 2)),
+                  );
+                  done();
+               });
+            });
+            source.addText('bc', new Range(new EntityId()));
+         }));
    });
 });

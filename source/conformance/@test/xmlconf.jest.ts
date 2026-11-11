@@ -2,21 +2,25 @@
 
 import { Transform } from 'stream';
 
-import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, XmlEdition, XmlVersion } from 'basic';
 import { STokenSource } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { AttFixerStream, CheckWellFormed, PTokenStream } from 'node';
 import { ParseType, ParseToken } from 'pToken';
+import { describe, expect, it } from 'vitest';
 
 import CheckValidityStream from '../../node/CheckValidityStream';
-import metadata from './data/xmlconf.json';
+import metadataText from './data/xmlconf.json?raw';
 import { installMatchers } from './helper/customMatchers';
 import { makeAllDone } from './helper/makeAllDone';
 import { TestDetails, prepareTestDetails } from './helper/prepareTestDetails';
 import { PTokenToXmlStream } from './helper/PTokenToXmlStream';
 import { TestExpanderStream } from './helper/TestExpanderStream';
 import { TestSuite } from './helper/types';
+
+type XmlConfData = typeof import('./data/xmlconf.json');
+
+const metadata = JSON.parse(metadataText) as XmlConfData;
 
 installMatchers();
 
@@ -73,62 +77,65 @@ describe('XML Conformance tests', () => {
          .map((ver) => Number.parseInt(ver, 10) as XmlEdition);
 
       allEditions.forEach((edition) => {
-         it(`${testData.ID} (${testData.TYPE}:${ver}/${edition}) ${testData.description}`, (done) => {
-            const hasOutput = 'outputData' in testData;
-            // If an edition was specified in the test data, then we enforce which version to use in the processor. Otherwise we let the document decide
-            const verToUse = hasEdition ? ver : undefined;
-            const revToUse = hasEdition ? edition : undefined;
-            const testStream = setUpStreams(testData, verToUse, revToUse);
-            const doneWhenAllDone = makeAllDone(hasOutput ? 2 : 1, done);
+         it(`${testData.ID} (${testData.TYPE}:${ver}/${edition}) ${testData.description}`, () =>
+            new Promise<void>((done) => {
+               const hasOutput = 'outputData' in testData;
+               // If an edition was specified in the test data, then we enforce which version to use in the processor. Otherwise we let the document decide
+               const verToUse = hasEdition ? ver : undefined;
+               const revToUse = hasEdition ? edition : undefined;
+               const testStream = setUpStreams(testData, verToUse, revToUse);
+               const doneWhenAllDone = makeAllDone(hasOutput ? 2 : 1, () => {
+                  done();
+               });
 
-            // If the test details includes output, then we should test that the output matches
-            if (hasOutput) {
-               const toXmlStream = testStream.pipe(new PTokenToXmlStream());
+               // If the test details includes output, then we should test that the output matches
+               if (hasOutput) {
+                  const toXmlStream = testStream.pipe(new PTokenToXmlStream());
 
-               gatherStreamResults<string>(toXmlStream, (results) => {
-                  // @ts-expect-error 2329/matchers
-                  expect(results).toEqualNormalized(testData.outputData);
+                  gatherStreamResults<string>(toXmlStream, (results) => {
+                     // @ts-expect-error 2329/matchers
+                     expect(results).toEqualNormalized(testData.outputData);
+                     doneWhenAllDone();
+                  });
+               }
+
+               // We also want to test  whether the errors match as expected
+               gatherStreamResults<ParseToken>(testStream, (results) => {
+                  const key = `V${ver}R${edition}`;
+                  let expectedError;
+
+                  if (testData.expectedError) {
+                     expectedError = testData.expectedError[key] ?? testData.expectedError.default;
+                  }
+
+                  // console.log(
+                  //    'results',
+                  //    results.map((r) => r.type),
+                  // );
+                  // console.json(results);
+                  // const actualErrors: Array<any> = results.filter(
+                  //    (token) => token.type === 'ERROR_TYPE' && (token as any).subtype !== 'WARNING',
+                  // ) as any;
+
+                  // const xxx = actualErrors.map((error) => `${error.id} : ${error.message}`);
+
+                  // console.log('-------------------');
+                  // console.log('ID>   ', testData.ID);
+                  // console.log('About>', testData.description);
+                  // console.log(testData.testData?.replace('\\r\\n', '\n').replace('\\n', '\n'));
+                  // console.log('---');
+                  // console.log(xxx.join('\n'));
+
+                  if (expectedError) {
+                     // @ts-expect-error 2329/matchers
+                     expect(results).toHaveXmlConfErrors([expectedError]);
+                  } else {
+                     // @ts-expect-error 2329/matchers
+                     expect(results).not.toHaveXmlConfErrors();
+                  }
                   doneWhenAllDone();
                });
-            }
-
-            // We also want to test  whether the errors match as expected
-            gatherStreamResults<ParseToken>(testStream, (results) => {
-               const key = `V${ver}R${edition}`;
-               let expectedError;
-
-               if (testData.expectedError) {
-                  expectedError = testData.expectedError[key] ?? testData.expectedError.default;
-               }
-
-               // console.log(
-               //    'results',
-               //    results.map((r) => r.type),
-               // );
-               // console.json(results);
-               // const actualErrors: Array<any> = results.filter(
-               //    (token) => token.type === 'ERROR_TYPE' && (token as any).subtype !== 'WARNING',
-               // ) as any;
-
-               // const xxx = actualErrors.map((error) => `${error.id} : ${error.message}`);
-
-               // console.log('-------------------');
-               // console.log('ID>   ', testData.ID);
-               // console.log('About>', testData.description);
-               // console.log(testData.testData?.replace('\\r\\n', '\n').replace('\\n', '\n'));
-               // console.log('---');
-               // console.log(xxx.join('\n'));
-
-               if (expectedError) {
-                  // @ts-expect-error 2329/matchers
-                  expect(results).toHaveXmlConfErrors([expectedError]);
-               } else {
-                  // @ts-expect-error 2329/matchers
-                  expect(results).not.toHaveXmlConfErrors();
-               }
-               doneWhenAllDone();
-            });
-         });
+            }));
 
          const NOT_WF_INVALID = ['o-p16pass1', 'rmt-e2e-14', 'invalid--005', 'invalid--006'];
 
@@ -136,25 +143,26 @@ describe('XML Conformance tests', () => {
             if (NOT_WF_INVALID.includes(testData.ID)) {
                return;
             }
-            it(`${testData.ID} (${testData.TYPE}:${ver}/${edition} Running WITHOUT validation) ${testData.description}`, (done) => {
-               const verToUse = hasEdition ? ver : undefined;
-               const revToUse = hasEdition ? edition : undefined;
-               const { sTokenSource, wellFormedStream } = setupWellFormedStream(
-                  testData,
-                  verToUse,
-                  revToUse,
-               );
+            it(`${testData.ID} (${testData.TYPE}:${ver}/${edition} Running WITHOUT validation) ${testData.description}`, () =>
+               new Promise<void>((done) => {
+                  const verToUse = hasEdition ? ver : undefined;
+                  const revToUse = hasEdition ? edition : undefined;
+                  const { sTokenSource, wellFormedStream } = setupWellFormedStream(
+                     testData,
+                     verToUse,
+                     revToUse,
+                  );
 
-               sTokenSource.addText(testData.testData ?? '');
-               sTokenSource.endText();
+                  sTokenSource.addText(testData.testData ?? '');
+                  sTokenSource.endText();
 
-               // We also want to test  whether the errors match as expected
-               gatherStreamResults<ParseToken>(wellFormedStream, (results) => {
-                  // @ts-expect-error 2329/matchers
-                  expect(results).not.toHaveXmlConfErrors();
-                  done();
-               });
-            });
+                  // We also want to test  whether the errors match as expected
+                  gatherStreamResults<ParseToken>(wellFormedStream, (results) => {
+                     // @ts-expect-error 2329/matchers
+                     expect(results).not.toHaveXmlConfErrors();
+                     done();
+                  });
+               }));
          }
       });
    });

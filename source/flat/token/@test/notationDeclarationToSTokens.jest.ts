@@ -1,20 +1,20 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { NotationDeclarationPToken, TextPToken } from 'pToken';
+import { describe, expect, it, vi, type Mock } from 'vitest';
 
 import { externalIdToSTokens } from '../../common/externalIdToSTokens';
 import { unexpandedToSTokens } from '../../common/unexpandedToSTokens';
 import { notationDeclarationToSTokens } from '../notationDeclarationToSTokens';
 
-jest.mock('../../common/externalIdToSTokens');
-jest.mock('../../common/unexpandedToSTokens');
+vi.mock('../../common/externalIdToSTokens');
+vi.mock('../../common/unexpandedToSTokens');
 
 describe('notationDeclarationToSTokens() (unit)', () => {
    beforeEach(() => {
-      (externalIdToSTokens as jest.Mock).mockReturnValue([toSToken('externalID')]);
-      (unexpandedToSTokens as jest.Mock).mockReturnValue([toSToken('unexpanded')]);
+      (externalIdToSTokens as Mock).mockReturnValue([toSToken('externalID')]);
+      (unexpandedToSTokens as Mock).mockReturnValue([toSToken('unexpanded')]);
    });
 
    it('returns all the STokens', () => {

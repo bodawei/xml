@@ -1,15 +1,15 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { ParameterEntityReferencePToken, UnexpandedMarkupDetails, TextPToken } from 'pToken';
+import { describe, expect, it, vi, type Mock } from 'vitest';
 
 import { parameterEntityReferenceToSTokens } from '../../token/parameterEntityReferenceToSTokens';
 import { textToSTokens } from '../../token/textToSTokens';
 import { unexpandedToSTokens } from '../unexpandedToSTokens';
 
-jest.mock('../../token/parameterEntityReferenceToSTokens');
-jest.mock('../../token/textToSTokens');
+vi.mock('../../token/parameterEntityReferenceToSTokens');
+vi.mock('../../token/textToSTokens');
 
 describe('unexpandedToSTokens()', () => {
    let unexpanded: UnexpandedMarkupDetails;
@@ -32,7 +32,7 @@ describe('unexpandedToSTokens()', () => {
    });
 
    it('extracts the tokens from text tokens', () => {
-      (textToSTokens as jest.Mock).mockReturnValue([toSToken('text')]);
+      (textToSTokens as Mock).mockReturnValue([toSToken('text')]);
       unexpanded.tokens = [
          new TextPToken({ text: toSToken('one') }),
          new TextPToken({ text: toSToken('two') }),
@@ -43,8 +43,8 @@ describe('unexpandedToSTokens()', () => {
    });
 
    it('extracts the tokens from text and a PERef token', () => {
-      (textToSTokens as jest.Mock).mockReturnValue([toSToken('text')]);
-      (parameterEntityReferenceToSTokens as jest.Mock).mockReturnValue([toSToken('peref')]);
+      (textToSTokens as Mock).mockReturnValue([toSToken('text')]);
+      (parameterEntityReferenceToSTokens as Mock).mockReturnValue([toSToken('peref')]);
       unexpanded.tokens = [
          new TextPToken({ text: toSToken('one') }),
          new ParameterEntityReferencePToken({ open: toSToken('%') }),

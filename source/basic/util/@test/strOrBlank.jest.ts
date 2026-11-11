@@ -1,6 +1,6 @@
-/* Copyright ® 2018-2022 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'vitest';
 
 import { strOrBlank } from '../strOrBlank';
 import { toSToken } from '../toSToken';

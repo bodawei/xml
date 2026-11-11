@@ -1,7 +1,7 @@
-/* Copyright ® 2016-2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
-import { describe, it, expect } from '@jest/globals';
 import { EntityId, Range } from 'basic';
+import { describe, it, expect } from 'vitest';
 
 import { AllExtractor } from '../AllExtractor';
 import { Extractor } from '../Extractor';

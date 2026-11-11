@@ -1,9 +1,9 @@
-/* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { CharRefPToken } from 'pToken';
 import { makeCharRef } from 'token-test';
+import { describe, expect, it } from 'vitest';
 
 import { CharRefXToken } from '../charRefXToken';
 

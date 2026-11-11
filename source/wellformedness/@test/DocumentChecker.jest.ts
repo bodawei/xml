@@ -1,6 +1,5 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it, jest } from '@jest/globals';
 import { ProblemCollector, ConformanceVersion, EntityId } from 'basic';
 import { toSToken } from 'basic';
 import {
@@ -44,6 +43,7 @@ import {
    makeElementEnd,
    makeElementEmpty,
 } from 'token-test';
+import { describe, expect, it, vi } from 'vitest';
 
 import { checkMap } from '../checkMap';
 import {
@@ -59,8 +59,8 @@ import { DocumentChecker } from '../DocumentChecker';
 import { wellFormedErrorCodes, WellFormedError } from '../error/wellFormedError';
 import { conditionalStartCheck } from '../token/conditionalStartCheck';
 
-jest.mock('../common/dtdEndCheck');
-jest.mock('../token/conditionalStartCheck');
+vi.mock('../common/dtdEndCheck');
+vi.mock('../token/conditionalStartCheck');
 
 const WFEID = wellFormedErrorCodes.id;
 
@@ -154,8 +154,8 @@ describe('DocumentChecker (unit)', () => {
    }
 
    beforeEach(() => {
-      jest.restoreAllMocks();
-      jest.resetAllMocks();
+      vi.restoreAllMocks();
+      vi.resetAllMocks();
       subState = new CheckState();
       subParams = [];
       checker = new DocumentChecker({
@@ -197,7 +197,7 @@ describe('DocumentChecker (unit)', () => {
 
    describe('check()', () => {
       it('calls pToken.checkWellFormed() when encountering an XML Declaration', () => {
-         const cwfSpy = jest
+         const cwfSpy = vi
             .spyOn(
                checkMap as Record<string, (...args: Array<unknown>) => unknown>,
                'XMLDECL_PTOKEN',

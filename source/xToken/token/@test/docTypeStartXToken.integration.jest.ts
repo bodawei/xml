@@ -1,8 +1,8 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { STokenSource, toSToken } from 'basic';
 import { DeclarationPToken, parseDocTypeStart } from 'token';
+import { describe, expect, it } from 'vitest';
 
 import { ExternalIdX } from '../../common/externalIdX';
 import { DocTypeStartXToken } from '../docTypeStartXToken';
@@ -17,18 +17,19 @@ describe('docTypeStart (integration)', () => {
       });
    });
 
-   it('populates the token with data from the PToken', (done) => {
-      const source = new STokenSource();
-      source.addText('rootElement SYSTEM "sys.dtd" [');
-      source.endText();
+   it('populates the token with data from the PToken', () =>
+      new Promise<void>((done) => {
+         const source = new STokenSource();
+         source.addText('rootElement SYSTEM "sys.dtd" [');
+         source.endText();
 
-      parseDocTypeStart(source, declaration, (pToken) => {
-         const token = new DocTypeStartXToken(pToken);
+         parseDocTypeStart(source, declaration, (pToken) => {
+            const token = new DocTypeStartXToken(pToken);
 
-         expect(token.name).toEqual('rootElement');
-         expect(token.externalId).toEqual(new ExternalIdX('sys.dtd'));
-         expect(token.pToken!.declType).toEqual(declaration.declType);
-         done();
-      });
-   });
+            expect(token.name).toEqual('rootElement');
+            expect(token.externalId).toEqual(new ExternalIdX('sys.dtd'));
+            expect(token.pToken!.declType).toEqual(declaration.declType);
+            done();
+         });
+      }));
 });

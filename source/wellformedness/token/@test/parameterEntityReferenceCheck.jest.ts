@@ -1,9 +1,10 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { ParameterEntityReferencePToken } from 'pToken';
+import { vi } from 'vitest';
 
 import * as util from '../../common/nameCheck';
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
@@ -28,7 +29,7 @@ describe('parameterEntityReferenceCheck()', () => {
          openSpace: toSToken(' '),
       });
 
-      jest.spyOn(util, 'nameCheck').mockImplementation();
+      vi.spyOn(util, 'nameCheck').mockImplementation(() => undefined);
    });
 
    it('checks that the name is a valid name ', () => {

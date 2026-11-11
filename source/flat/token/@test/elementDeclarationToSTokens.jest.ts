@@ -1,23 +1,23 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { ContentModelP, ElementDeclarationPToken } from 'pToken';
+import { describe, expect, it, vi, type Mock } from 'vitest';
 
 import { contentModelToSTokens } from '../../common/contentModelToSTokens';
 import { unexpandedToSTokens } from '../../common/unexpandedToSTokens';
 import { elementDeclarationToSTokens } from '../elementDeclarationToSTokens';
 
-jest.mock('../../common/contentModelToSTokens');
-jest.mock('../../common/unexpandedToSTokens');
+vi.mock('../../common/contentModelToSTokens');
+vi.mock('../../common/unexpandedToSTokens');
 
 describe('elementDeclarationToSTokens() (unit)', () => {
    beforeEach(() => {
-      (contentModelToSTokens as jest.Mock).mockReturnValue([
+      (contentModelToSTokens as Mock).mockReturnValue([
          toSToken('content model'),
          toSToken('content B'),
       ]);
-      (unexpandedToSTokens as jest.Mock).mockReturnValue([
+      (unexpandedToSTokens as Mock).mockReturnValue([
          toSToken('unexpanded1'),
          toSToken('unexpanded2'),
       ]);

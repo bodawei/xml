@@ -1,9 +1,9 @@
-/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { ElementDeclarationPToken } from 'pToken';
 import { ElementEndPToken } from 'token';
+import { describe, expect, it } from 'vitest';
 
 import { ElDeclType, ElementContext, ValidityState } from '../../common/validityState';
 import { elementEndUpdateState } from '../elementEndUpdateState';

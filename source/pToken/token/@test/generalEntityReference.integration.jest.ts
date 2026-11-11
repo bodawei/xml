@@ -9,23 +9,24 @@ import {
 
 describe('generalEntityReference (integration)', () => {
    describe('parseGeneralEntityReference()', () => {
-      it('parses the input', (done) => {
-         const source = new STokenSource();
-         source.addText(' foo ;');
-         source.endText();
+      it('parses the input', () =>
+         new Promise<void>((done) => {
+            const source = new STokenSource();
+            source.addText(' foo ;');
+            source.endText();
 
-         parseGeneralEntityReference(source, toSToken('&'), (parsing) => {
-            expect(parsing).toEqualRangeless(
-               new GeneralEntityReferencePToken({
-                  open: toSToken('&'),
-                  openSpace: toSToken(' '),
-                  name: toSToken('foo'),
-                  nameSpace: toSToken(' '),
-                  close: toSToken(';'),
-               }),
-            );
-            done();
-         });
-      });
+            parseGeneralEntityReference(source, toSToken('&'), (parsing) => {
+               expect(parsing).toEqualRangeless(
+                  new GeneralEntityReferencePToken({
+                     open: toSToken('&'),
+                     openSpace: toSToken(' '),
+                     name: toSToken('foo'),
+                     nameSpace: toSToken(' '),
+                     close: toSToken(';'),
+                  }),
+               );
+               done();
+            });
+         }));
    });
 });

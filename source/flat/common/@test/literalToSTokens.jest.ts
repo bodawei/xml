@@ -1,14 +1,14 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { TextPToken } from 'pToken';
 import { LiteralPToken } from 'token';
+import { describe, expect, it, vi, type Mock } from 'vitest';
 
 import { literalToSTokens } from '../literalToSTokens';
 import { literalValueToSTokens } from '../literalValueToSTokens';
 
-jest.mock('../literalValueToSTokens');
+vi.mock('../literalValueToSTokens');
 
 describe('literalToSTokens() (unit)', () => {
    let literalPToken: LiteralPToken;
@@ -20,7 +20,7 @@ describe('literalToSTokens() (unit)', () => {
          closeQuote: toSToken('"'),
       };
 
-      (literalValueToSTokens as jest.Mock).mockReturnValue(toSToken('xxx'));
+      (literalValueToSTokens as Mock).mockReturnValue(toSToken('xxx'));
    });
 
    it('calls literalValue.getSTokens()', () => {

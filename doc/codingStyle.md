@@ -7,8 +7,8 @@
 
 
 ## Test files
-* Should import jest globals via
-   `import { describe, expect, it } from '@jest/globals';`
+* Should import vitest globals via
+   `import { describe, expect, it } from 'vitest';`
 * Test descriptions should be present active singular ("(it) does x"). If more details are needed, should be of the form "(it) does x when y")
 
 ## Errors

@@ -1,6 +1,5 @@
-/* Copyright ® 2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, XmlEdition, XmlVersion, toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { ContentModelP, ElementDeclarationPToken, ParseToken } from 'pToken';
@@ -34,6 +33,7 @@ import {
    makeTextPToken,
    makeXmlDecl,
 } from 'token-test';
+import { describe, expect, it, vi } from 'vitest';
 
 import { makeCmGraph } from '../../contentModel/makeCmGraph';
 import { validityErrorCodes } from '../../error/validityErrorCodes';
@@ -42,34 +42,34 @@ import { ElDeclType, ValidityState } from '../validityState';
 
 const VID = validityErrorCodes.id;
 
-jest.mock('../../common/elementDeclarationPreprocess');
-jest.mock('../../token/attListDeclarationValidate');
-jest.mock('../../token/attListDeclarationUpdateState');
-jest.mock('../../token/conditionalEndUpdateState');
-jest.mock('../../token/conditionalEndValidate');
-jest.mock('../../token/conditionalStartUpdateState');
-jest.mock('../../token/conditionalStartValidate');
-jest.mock('../../token/docTypeStartUpdateState');
-jest.mock('../../token/docTypeEndValidate');
-jest.mock('../../token/elementDeclarationUpdateState');
-jest.mock('../../token/elementDeclarationValidate');
-jest.mock('../../token/elementEndUpdateState');
-jest.mock('../../token/elementEndValidate');
-jest.mock('../../token/elementStartUpdateState');
-jest.mock('../../token/elementStartValidate');
-jest.mock('../../token/elidedEntityDeclarationUpdateState');
-jest.mock('../../token/entityDeclarationValidate');
-jest.mock('../../token/externalSubsetEndUpdateState');
-jest.mock('../../token/externalSubsetStartUpdateState');
-jest.mock('../../token/generalEntityDeclarationUpdateState');
-jest.mock('../../token/generalEntityReferenceValidate');
-jest.mock('../../token/generalEntityStartValidate');
-jest.mock('../../token/notationDeclarationUpdateState');
-jest.mock('../../token/notationDeclarationValidate');
-jest.mock('../../token/parameterEntityDeclarationUpdateState');
-jest.mock('../../token/parameterEntityReferenceValidate');
-jest.mock('../../token/parameterEntityStartValidate');
-jest.mock('../../token/xmlDeclarationUpdateState');
+vi.mock('../../common/elementDeclarationPreprocess');
+vi.mock('../../token/attListDeclarationValidate');
+vi.mock('../../token/attListDeclarationUpdateState');
+vi.mock('../../token/conditionalEndUpdateState');
+vi.mock('../../token/conditionalEndValidate');
+vi.mock('../../token/conditionalStartUpdateState');
+vi.mock('../../token/conditionalStartValidate');
+vi.mock('../../token/docTypeStartUpdateState');
+vi.mock('../../token/docTypeEndValidate');
+vi.mock('../../token/elementDeclarationUpdateState');
+vi.mock('../../token/elementDeclarationValidate');
+vi.mock('../../token/elementEndUpdateState');
+vi.mock('../../token/elementEndValidate');
+vi.mock('../../token/elementStartUpdateState');
+vi.mock('../../token/elementStartValidate');
+vi.mock('../../token/elidedEntityDeclarationUpdateState');
+vi.mock('../../token/entityDeclarationValidate');
+vi.mock('../../token/externalSubsetEndUpdateState');
+vi.mock('../../token/externalSubsetStartUpdateState');
+vi.mock('../../token/generalEntityDeclarationUpdateState');
+vi.mock('../../token/generalEntityReferenceValidate');
+vi.mock('../../token/generalEntityStartValidate');
+vi.mock('../../token/notationDeclarationUpdateState');
+vi.mock('../../token/notationDeclarationValidate');
+vi.mock('../../token/parameterEntityDeclarationUpdateState');
+vi.mock('../../token/parameterEntityReferenceValidate');
+vi.mock('../../token/parameterEntityStartValidate');
+vi.mock('../../token/xmlDeclarationUpdateState');
 
 describe('conentValidate (unit)', () => {
    let collector: ParamCollector;

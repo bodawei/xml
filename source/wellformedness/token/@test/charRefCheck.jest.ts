@@ -1,21 +1,22 @@
-/* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, extractSurrogatePair, isChar } from 'basic';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { CharRefPToken } from 'pToken';
 import { makeCharRef } from 'token-test';
+import { vi, type Mock } from 'vitest';
 
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { charRefCheck } from '../charRefCheck';
 
-jest.mock('basic', () => {
-   const basicOriginal: Record<string, unknown> = jest.requireActual('basic');
+vi.mock('basic', async () => {
+   const basicOriginal = (await vi.importActual('basic')) as Record<string, unknown>;
 
    return {
       ...basicOriginal,
-      extractSurrogatePair: jest.fn(),
-      isChar: jest.fn(),
+      extractSurrogatePair: vi.fn(),
+      isChar: vi.fn(),
    };
 });
 
@@ -30,7 +31,7 @@ describe('charRefCheck()', () => {
       collector = new ParamCollector();
       confVer = new ConformanceVersion(1, 2);
 
-      (extractSurrogatePair as jest.Mock).mockReturnValue([123, 456]);
+      (extractSurrogatePair as Mock).mockReturnValue([123, 456]);
 
       charRefPToken = makeCharRef();
    });
@@ -48,7 +49,7 @@ describe('charRefCheck()', () => {
    });
 
    it('reports an error if the character is not a valid Char (WFC §4.1.0)', () => {
-      (isChar as jest.Mock).mockReturnValue(false);
+      (isChar as Mock).mockReturnValue(false);
       charRefPToken = new CharRefPToken({
          charCode: 0xffff,
          digits: toSToken('65535'),
@@ -67,7 +68,7 @@ describe('charRefCheck()', () => {
    });
 
    it('reports an error if the character is not a valid Char (WFC §4.1.0)', () => {
-      (isChar as jest.Mock).mockReturnValue(false);
+      (isChar as Mock).mockReturnValue(false);
       charRefPToken = new CharRefPToken({
          charCode: 0x1f026,
          digits: toSToken('1F026'),

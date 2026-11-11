@@ -4,6 +4,7 @@ import { toSToken } from 'basic';
 import { TextPToken } from 'pToken';
 import { MockSTokenSource } from 'pToken-test';
 import { DeclarationStart } from 'token';
+import { vi, type MockedFunction } from 'vitest';
 
 import literal, { LiteralPToken } from '../../../token/common/literal';
 import * as externalId from '../../common/externalId';
@@ -15,9 +16,9 @@ import { ParameterEntityDeclarationPToken } from '../../token/parameterEntityDec
 import { ParameterEntityReferencePToken } from '../../token/parameterEntityReference';
 import { parseEntityDeclaration, resumeParseEntityDeclaration } from '../entityDeclaration';
 
-jest.mock('../../common/externalId');
-jest.mock('../../common/parseUnexpanded');
-jest.mock('../../../token/common/literal');
+vi.mock('../../common/externalId');
+vi.mock('../../common/parseUnexpanded');
+vi.mock('../../../token/common/literal');
 
 type TermArray = Array<string>;
 interface LitParams {
@@ -26,26 +27,26 @@ interface LitParams {
 
 describe('entityDeclaration (unit)', () => {
    let declarationStart: DeclarationStart;
-   let parseUnexpanded: jest.MockedFunction<typeof unexpanded.parseUnexpanded>;
-   let parseUnexpandedAfterPeRef: jest.MockedFunction<typeof unexpanded.parseUnexpandedAfterPeRef>;
-   let parseExternalId: jest.MockedFunction<typeof externalId.parseExternalId>;
-   let literalParse: jest.MockedFunction<typeof literal.parse>;
+   let parseUnexpanded: MockedFunction<typeof unexpanded.parseUnexpanded>;
+   let parseUnexpandedAfterPeRef: MockedFunction<typeof unexpanded.parseUnexpandedAfterPeRef>;
+   let parseExternalId: MockedFunction<typeof externalId.parseExternalId>;
+   let literalParse: MockedFunction<typeof literal.parse>;
 
    beforeEach(() => {
       declarationStart = {
          open: toSToken('<!'),
       };
 
-      parseUnexpanded = unexpanded.parseUnexpanded as jest.MockedFunction<
+      parseUnexpanded = unexpanded.parseUnexpanded as MockedFunction<
          typeof unexpanded.parseUnexpanded
       >;
-      parseUnexpandedAfterPeRef = unexpanded.parseUnexpandedAfterPeRef as jest.MockedFunction<
+      parseUnexpandedAfterPeRef = unexpanded.parseUnexpandedAfterPeRef as MockedFunction<
          typeof unexpanded.parseUnexpandedAfterPeRef
       >;
-      parseExternalId = externalId.parseExternalId as jest.MockedFunction<
+      parseExternalId = externalId.parseExternalId as MockedFunction<
          typeof externalId.parseExternalId
       >;
-      literalParse = literal.parse as jest.MockedFunction<typeof literal.parse>;
+      literalParse = literal.parse as MockedFunction<typeof literal.parse>;
 
       parseUnexpanded.mockImplementation((source, prop, cb) => {
          cb(undefined);

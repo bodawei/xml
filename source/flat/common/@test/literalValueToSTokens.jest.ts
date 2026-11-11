@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { toSToken } from 'basic';
 import {
@@ -8,6 +8,7 @@ import {
    TextPToken,
 } from 'pToken';
 import { GeneralEntityStartPToken } from 'token';
+import { vi, type Mock } from 'vitest';
 
 import { charRefToSTokens } from '../../token/charRefToSTokens';
 import { generalEntityReferenceToSTokens } from '../../token/generalEntityReferenceToSTokens';
@@ -15,10 +16,10 @@ import { parameterEntityReferenceToSTokens } from '../../token/parameterEntityRe
 import { textToSTokens } from '../../token/textToSTokens';
 import { literalValueToSTokens } from '../literalValueToSTokens';
 
-jest.mock('../../token/generalEntityReferenceToSTokens');
-jest.mock('../../token/parameterEntityReferenceToSTokens');
-jest.mock('../../token/textToSTokens');
-jest.mock('../../token/charRefToSTokens');
+vi.mock('../../token/generalEntityReferenceToSTokens');
+vi.mock('../../token/parameterEntityReferenceToSTokens');
+vi.mock('../../token/textToSTokens');
+vi.mock('../../token/charRefToSTokens');
 
 describe('literalValueToSTokens (unit)', () => {
    it('returns an empty array when passed an empty array', () => {
@@ -28,7 +29,7 @@ describe('literalValueToSTokens (unit)', () => {
    });
 
    it('returns the result of processing a char ref ptoken', () => {
-      (charRefToSTokens as jest.Mock).mockReturnValue([toSToken('char')]);
+      (charRefToSTokens as Mock).mockReturnValue([toSToken('char')]);
       const pToken = [new CharRefPToken({ open: toSToken('&#') })];
       const results = literalValueToSTokens(pToken);
 
@@ -36,7 +37,7 @@ describe('literalValueToSTokens (unit)', () => {
    });
 
    it('returns the result of processing a text ptoken', () => {
-      (textToSTokens as jest.Mock).mockReturnValue([toSToken('text')]);
+      (textToSTokens as Mock).mockReturnValue([toSToken('text')]);
       const pToken = [new TextPToken({ text: toSToken('blah') })];
       const results = literalValueToSTokens(pToken);
 
@@ -44,7 +45,7 @@ describe('literalValueToSTokens (unit)', () => {
    });
 
    it('adds STokens from a general entity references', () => {
-      (generalEntityReferenceToSTokens as jest.Mock).mockReturnValue([toSToken('general')]);
+      (generalEntityReferenceToSTokens as Mock).mockReturnValue([toSToken('general')]);
       const pToken = [
          new GeneralEntityReferencePToken({
             open: toSToken('&'),
@@ -57,7 +58,7 @@ describe('literalValueToSTokens (unit)', () => {
    });
 
    it('adds STokens from a parameter entity references', () => {
-      (parameterEntityReferenceToSTokens as jest.Mock).mockReturnValue([toSToken('parameter')]);
+      (parameterEntityReferenceToSTokens as Mock).mockReturnValue([toSToken('parameter')]);
       const pToken = [
          new ParameterEntityReferencePToken({
             open: toSToken('%'),

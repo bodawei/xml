@@ -1,6 +1,5 @@
-/* Copyright ® 2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import {
@@ -20,6 +19,7 @@ import {
    makeGeneralEntityEnd,
    makeGeneralEntityStart,
 } from 'token-test';
+import { describe, expect, it, vi } from 'vitest';
 
 import { ancestorPERefsValidate } from '../../common/ancestorPERefsValidate';
 import { attributeValueValidate } from '../../common/attributeValueValidate';
@@ -30,9 +30,9 @@ import { attListDeclarationValidate } from '../attListDeclarationValidate';
 
 const VID = validityErrorCodes.id;
 
-jest.mock('../../common/attributeValueValidate');
-jest.mock('../../common/ancestorPERefsValidate');
-jest.mock('../../common/xmlSpaceValidate');
+vi.mock('../../common/attributeValueValidate');
+vi.mock('../../common/ancestorPERefsValidate');
+vi.mock('../../common/xmlSpaceValidate');
 
 describe('attListDeclarationValidate (unit)', () => {
    let collector: ParamCollector;
@@ -255,7 +255,7 @@ describe('attListDeclarationValidate (unit)', () => {
          extra: toSToken('>'),
          open: toSToken('<!'),
       });
-      // jest.spyOn(validator, 'attributeValueValidate');
+      // vi.spyOn(validator, 'attributeValueValidate');
 
       attListDeclarationValidate(attListDecl, state, collector);
 

@@ -1,10 +1,10 @@
-/* Copyright ® 2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { ExternalIdP } from 'pToken';
 import { DocTypeStartPToken } from 'token';
 import { makeDocTypeStart } from 'token-test';
+import { describe, expect, it } from 'vitest';
 
 import { ValidityState } from '../../common/validityState';
 import { docTypeStartUpdateState } from '../docTypeStartUpdateState';

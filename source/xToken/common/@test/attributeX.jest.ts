@@ -1,14 +1,14 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { AttributePToken } from 'token';
+import { describe, expect, it, vi, type Mock } from 'vitest';
 
 import { TextXToken } from '../../token/textXToken';
 import { AttributeX } from '../attributeX';
 import { cloneLiteralValueX, makeLiteralValueX } from '../literalValueX';
 
-jest.mock('../literalValueX');
+vi.mock('../literalValueX');
 
 describe('attribute (unit)', () => {
    let attribute: AttributePToken;
@@ -25,7 +25,7 @@ describe('attribute (unit)', () => {
    });
 
    it('can be constructed with a string and a literalValue', () => {
-      (cloneLiteralValueX as jest.Mock).mockReturnValue([new TextXToken('wow')]);
+      (cloneLiteralValueX as Mock).mockReturnValue([new TextXToken('wow')]);
 
       const attrX = new AttributeX('name', [new TextXToken('wow')]);
 
@@ -48,7 +48,7 @@ describe('attribute (unit)', () => {
    });
 
    it('returns name value pairs from the parsing', () => {
-      (makeLiteralValueX as jest.Mock).mockReturnValue([new TextXToken('wow')]);
+      (makeLiteralValueX as Mock).mockReturnValue([new TextXToken('wow')]);
       const attrX = new AttributeX(attribute);
 
       expect(attrX).toEqual({

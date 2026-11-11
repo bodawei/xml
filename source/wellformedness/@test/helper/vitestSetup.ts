@@ -1,5 +1,7 @@
-import { expect } from '@jest/globals';
+/* Copyright ® 2026 by 柏大衛. All rights reserved. */
+
 import { makeProblemMatcher } from 'basic-test';
+import { expect } from 'vitest';
 
 import { errorCodes } from '../../error/errorCodes';
 import { fatalErrorCodes } from '../../error/fatalErrorCodes';

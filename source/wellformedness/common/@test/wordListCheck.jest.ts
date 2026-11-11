@@ -4,14 +4,15 @@ import { ConformanceVersion } from 'basic';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { WordListPToken, WordListType } from 'token';
+import { vi } from 'vitest';
 
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { nameCheck } from '../nameCheck';
 import { nmTokenCheck } from '../nmTokenCheck';
 import { wordListCheck } from '../wordlistCheck';
 
-jest.mock('../nmTokenCheck');
-jest.mock('../nameCheck');
+vi.mock('../nmTokenCheck');
+vi.mock('../nameCheck');
 
 const WFEID = wellFormedErrorCodes.id;
 

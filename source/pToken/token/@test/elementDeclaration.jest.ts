@@ -1,9 +1,9 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { MockSTokenSource } from 'pToken-test';
 import { DeclarationStart } from 'token';
+import { describe, expect, it, vi, type MockedFunction } from 'vitest';
 
 import { ContentModelP } from '../../common/contentModel';
 import * as contentModel from '../../common/contentModel';
@@ -18,10 +18,8 @@ describe('elementDeclaration (unit)', () => {
    let result: ElementDeclarationPToken | undefined;
    let elementDeclaration: ElementDeclarationPToken;
    let dummyCM: ContentModelP;
-   let parseContentModelMock: jest.MockedFunction<typeof contentModel.parseContentModel>;
-   let resumeParseContentModelMock: jest.MockedFunction<
-      typeof contentModel.resumeParseContentModel
-   >;
+   let parseContentModelMock: MockedFunction<typeof contentModel.parseContentModel>;
+   let resumeParseContentModelMock: MockedFunction<typeof contentModel.resumeParseContentModel>;
 
    function getResult(item: ElementDeclarationPToken) {
       result = item;
@@ -40,14 +38,9 @@ describe('elementDeclaration (unit)', () => {
       });
       dummyCM = new ContentModelP({});
 
-      resumeParseContentModelMock = jest.spyOn(
-         contentModel,
-         'resumeParseContentModel',
-      ) as jest.MockedFunction<typeof contentModel.resumeParseContentModel>;
-      resumeParseContentModelMock.mockImplementation();
-      parseContentModelMock = jest.spyOn(contentModel, 'parseContentModel') as jest.MockedFunction<
-         typeof contentModel.parseContentModel
-      >;
+      resumeParseContentModelMock = vi.spyOn(contentModel, 'resumeParseContentModel');
+      resumeParseContentModelMock.mockImplementation(() => undefined);
+      parseContentModelMock = vi.spyOn(contentModel, 'parseContentModel');
       parseContentModelMock.mockImplementation(
          (source, cb: (spec: ContentModelP | undefined) => void) => {
             cb(dummyCM);
@@ -143,15 +136,13 @@ describe('elementDeclaration (unit)', () => {
 
    describe('parseElementDeclaration()', () => {
       let declarationStart: DeclarationStart;
-      let parseUnexpandedSpy: jest.MockedFunction<typeof parseUnexpanded.parseUnexpanded>;
+      let parseUnexpandedSpy: MockedFunction<typeof parseUnexpanded.parseUnexpanded>;
 
       beforeEach(() => {
          declarationStart = {
             open: toSToken('<!'),
          };
-         parseUnexpandedSpy = jest.spyOn(parseUnexpanded, 'parseUnexpanded') as jest.MockedFunction<
-            typeof parseUnexpanded.parseUnexpanded
-         >;
+         parseUnexpandedSpy = vi.spyOn(parseUnexpanded, 'parseUnexpanded');
 
          parseUnexpandedSpy.mockImplementation((source, propName, cb) => {
             cb(undefined);
@@ -409,12 +400,10 @@ describe('elementDeclaration (unit)', () => {
    });
 
    describe('resumeParseElementDeclaration()', () => {
-      let parseUnexpandedSpy: jest.MockedFunction<typeof parseUnexpanded.parseUnexpanded>;
+      let parseUnexpandedSpy: MockedFunction<typeof parseUnexpanded.parseUnexpanded>;
 
       beforeEach(() => {
-         parseUnexpandedSpy = jest.spyOn(parseUnexpanded, 'parseUnexpanded') as jest.MockedFunction<
-            typeof parseUnexpanded.parseUnexpanded
-         >;
+         parseUnexpandedSpy = vi.spyOn(parseUnexpanded, 'parseUnexpanded');
 
          parseUnexpandedSpy.mockImplementation((source, propName, cb) => {
             cb(undefined);

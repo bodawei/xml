@@ -1,11 +1,11 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, Problem } from 'basic';
 import { STokenSource } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { AttFixerStream, EntityExpanderStream, PTokenStream } from 'node';
 import { ParseType, ParseToken } from 'pToken';
+import { describe, expect, it } from 'vitest';
 
 import { ContentChecker } from '../ContentChecker';
 import { DocumentChecker } from '../DocumentChecker';
@@ -60,41 +60,44 @@ describe('DocumentChecker (integration)', () => {
       });
    }
 
-   it('reports an interoperability warning when an empty element tag is used for an element that was not declared as EMPTY (§3.1.0)', (done) => {
-      expectError(
-         `<?xml version="1.0"?>
+   it('reports an interoperability warning when an empty element tag is used for an element that was not declared as EMPTY (§3.1.0)', () =>
+      new Promise<void>((done) => {
+         expectError(
+            `<?xml version="1.0"?>
          <!DOCTYPE root [
             <!ELEMENT bar ANY>
          ]>
          <bar/>`,
-         WID.ELEMENT_EMPTY_WITH_NONEMPTY_DECL,
-         done,
-      );
-   });
+            WID.ELEMENT_EMPTY_WITH_NONEMPTY_DECL,
+            done,
+         );
+      }));
 
-   it('reports a warning there is a second declaration of an existing general entity (§4.2.0)', (done) => {
-      expectError(
-         `<?xml version="1.0"?>
+   it('reports a warning there is a second declaration of an existing general entity (§4.2.0)', () =>
+      new Promise<void>((done) => {
+         expectError(
+            `<?xml version="1.0"?>
          <!DOCTYPE root [
             <!ENTITY bar "goo">
             <!ENTITY bar "boo">
          ]>
          <bar/>`,
-         WID.ENTITYDECL_XRA_DECLARATION,
-         done,
-      );
-   });
+            WID.ENTITYDECL_XRA_DECLARATION,
+            done,
+         );
+      }));
 
-   it('reports a warning there is a second declaration of an existing parameter entity (§4.2.0)', (done) => {
-      expectError(
-         `<?xml version="1.0"?>
+   it('reports a warning there is a second declaration of an existing parameter entity (§4.2.0)', () =>
+      new Promise<void>((done) => {
+         expectError(
+            `<?xml version="1.0"?>
          <!DOCTYPE root [
             <!ENTITY % bar "goo">
             <!ENTITY % bar "boo">
          ]>
          <bar/>`,
-         WID.ENTITYDECL_XRA_DECLARATION,
-         done,
-      );
-   });
+            WID.ENTITYDECL_XRA_DECLARATION,
+            done,
+         );
+      }));
 });

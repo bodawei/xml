@@ -1,4 +1,4 @@
-/* Copyright ® 2017 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ProblemCollector } from 'basic';
 import { STokenSource, toSToken } from 'basic';
@@ -22,22 +22,23 @@ describe('processingInstructionCheck() (integration)', () => {
       piPToken = new ProcessingInstructionPToken(proto);
    });
 
-   it('asks the instruction module report if there is an extra space', (done) => {
-      piPToken = new ProcessingInstructionPToken(piPToken, {
-         openSpace: toSToken(' '),
-      });
-      const source = new STokenSource();
-      source.addText('blah blah?>');
-      source.endText();
+   it('asks the instruction module report if there is an extra space', () =>
+      new Promise<void>((done) => {
+         piPToken = new ProcessingInstructionPToken(piPToken, {
+            openSpace: toSToken(' '),
+         });
+         const source = new STokenSource();
+         source.addText('blah blah?>');
+         source.endText();
 
-      parseProcessingInstruction(source, piPToken, (pToken) => {
-         const collector = new ProblemCollector(toSToken(''), WellFormedError);
+         parseProcessingInstruction(source, piPToken, (pToken) => {
+            const collector = new ProblemCollector(toSToken(''), WellFormedError);
 
-         processingInstructionCheck(pToken, collector, new ConformanceVersion());
+            processingInstructionCheck(pToken, collector, new ConformanceVersion());
 
-         // @ts-expect-error 2329/matchers
-         expect(collector).toHaveProblem(WFEID.PI_SPACE_AFTER_OPEN);
-         done();
-      });
-   });
+            // @ts-expect-error 2329/matchers
+            expect(collector).toHaveProblem(WFEID.PI_SPACE_AFTER_OPEN);
+            done();
+         });
+      }));
 });

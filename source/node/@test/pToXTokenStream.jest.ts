@@ -1,19 +1,19 @@
-/* Copyright ® 2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { makeTextPToken } from 'token-test';
+import { describe, expect, it, vi, type MockedFunction } from 'vitest';
 import { convertPTokenToXToken, TextXToken } from 'xToken';
 
 import { PToXTokenStream } from '../pToXTokenStream';
 
-jest.mock('xToken');
+vi.mock('xToken');
 
 describe('PToXTokenStream (unit)', () => {
    let pToXTokenStream: PToXTokenStream;
-   let convertPTokenToXTokenMock: jest.MockedFunction<typeof convertPTokenToXToken>;
+   let convertPTokenToXTokenMock: MockedFunction<typeof convertPTokenToXToken>;
 
    beforeEach(() => {
-      convertPTokenToXTokenMock = convertPTokenToXToken as jest.MockedFunction<
+      convertPTokenToXTokenMock = convertPTokenToXToken as MockedFunction<
          typeof convertPTokenToXToken
       >;
 
@@ -30,17 +30,18 @@ describe('PToXTokenStream (unit)', () => {
 
    it('calls the push() when with the result of the conversion', () => {
       const pToken = makeTextPToken('foo');
-      jest.spyOn(pToXTokenStream, 'push');
-      convertPTokenToXTokenMock.mockReturnValue(new TextXToken('gooo'));
+      vi.spyOn(pToXTokenStream, 'push');
+      const xToken = new TextXToken('gooo');
+      convertPTokenToXTokenMock.mockReturnValue(xToken);
 
       pToXTokenStream.write(pToken);
 
-      expect(pToXTokenStream.push).toHaveBeenCalledWith(new TextXToken('gooo'));
+      expect(pToXTokenStream.push).toHaveBeenCalledWith(xToken);
    });
 
    it('calls the done callback when done processing', () => {
       const pToken = makeTextPToken('foo');
-      const doneMock = jest.fn();
+      const doneMock = vi.fn();
 
       pToXTokenStream._transform(pToken, 'foo', doneMock);
 

@@ -1,4 +1,4 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ProblemCollector } from 'basic';
 import { STokenSource, toSToken } from 'basic';
@@ -26,32 +26,34 @@ describe('xmlDeclarationCheck (integration)', () => {
       source = new STokenSource();
    });
 
-   it('reports an error when the target text is malformed (check charCheck())', (done) => {
-      source.addText('version "1.0" encoding="usascii"?>');
-      start.target = toSToken('\u0001xml');
+   it('reports an error when the target text is malformed (check charCheck())', () =>
+      new Promise<void>((done) => {
+         source.addText('version "1.0" encoding="usascii"?>');
+         start.target = toSToken('\u0001xml');
 
-      parseXmlDeclaration(source, start, (result) => {
-         const collector = new ProblemCollector(start.open, WellFormedError);
+         parseXmlDeclaration(source, start, (result) => {
+            const collector = new ProblemCollector(start.open, WellFormedError);
 
-         xmlDeclarationCheck(result, collector, confVer);
+            xmlDeclarationCheck(result, collector, confVer);
 
-         // @ts-expect-error 2329/matchers
-         expect(collector).toHaveProblem(WFEID.CHARDATA_INVALID_CHAR);
-         done();
-      });
-   });
+            // @ts-expect-error 2329/matchers
+            expect(collector).toHaveProblem(WFEID.CHARDATA_INVALID_CHAR);
+            done();
+         });
+      }));
 
-   it('reports an error when the param value is malformed (check charCheck())', (done) => {
-      source.addText('version="\u00011.0" encoding="usascii"?>');
+   it('reports an error when the param value is malformed (check charCheck())', () =>
+      new Promise<void>((done) => {
+         source.addText('version="\u00011.0" encoding="usascii"?>');
 
-      parseXmlDeclaration(source, start, (result) => {
-         const collector = new ProblemCollector(result.open, WellFormedError);
+         parseXmlDeclaration(source, start, (result) => {
+            const collector = new ProblemCollector(result.open, WellFormedError);
 
-         xmlDeclarationCheck(result, collector, confVer);
+            xmlDeclarationCheck(result, collector, confVer);
 
-         // @ts-expect-error 2329/matchers
-         expect(collector).toHaveProblem(WFEID.CHARDATA_INVALID_CHAR);
-         done();
-      });
-   });
+            // @ts-expect-error 2329/matchers
+            expect(collector).toHaveProblem(WFEID.CHARDATA_INVALID_CHAR);
+            done();
+         });
+      }));
 });

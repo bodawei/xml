@@ -25,8 +25,8 @@ pipeline: `basic` → `pToken` → `token` / `xToken` / `flat` → `wellformedne
 | Purpose            | Command                                                      |
 | ------------------ | ------------------------------------------------------------ |
 | Jasmine specs      | `npm test` (nodemon; watches and reruns)                     |
-| All Jest specs     | `npm run jest:all`                                           |
-| One Jest spec      | `npx jest --config ./jest.config.js <path> --coverage=false` |
+| All Vitest specs   | `npm run vitest:all`                                         |
+| One Vitest spec    | `npx vitest run <path> --coverage=false`                     |
 | Type-check         | `npm run check:types` (TypeScript 7; should report no errors) |
 | Lint touched files | `npx oxlint <files>`                                         |
 | Format check       | `npx oxfmt --check <files>`                                  |
@@ -90,7 +90,7 @@ Do not treat these as regressions, and do not fix them as part of unrelated work
 
 ## Tests
 
--  Jest specs live in `source/**/@test/**/*.jest.ts`. Add new tests as Jest.
+-  Vitest specs live in `source/**/@test/**/*.jest.ts`. Add new tests as Vitest.
 -  Jasmine specs live in `source/**/*test.ts` and are run by `npm test`.
 -  Do not add new Jasmine specs unless you are extending an existing Jasmine file.
 -  The Jasmine scripts (and `build:xmlconf` / `build:flat`) run
@@ -109,7 +109,7 @@ Do not treat these as regressions, and do not fix them as part of unrelated work
 
 ## Definition of done
 
--  Relevant specs pass: `npm run jest:all` and/or `npm test`.
+-  Relevant specs pass: `npm run vitest:all` and/or `npm test`.
 -  `npx oxlint` passes for the files you touched (no new errors or warnings).
 -  `npx oxfmt --check` passes for the files you touched.
 -  Type-check your changes: `npm run check:types` should report no errors.

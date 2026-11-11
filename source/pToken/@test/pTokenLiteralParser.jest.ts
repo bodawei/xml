@@ -1,10 +1,10 @@
-/* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { Range, EntityId } from 'basic';
 import { SToken } from 'basic';
 import { TextPToken } from 'pToken';
 import { MockSTokenSource } from 'pToken-test';
+import { describe, expect, it, vi } from 'vitest';
 
 import { parseInstruction } from '../bridge/instruction';
 import { PTokenLiteralParser } from '../pTokenLiteralParser';
@@ -13,17 +13,20 @@ import { parseGeneralEntityReference } from '../token/generalEntityReference';
 import { parseParameterEntityReference } from '../token/parameterEntityReference';
 import { parseText } from '../token/text';
 
-jest.mock('../bridge/instruction');
-jest.mock('../token/generalEntityReference');
-jest.mock('../token/parameterEntityReference');
-jest.mock('../token/charRef');
-jest.mock('../token/text');
+vi.mock('../bridge/instruction');
+vi.mock('../token/generalEntityReference');
+vi.mock('../token/parameterEntityReference');
+vi.mock('../token/charRef');
+vi.mock('../token/text', async (importOriginal) => {
+   const actual = await importOriginal<typeof import('../token/text')>();
+   return { ...actual, parseText: vi.fn() };
+});
 
 describe('PTokenLiteralParser (unit)', () => {
    it('reports the end of stream if no next character is found', () => {
       const mockSource = new MockSTokenSource([[undefined, 'peekChar']]);
       const pTokenLiteralParser = new PTokenLiteralParser(mockSource);
-      const handler = jest.fn();
+      const handler = vi.fn();
 
       pTokenLiteralParser.parse(handler);
       mockSource.respondInAsyncTime();
@@ -38,7 +41,7 @@ describe('PTokenLiteralParser (unit)', () => {
          // now we hit parseText
       ]);
       const pTokenLiteralParser = new PTokenLiteralParser(mockSource, { peRef: true });
-      const handler = jest.fn();
+      const handler = vi.fn();
 
       pTokenLiteralParser.parse(handler);
       mockSource.respondInAsyncTime();
@@ -54,7 +57,7 @@ describe('PTokenLiteralParser (unit)', () => {
          // now we hit parseText
       ]);
       const pTokenLiteralParser = new PTokenLiteralParser(mockSource, { peRef: true });
-      const handler = jest.fn();
+      const handler = vi.fn();
 
       pTokenLiteralParser.parse(handler);
       mockSource.respondInAsyncTime();
@@ -70,7 +73,7 @@ describe('PTokenLiteralParser (unit)', () => {
          // now we hit parseText
       ]);
       const pTokenLiteralParser = new PTokenLiteralParser(mockSource, { peRef: true });
-      const handler = jest.fn();
+      const handler = vi.fn();
 
       pTokenLiteralParser.parse(handler);
       mockSource.respondInAsyncTime();
@@ -87,7 +90,7 @@ describe('PTokenLiteralParser (unit)', () => {
          // now we hit parseText
       ]);
       const pTokenLiteralParser = new PTokenLiteralParser(mockSource, { peRef: true });
-      const handler = jest.fn();
+      const handler = vi.fn();
 
       pTokenLiteralParser.parse(handler);
       mockSource.respondInAsyncTime();
@@ -100,7 +103,7 @@ describe('PTokenLiteralParser (unit)', () => {
    it('calls parseParameterEntityReference() if it is to be looking for entity references and finds a %', () => {
       const mockSource = new MockSTokenSource([['%', 'peekChar']]);
       const pTokenLiteralParser = new PTokenLiteralParser(mockSource, { peRef: true });
-      const handler = jest.fn();
+      const handler = vi.fn();
 
       pTokenLiteralParser.parse(handler);
       mockSource.respondInAsyncTime();
@@ -111,7 +114,7 @@ describe('PTokenLiteralParser (unit)', () => {
    it('calls parseText() with just & if not looking for perefs', () => {
       const mockSource = new MockSTokenSource([['x', 'peekChar']]);
       const pTokenLiteralParser = new PTokenLiteralParser(mockSource, {});
-      const handler = jest.fn();
+      const handler = vi.fn();
 
       pTokenLiteralParser.parse(handler);
       mockSource.respondInAsyncTime();
@@ -122,7 +125,7 @@ describe('PTokenLiteralParser (unit)', () => {
    it('calls parseText() with all terminators if can look for peref', () => {
       const mockSource = new MockSTokenSource([['x', 'peekChar']]);
       const pTokenLiteralParser = new PTokenLiteralParser(mockSource, { peRef: true });
-      const handler = jest.fn();
+      const handler = vi.fn();
 
       pTokenLiteralParser.parse(handler);
       mockSource.respondInAsyncTime();
@@ -137,7 +140,7 @@ describe('PTokenLiteralParser (unit)', () => {
          [undefined, 'char'],
       ]);
       const pTokenLiteralParser = new PTokenLiteralParser(mockSource);
-      const handler = jest.fn();
+      const handler = vi.fn();
 
       pTokenLiteralParser.parse(handler);
       mockSource.respondInAsyncTime();
@@ -151,7 +154,7 @@ describe('PTokenLiteralParser (unit)', () => {
          ['&#', 'match', '&#'],
       ]);
       const pTokenLiteralParser = new PTokenLiteralParser(mockSource, { peRef: true });
-      const handler = jest.fn();
+      const handler = vi.fn();
 
       pTokenLiteralParser.parse(handler);
       mockSource.respondInAsyncTime();
@@ -166,7 +169,7 @@ describe('PTokenLiteralParser (unit)', () => {
          ['&', 'char'],
       ]);
       const pTokenLiteralParser = new PTokenLiteralParser(mockSource, { geRef: true });
-      const handler = jest.fn();
+      const handler = vi.fn();
 
       pTokenLiteralParser.parse(handler);
       mockSource.respondInAsyncTime();
@@ -186,7 +189,7 @@ describe('PTokenLiteralParser (unit)', () => {
       ]);
       const pTokenLiteralParser = new PTokenLiteralParser(mockSource, { peRef: true });
       const sToken = new SToken('&', '&', new Range(new EntityId(), 1, 0, 1, 2, 0, 2));
-      const handler = jest.fn();
+      const handler = vi.fn();
 
       pTokenLiteralParser.parse(handler);
       mockSource.respondInAsyncTime();

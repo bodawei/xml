@@ -40,8 +40,8 @@ jobs:
          - run: npm ci
          - run: npm run check:types
 
-   jest:
-      name: Jest
+   vitest:
+      name: Vitest
       runs-on: ubuntu-latest
       steps:
          - uses: actions/checkout@v4
@@ -50,7 +50,7 @@ jobs:
               node-version: 26
               cache: npm
          - run: npm ci
-         - run: npm run jest:all
+         - run: npm run vitest:all
 
    jasmine:
       name: Jasmine

@@ -1,16 +1,17 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { TextPToken } from 'pToken';
 import { LiteralPToken } from 'token';
+import { vi } from 'vitest';
 
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { literalCheck } from '../literalCheck';
 import { literalValueCheck } from '../literalValueCheck';
 
-jest.mock('../literalValueCheck');
+vi.mock('../literalValueCheck');
 
 const WFEID = wellFormedErrorCodes.id;
 

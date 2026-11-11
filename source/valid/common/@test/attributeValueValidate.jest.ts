@@ -1,6 +1,5 @@
-/* Copyright ® 2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { ParamCollector } from 'basic-test';
 import {
    makeGeneralEntityDeclaration,
@@ -8,12 +7,13 @@ import {
    makeGeneralEntityStart,
    makeTextPToken,
 } from 'token-test';
+import { describe, expect, it, vi } from 'vitest';
 
 import { attributeValueValidate } from '../attributeValueValidate';
 import { geRefValidate } from '../geRefValidate';
 import { ValidityState } from '../validityState';
 
-jest.mock('../geRefValidate');
+vi.mock('../geRefValidate');
 
 describe('attributeValueValidate (unit)', () => {
    let collector: ParamCollector;

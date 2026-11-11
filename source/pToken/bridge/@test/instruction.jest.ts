@@ -1,8 +1,8 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { SToken, toSToken } from 'basic';
 import { MockSTokenSource } from 'pToken-test';
+import { describe, expect, it, vi, type MockedFunction } from 'vitest';
 
 import * as pi from '../../token/processingInstruction';
 import * as textDecl from '../../token/textDeclaration';
@@ -10,7 +10,7 @@ import * as xmlDecl from '../../token/xmlDeclaration';
 import { parseInstruction } from '../instruction';
 
 describe('parseInstruction (unit)', () => {
-   let callback: jest.MockedFunction<
+   let callback: MockedFunction<
       (
          section:
             | pi.ProcessingInstructionPToken
@@ -22,13 +22,15 @@ describe('parseInstruction (unit)', () => {
 
    beforeEach(() => {
       open = toSToken('<?');
-      callback = jest.fn();
+      callback = vi.fn();
    });
 
    // See the integration test for validation that this actually returns something through callback
 
    it('calls parseProcessingInstruction() when the target is not "xml"', () => {
-      const piParse = jest.spyOn(pi, 'parseProcessingInstruction').mockImplementation();
+      const piParse = vi
+         .spyOn(pi, 'parseProcessingInstruction')
+         .mockImplementation(() => undefined);
       const mockSource = new MockSTokenSource([
          [undefined, 'space'],
          [undefined, 'word', ['?>']],
@@ -51,7 +53,7 @@ describe('parseInstruction (unit)', () => {
    });
 
    it('parses an XnlDeclaration if it finds a target of xml and is not in a document entity', () => {
-      const xmlParse = jest.spyOn(xmlDecl, 'parseXmlDeclaration').mockImplementation();
+      const xmlParse = vi.spyOn(xmlDecl, 'parseXmlDeclaration').mockImplementation(() => undefined);
       const mockSource = new MockSTokenSource([
          [undefined, 'space'],
          ['xml', 'word', ['?>']],
@@ -74,7 +76,9 @@ describe('parseInstruction (unit)', () => {
    });
 
    it('parses an TextDeclaration if it finds a target of xml and is not in a document entity', () => {
-      const textParse = jest.spyOn(textDecl, 'parseTextDeclaration').mockImplementation();
+      const textParse = vi
+         .spyOn(textDecl, 'parseTextDeclaration')
+         .mockImplementation(() => undefined);
       const mockSource = new MockSTokenSource([
          ['\t', 'space'],
          ['xml', 'word', ['?>']],

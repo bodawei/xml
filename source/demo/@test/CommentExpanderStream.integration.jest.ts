@@ -31,56 +31,63 @@ describe('CommentExpanderStream (integration)', () => {
    }
 
    describe('transformation', () => {
-      it('passes through an a comment with no character references', (done) => {
-         testTransformation(' this is a test ', ' this is a test ', done);
-      });
+      it('passes through an a comment with no character references', () =>
+         new Promise<void>((done) => {
+            testTransformation(' this is a test ', ' this is a test ', done);
+         }));
 
-      it('passes through a decimal character reference', (done) => {
-         testTransformation(' this is &#97; test ', ' this is a test ', done);
-      });
+      it('passes through a decimal character reference', () =>
+         new Promise<void>((done) => {
+            testTransformation(' this is &#97; test ', ' this is a test ', done);
+         }));
 
-      it('passes through a hex character reference', (done) => {
-         testTransformation(' this is &#x61; test ', ' this is a test ', done);
-      });
+      it('passes through a hex character reference', () =>
+         new Promise<void>((done) => {
+            testTransformation(' this is &#x61; test ', ' this is a test ', done);
+         }));
 
-      it('passes through multiple character references', (done) => {
-         testTransformation(' this &#105;s &#x61; test ', ' this is a test ', done);
-      });
+      it('passes through multiple character references', () =>
+         new Promise<void>((done) => {
+            testTransformation(' this &#105;s &#x61; test ', ' this is a test ', done);
+         }));
 
-      it('handles a character reference at the start', (done) => {
-         testTransformation('&#32;this &#105;s &#x61; test ', ' this is a test ', done);
-      });
+      it('handles a character reference at the start', () =>
+         new Promise<void>((done) => {
+            testTransformation('&#32;this &#105;s &#x61; test ', ' this is a test ', done);
+         }));
 
-      it('handles a character reference at the end', (done) => {
-         testTransformation('&#32;this &#105;s &#x61; test&#32;', ' this is a test ', done);
-      });
+      it('handles a character reference at the end', () =>
+         new Promise<void>((done) => {
+            testTransformation('&#32;this &#105;s &#x61; test&#32;', ' this is a test ', done);
+         }));
    });
 
    describe('passthrough', () => {
-      it('passes all tokens through', (done) => {
-         const sTokenSource = new STokenSource();
-         pTokenStream = new PTokenStream(sTokenSource);
+      it('passes all tokens through', () =>
+         new Promise<void>((done) => {
+            const sTokenSource = new STokenSource();
+            pTokenStream = new PTokenStream(sTokenSource);
 
-         sTokenSource.addText('<?xml encoding="utf-8"?><!--test--><one>foo</one>');
-         sTokenSource.endText();
+            sTokenSource.addText('<?xml encoding="utf-8"?><!--test--><one>foo</one>');
+            sTokenSource.endText();
 
-         const cf = new CommentExpanderStream();
-         pTokenStream.pipe(cf);
+            const cf = new CommentExpanderStream();
+            pTokenStream.pipe(cf);
 
-         gatherStreamResults<ParseToken>(cf, (results) => {
-            const types = results.map((r) => r.type);
+            gatherStreamResults<ParseToken>(cf, (results) => {
+               const types = results.map((r) => r.type);
 
-            expect(types).toEqual([
-               CONFORMANCE_VERSION,
-               ENTITY_ID,
-               XMLDECL_PTOKEN,
-               COMMENT_PTOKEN,
-               ELEMENT_START_PTOKEN,
-               CHARDATA_PTOKEN,
-               ELEMENT_END_PTOKEN,
-            ]);
-            done();
-         });
-      });
+               expect(types).toEqual([
+                  CONFORMANCE_VERSION,
+                  ENTITY_ID,
+                  XMLDECL_PTOKEN,
+                  COMMENT_PTOKEN,
+                  ELEMENT_START_PTOKEN,
+                  CHARDATA_PTOKEN,
+                  ELEMENT_END_PTOKEN,
+               ]);
+               done();
+            });
+         }));
    });
 });

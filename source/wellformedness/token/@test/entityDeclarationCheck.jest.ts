@@ -1,4 +1,4 @@
-/* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2019-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
 import { toSToken } from 'basic';
@@ -9,6 +9,7 @@ import {
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
 } from 'pToken';
+import { vi } from 'vitest';
 
 import { charCheck } from '../../common/charCheck';
 import { externalIdCheck } from '../../common/externalIdCheck';
@@ -19,11 +20,11 @@ import { warningCodes } from '../../error/warningCodes';
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { entityDeclarationCheck } from '../entityDeclarationCheck';
 
-jest.mock('../../common/charCheck');
-jest.mock('../../common/externalIdCheck');
-jest.mock('../../common/literalCheck');
-jest.mock('../../common/nameCheck');
-jest.mock('../../common/nameXmlCheck');
+vi.mock('../../common/charCheck');
+vi.mock('../../common/externalIdCheck');
+vi.mock('../../common/literalCheck');
+vi.mock('../../common/nameCheck');
+vi.mock('../../common/nameXmlCheck');
 
 const WFEID = wellFormedErrorCodes.id;
 const WID = warningCodes.id;

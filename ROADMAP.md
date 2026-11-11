@@ -17,7 +17,7 @@ README goals and the current code; edit, reorder, or replace them as priorities 
 | P7  | done   | Bring all pkg dependencies up to date.                                                  |
 | P8  | done   | Try swapping oxfmt in for prettier.                                                     |
 | P9  | done   | Bring oxlint into the picture.                                                          |
-| P10 | idea   | Replace jest with with vitest                                                           |
+| P10 | blocked | Replace jest with vitest (migrated; awaiting keep/revert decision)                      |
 | P11 | idea   | Kill jasmine, move those to vitest.                                                     |
 | P12 | idea   | Switch to one of the mono repo systems so we can lock down cross "package" dependencies |
 | P13 | idea   | Clarify/fix the impossible to "fix" core of the parsing loop                            |
@@ -260,7 +260,7 @@ should get from a `lint` command.
        documented command and `tsc` is already 0.8 s.
 
 
-## P10: Replace jest with with vitest
+## P10: Replace jest with vitest
 
 ### Goal
 Explor the possibility of replacing jest with vitest.
@@ -277,11 +277,45 @@ Jest was innovative in its time, but last I saw it had a tiny team working on it
 6. If proceed, we create a final PR (basically the same as #4) with vitest added to the system, and if not proceed, we revert to where we were before starting P10
 
 ### Current state
-Unstarted
+
+**Migration implemented and verified on 2026-11-11; waiting on the keep/revert decision.**
+
+All 265 suites and 9768 tests pass under Vitest 5.1.0, the 68 inline snapshots match
+unchanged, and `npm run check:types` is clean. Coverage is 98.09 / 98.31 / 98.46 /
+98.08 (statements / branches / functions / lines) against Jest's Babel-provider
+98.18 / 98.40 / 98.57 / 98.18.
+
+Measured on an M4 / 10-core, Node 26, wall clock including npm:
+
+| Runner                    | With coverage   | Without coverage |
+| ------------------------- | --------------- | ---------------- |
+| Jest (baseline)           | 16.5-17.5 s     | 10.3-13.6 s      |
+| Vitest, `pool: 'threads'` | 20.6-22.4 s     | 13.5-14.6 s      |
+| Vitest, default `forks`   | 24.8-27.5 s     | 19.0-20.3 s      |
+
+Vitest's default `forks` pool spawns a process per test file and is clearly slower
+than Jest. `pool: 'threads'`, now in `vitest.config.mts`, closes most of the gap;
+`isolate: false` is not usable (46 files fail from leaked module state).
+
+The diff is wide but mechanical: `@jest/globals` → `vitest`, `jest.*` → `vi.*`
+across every spec, 404 `done` callbacks rewritten as promises (Vitest 5 throws on
+`done`), four automock fixes, `xmlconf.json` loaded through `?raw` because Vite's
+JSON loader rejects its lone surrogate escape, and the config, dependency, tsconfig
+and CI swap. Full detail, including the six tests that needed behavioural changes,
+is in `doc/vitestMigration.md`.
+
+Open decisions: keep or revert; whether to rename `*.jest.ts` (still used because
+`.test.ts` belongs to Jasmine); v8 versus istanbul coverage; keep `threads`.
 
 ### Next actions
 
--  [ ] See the done list
+-  [x] Gather timing for the whole Jest suite.
+-  [x] Replace Jest with Vitest, including configuration and test updates.
+-  [x] Measure Vitest's performance.
+-  [x] Report the performance change and the code changes required.
+-  [ ] Human decides whether to proceed.
+-  [ ] If yes, merge this migration (or apply the decided naming/coverage changes).
+       If no, revert the branch.
 
 
 ## P14: Make `xToken` lint-perfect on close-to-stock oxlint settings
@@ -397,7 +431,7 @@ used by the rest of the module.
 -  [ ] Finish `ExtractorNew` and `SpaceExtractorNew` and add their Jest specs.
 -  [ ] Port the remaining extractors (All, Char, Digit, Match, MultiMatch, Peek, Word).
 -  [ ] Switch `defaultExtractors.ts` to the new classes.
--  [ ] Delete the legacy files and run `npm run jest:all`.
+-  [ ] Delete the legacy files and run `npm run vitest:all`.
 
 **Notes:** `source/basic/RANGES.md` records the open questions about ranges in
 segments, and `source/basic/README.md` documents the token model.

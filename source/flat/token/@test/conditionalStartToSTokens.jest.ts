@@ -1,14 +1,14 @@
-/* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { ParameterEntityReferencePToken } from 'pToken';
 import { ConditionalStartPToken } from 'token';
+import { describe, expect, it, vi, type Mock } from 'vitest';
 
 import { conditionalStartToSTokens } from '../conditionalStartToSTokens';
 import { parameterEntityReferenceToSTokens } from '../parameterEntityReferenceToSTokens';
 
-jest.mock('../parameterEntityReferenceToSTokens');
+vi.mock('../parameterEntityReferenceToSTokens');
 
 describe('conditionalStartToSTokens()', () => {
    it('returns all tokens', () => {
@@ -32,7 +32,7 @@ describe('conditionalStartToSTokens()', () => {
    });
 
    it('returns all tokens when there are unexpanded values', () => {
-      (parameterEntityReferenceToSTokens as jest.Mock).mockReturnValue([toSToken('%')]);
+      (parameterEntityReferenceToSTokens as Mock).mockReturnValue([toSToken('%')]);
       const conditionalStart = new ConditionalStartPToken({
          open: toSToken('<![>'),
          openSpace: toSToken(' '),

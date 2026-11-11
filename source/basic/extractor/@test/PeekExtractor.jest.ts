@@ -1,5 +1,5 @@
 /* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect, vi, type Mock } from 'vitest';
 
 import { Extractor, ExtractResult, SegmentInfo } from '../Extractor';
 import { PeekExtractor } from '../PeekExtractor';
@@ -11,8 +11,8 @@ describe('PeekExtractor', () => {
 
    beforeEach(() => {
       sub = {
-         process: jest.fn(),
-         finish: jest.fn(),
+         process: vi.fn(),
+         finish: vi.fn(),
       } as unknown as Extractor;
       sub.state = Extractor.STATE.WORKING;
 
@@ -50,7 +50,7 @@ describe('PeekExtractor', () => {
 
    describe('finish()', () => {
       it('calls done() in subExtractor when called', () => {
-         (sub.finish as jest.Mock).mockReturnValue({
+         (sub.finish as Mock).mockReturnValue({
             segments: [],
          });
          extractor.finish();
@@ -59,7 +59,7 @@ describe('PeekExtractor', () => {
       });
 
       it('sets state to success if sub is success', () => {
-         (sub.finish as jest.Mock).mockReturnValue({
+         (sub.finish as Mock).mockReturnValue({
             segments: [],
          });
          sub.state = Extractor.STATE.SUCCESS;
@@ -69,7 +69,7 @@ describe('PeekExtractor', () => {
       });
 
       it('sets state to failure if sub is failure', () => {
-         (sub.finish as jest.Mock).mockReturnValue({
+         (sub.finish as Mock).mockReturnValue({
             segments: [],
          });
          sub.state = Extractor.STATE.FAILURE;

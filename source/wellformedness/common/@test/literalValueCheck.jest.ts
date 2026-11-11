@@ -1,15 +1,16 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { TextPToken } from 'pToken';
 import { LiteralValuePToken } from 'token';
+import { vi, type MockedFunction } from 'vitest';
 
 import { charCheck } from '../../common/charCheck';
 import { literalValueCheck } from '../literalValueCheck';
 
-jest.mock('../../common/charCheck');
+vi.mock('../../common/charCheck');
 
 describe('literalValueCheck() (unit)', () => {
    let collector: ParamCollector;
@@ -30,7 +31,7 @@ describe('literalValueCheck() (unit)', () => {
    });
 
    it('sets the position before calling misc.checkWellFormed', () => {
-      const mock: jest.MockedFunction<typeof collector.setPos> = jest.fn();
+      const mock: MockedFunction<typeof collector.setPos> = vi.fn();
 
       collector.setPos = mock;
 

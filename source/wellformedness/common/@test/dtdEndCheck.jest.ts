@@ -1,6 +1,5 @@
-/* Copyright ® 2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
@@ -10,6 +9,7 @@ import {
    ParameterEntityDeclarationPToken,
    TextPToken,
 } from 'pToken';
+import { describe, expect, it } from 'vitest';
 
 import { CheckState } from '../../checkUtils';
 import { errorCodes } from '../../error/errorCodes';

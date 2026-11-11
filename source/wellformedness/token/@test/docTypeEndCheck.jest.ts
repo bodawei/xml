@@ -1,9 +1,9 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { DocTypeEndPToken, DocTypeStartPToken } from 'token';
+import { describe, expect, it } from 'vitest';
 
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { docTypeEndCheck } from '../docTypeEndCheck';

@@ -230,8 +230,8 @@ class MockSTokenSource extends STokenSource {
          this.extractToObject = spyOn(this as any, 'extractToObject').and.callThrough(); // typeHack
          this.extract = spyOn(this as any, 'extract').and.callThrough(); // typeHack
       } else {
-         this.extractToObject = jest.spyOn(this as any, 'extractToObject') as any; // typeHack
-         this.extract = jest.spyOn(this as any, 'extract') as any; // typeHack
+         this.extractToObject = vi.spyOn(this as any, 'extractToObject') as any; // typeHack
+         this.extract = vi.spyOn(this as any, 'extract') as any; // typeHack
       }
    }
 

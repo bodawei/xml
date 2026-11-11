@@ -1,6 +1,6 @@
-/* Copyright ® 2022 by 柏大衛. All rights reserved. */
+/* Copyright ® 2022-2026 by 柏大衛. All rights reserved. */
 
-import { expect } from '@jest/globals';
+import { expect } from 'vitest';
 
 import { EntityId } from '../../token/entityId';
 import { Offset } from '../offset';

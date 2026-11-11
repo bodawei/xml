@@ -1,17 +1,17 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { CharRefPToken, ExternalIdP, TextPToken } from 'pToken';
+import { describe, expect, it, vi, type MockedFunction } from 'vitest';
 
 import { errorCodes } from '../../error/errorCodes';
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { externalIdCheck } from '../externalIdCheck';
 import { literalCheck } from '../literalCheck';
 
-jest.mock('../literalCheck');
+vi.mock('../literalCheck');
 
 const EID = errorCodes.id;
 const WFEID = wellFormedErrorCodes.id;
@@ -19,7 +19,7 @@ const WFEID = wellFormedErrorCodes.id;
 describe('externalIdCheck()', () => {
    let collector: ParamCollector;
    let externalId: ExternalIdP;
-   let mockLiteralCheck: jest.MockedFunction<typeof literalCheck>;
+   let mockLiteralCheck: MockedFunction<typeof literalCheck>;
 
    beforeEach(() => {
       collector = new ParamCollector();
@@ -39,7 +39,7 @@ describe('externalIdCheck()', () => {
             value: [new TextPToken({ text: toSToken('sys.xml') })],
          },
       };
-      mockLiteralCheck = literalCheck as jest.MockedFunction<typeof literalCheck>;
+      mockLiteralCheck = literalCheck as MockedFunction<typeof literalCheck>;
    });
 
    it('calls literalCheck() to check the PUBLIC value', () => {
@@ -84,7 +84,7 @@ describe('externalIdCheck()', () => {
       externalIdCheck(externalId, false, collector, new ConformanceVersion());
 
       // invoke the callback function
-      const mockLiteralCheck = literalCheck as jest.MockedFunction<typeof literalCheck>;
+      const mockLiteralCheck = literalCheck as MockedFunction<typeof literalCheck>;
       const cb = mockLiteralCheck.mock.calls[1][4]; // eslint-disable-line
       cb?.();
 
@@ -105,7 +105,7 @@ describe('externalIdCheck()', () => {
       externalIdCheck(externalId, false, collector, new ConformanceVersion());
 
       // invoke the callback function
-      const mockLiteralCheck = literalCheck as jest.MockedFunction<typeof literalCheck>;
+      const mockLiteralCheck = literalCheck as MockedFunction<typeof literalCheck>;
       const cb = mockLiteralCheck.mock.calls[0][4]; // eslint-disable-line
       cb?.();
 

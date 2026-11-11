@@ -1,6 +1,6 @@
-/* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'vitest';
 
 import { Extractor } from '../Extractor';
 import { Segment } from '../Segment';
