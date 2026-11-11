@@ -57,6 +57,10 @@ Do not treat these as regressions, and do not fix them as part of unrelated work
    as the standard for naming, formatting, and general code arrangement. When in
    doubt, ask before doing something different, or if something in that directory
    seems inconsistent.
+-  Treat that as a claim about *style*, not about lint. `xToken` is formatting-clean, but it
+   still reports 247 oxlint findings (236 of them `sort-keys`). Closing that gap, on close
+   to stock oxlint settings, is ROADMAP P14 — so do not read "canonical" as "lint-clean",
+   and do not copy a pattern out of it merely because it currently reports nothing.
 -  `source/basic/` and `source/valid/` follow the same conventions and are the two
    modules under the `import` rules and typescript-eslint's recommended-type-checked
    set in `.oxlintrc.jsonc`; use them for foundational patterns that `xToken` does not
