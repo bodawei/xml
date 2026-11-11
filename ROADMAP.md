@@ -313,13 +313,40 @@ auto-fixable), `no-unsafe-type-assertion` (35), `unicorn/no-zero-fractions` (18)
 `init-declarations` (18), `func-style` (16), `consistent-type-exports` (10),
 `unicorn/text-encoding-identifier-case` (6).
 
-Note that `sort-keys` alone is 236 of the current 247, and oxlint's fixer for it reorders object
-literals wholesale. Deciding whether this codebase wants its keys sorted at all is probably the
-first question, not the last, and it is a repo-wide question rather than an `xToken` one.
+`sort-keys` alone is 236 of the current 247, and 1285 of the repo's 1785. **Decision: adopt it
+and apply the fixer.** That was checked rather than assumed, on a scratch copy of the tree with
+every other rule switched off (measured 2026-11-10):
+
+-  Iterating `oxlint --fix` takes the repo from **1285 findings to 7**, rewriting 134 files. One
+   pass is not enough: the fixer handles one object per pass, so a single run only reaches 257.
+   It converges after four passes.
+-  Afterwards `tsc` is clean, Jest passes 265 suites / 9768 tests including all **68 snapshots**,
+   and Jasmine passes 336 specs.
+-  **Object spreads are never reordered.** The only `...` lines the fixer touched were array
+   spreads inside a property value that moved as a unit, so the deliberate
+   `{ ...pToken, externalId }` pattern is untouched. That was the main semantic risk and it is
+   not real.
+
+The 7 that survive are all **computed-key tables**, in four files: `wellformedness/ContentChecker.ts`
+(3), `wellformedness/checkMap.ts` (1), `conformance/@test/data/expectedCodes.ts` (2) and
+`conformance/@test/build/buildTestData.ts` (1). The fixer cannot reorder `[ELEMENT_START_PTOKEN]:`
+style keys because it cannot know the constant's value, and no option waives them: oxlint's
+`sort-keys` accepts only `caseSensitive`, `natural`, `minKeys` and `allowLineSeparatedGroups` --
+there is no `ignoreComputedKeys` (that option exists in ESLint, not here), and
+`allowLineSeparatedGroups: true` still leaves all 7. They want 7
+`oxlint-disable-next-line sort-keys` comments, which is the right answer regardless: those tables
+are ordered by XML spec production order with comment-grouped sections, and sorting them by
+constant name would destroy real information.
+
+Also still open: `sort-keys` is currently scoped to the strict file set only, so `basic` and
+`valid` are exempt. Widening it is part of this project.
 
 ### Next actions
 
--  [ ] Decide the `sort-keys` question: adopt it and run the fixer over `xToken`, or drop the rule.
+-  [ ] Apply the `sort-keys` fixer repo-wide, in its own commit: run `oxlint --fix` to
+       convergence (four passes), then `oxfmt`, then add the 7 `oxlint-disable-next-line`
+       comments with a one-line reason each. Verified safe; see above.
+-  [ ] Decide whether `sort-keys` should also cover `basic` and `valid`, which it exempts today.
 -  [ ] Triage the shortlist above rule by rule; widen `.oxlintrc.jsonc` to match, recording the
        deliberate exclusions and their reasons the way the current config already does.
 -  [ ] Fix the residue in `xToken` so it reports zero, including the 9 `no-unsafe-enum-comparison`
