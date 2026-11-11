@@ -1,14 +1,14 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { ElementStartPToken } from 'token';
+import { describe, expect, it, vi, type Mock } from 'vitest';
 
 import { AttributeX, cloneAttributeX } from '../../common/attributeX';
 import { ElementStartXToken, ELEMENT_START_XTOKEN } from '../elementStartXToken';
 import { TEXT_XTOKEN } from '../textXToken';
 
-jest.mock('../../common/attributeX');
+vi.mock('../../common/attributeX');
 
 describe('elementStartXToken (unit)', () => {
    let elementStartPToken: ElementStartPToken;
@@ -23,7 +23,7 @@ describe('elementStartXToken (unit)', () => {
          close: toSToken('>'),
       });
 
-      (cloneAttributeX as jest.Mock).mockReturnValue({ name: 'clonedAttr' });
+      (cloneAttributeX as Mock).mockReturnValue({ name: 'clonedAttr' });
    });
 
    it('constructs with just a string', () => {
@@ -58,7 +58,9 @@ describe('elementStartXToken (unit)', () => {
    });
 
    it('returns a token with the expected fields defined', () => {
-      (AttributeX as jest.Mock).mockImplementation(() => ({ name: 'foo', value: [] }));
+      (AttributeX as Mock).mockImplementation(function () {
+         return { name: 'foo', value: [] };
+      });
 
       const token = new ElementStartXToken(elementStartPToken);
 

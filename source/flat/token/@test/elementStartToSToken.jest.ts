@@ -1,17 +1,17 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { ElementStartPToken, ElementEmptyPToken } from 'token';
+import { describe, expect, it, vi, type Mock } from 'vitest';
 
 import { attributeToSTokens } from '../../common/attributeToSTokens';
 import { elementStartToSTokens } from '../elementStartToSTokens';
 
-jest.mock('../../common/attributeToSTokens');
+vi.mock('../../common/attributeToSTokens');
 
 describe('elementStartToSTokens (unit)', () => {
    it('returns all the STokens from an elementStart', () => {
-      (attributeToSTokens as jest.Mock).mockReturnValue([toSToken('att'), toSToken('att2')]);
+      (attributeToSTokens as Mock).mockReturnValue([toSToken('att'), toSToken('att2')]);
       const elementStartPToken = new ElementStartPToken({
          open: toSToken('<'),
          openSpace: toSToken(' '),
@@ -33,7 +33,7 @@ describe('elementStartToSTokens (unit)', () => {
    });
 
    it('returns all the STokens in an empty element', () => {
-      (attributeToSTokens as jest.Mock).mockReturnValue([]);
+      (attributeToSTokens as Mock).mockReturnValue([]);
       const elementEmptyPToken = new ElementEmptyPToken({
          open: toSToken('<'),
          openSpace: toSToken('\n'),

@@ -1,22 +1,22 @@
-/* Copyright ® 2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { ElementDeclarationPToken } from 'pToken';
+import { describe, expect, it, vi, type MockedFunction } from 'vitest';
 
 import { makeCmGraph } from '../../contentModel/makeCmGraph';
 import { elementDeclarationPreprocess } from '../elementDeclarationPreprocess';
 import { ElDeclType, ValidityState } from '../validityState';
 
-jest.mock('../../contentModel/makeCmGraph');
+vi.mock('../../contentModel/makeCmGraph');
 
 describe('elementDeclarationPreprocess (unit)', () => {
-   let makeCmGraphMock: jest.MockedFunction<typeof makeCmGraph>;
+   let makeCmGraphMock: MockedFunction<typeof makeCmGraph>;
    let state: ValidityState;
    let externalState: ValidityState;
 
    beforeEach(() => {
-      makeCmGraphMock = makeCmGraph as jest.MockedFunction<typeof makeCmGraph>;
+      makeCmGraphMock = makeCmGraph as MockedFunction<typeof makeCmGraph>;
 
       state = new ValidityState();
       externalState = new ValidityState({

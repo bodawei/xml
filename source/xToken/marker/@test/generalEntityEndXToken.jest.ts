@@ -1,9 +1,9 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { GeneralEntityReferencePToken } from 'pToken';
 import { GeneralEntityEndPToken } from 'token';
+import { describe, expect, it } from 'vitest';
 
 import { GeneralEntityEndXToken } from '../generalEntityEndXToken';
 

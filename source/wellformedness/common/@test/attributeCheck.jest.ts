@@ -5,6 +5,7 @@ import { SToken, toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { AttributePToken } from 'token';
+import { vi, type MockedFunction } from 'vitest';
 
 import { nameXmlCheck } from '../../common/nameXmlCheck';
 import { errorCodes } from '../../error/errorCodes';
@@ -15,10 +16,10 @@ import { attributeLangCheck } from '../attributeLangCheck';
 import { literalCheck } from '../literalCheck';
 import { nameCheck } from '../nameCheck';
 
-jest.mock('../attributeLangCheck');
-jest.mock('../literalCheck');
-jest.mock('../nameCheck');
-jest.mock('../../common/nameXmlCheck');
+vi.mock('../attributeLangCheck');
+vi.mock('../literalCheck');
+vi.mock('../nameCheck');
+vi.mock('../../common/nameXmlCheck');
 
 const WFEID = wellFormedErrorCodes.id;
 const EID = errorCodes.id;
@@ -28,7 +29,7 @@ describe('attributeCheck (unit)', () => {
    let confVer: ConformanceVersion;
    let collector: ParamCollector;
    let previousSpace: SToken;
-   let mockLiteralCheck: jest.MockedFunction<typeof literalCheck>;
+   let mockLiteralCheck: MockedFunction<typeof literalCheck>;
 
    beforeEach(() => {
       attributesPChunk = [
@@ -53,7 +54,7 @@ describe('attributeCheck (unit)', () => {
       confVer = new ConformanceVersion();
       previousSpace = toSToken(' ');
       collector = new ParamCollector();
-      mockLiteralCheck = literalCheck as jest.MockedFunction<typeof literalCheck>;
+      mockLiteralCheck = literalCheck as MockedFunction<typeof literalCheck>;
    });
 
    it('calls the nameCheck() routine', () => {
@@ -208,7 +209,7 @@ describe('attributeCheck (unit)', () => {
    });
 
    it('calls the checkName function, if provided', () => {
-      const checkName = jest.fn();
+      const checkName = vi.fn();
 
       attributeCheck(
          attributesPChunk,
@@ -223,7 +224,7 @@ describe('attributeCheck (unit)', () => {
    });
 
    it('calls the checkValue function, if provided', () => {
-      const checkValue = jest.fn();
+      const checkValue = vi.fn();
       mockLiteralCheck.mockImplementation((_2, _3, _4, _5, callback) => {
          callback?.();
       });

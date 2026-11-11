@@ -1,6 +1,7 @@
 /* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
 import { Range, EntityId, CONFORMANCE_VERSION } from 'basic';
+import { vi, type Mock } from 'vitest';
 
 import {
    DONE_SEGMENT,
@@ -16,7 +17,7 @@ import { SToken } from '../sToken';
 import { STokenSource } from '../STokenSource';
 
 describe('STokenSource (unit)', () => {
-   let sTokenSpy: jest.Mock;
+   let sTokenSpy: Mock;
    let source: STokenSource;
    let testExtractors: ExtractorMap;
 
@@ -175,7 +176,7 @@ describe('STokenSource (unit)', () => {
       };
 
       source = new STokenSource(undefined, undefined, testExtractors);
-      sTokenSpy = jest.fn();
+      sTokenSpy = vi.fn();
    });
 
    describe('extractor definitions', () => {
@@ -354,29 +355,31 @@ describe('STokenSource (unit)', () => {
    });
 
    describe('extractToObject()', () => {
-      it('extracts an SToken to the property of the provided object', (done) => {
-         const obj: { [propName: string]: SToken } = {};
-         source.addText('1');
-         source.endText();
+      it('extracts an SToken to the property of the provided object', () =>
+         new Promise<void>((done) => {
+            const obj: { [propName: string]: SToken } = {};
+            source.addText('1');
+            source.endText();
 
-         source.extractToObject('all', [], obj, 'propName');
-         source.extract('all', () => {
-            expect(obj.propName.str).toEqual('1');
-            done();
-         });
-      });
+            source.extractToObject('all', [], obj, 'propName');
+            source.extract('all', () => {
+               expect(obj.propName.str).toEqual('1');
+               done();
+            });
+         }));
 
-      it('allows the properties to be omitted', (done) => {
-         const obj: { [propName: string]: SToken } = {};
-         source.addText('1');
-         source.endText();
+      it('allows the properties to be omitted', () =>
+         new Promise<void>((done) => {
+            const obj: { [propName: string]: SToken } = {};
+            source.addText('1');
+            source.endText();
 
-         source.extractToObject('all', obj, 'propName');
-         source.extract('all', () => {
-            expect(obj.propName.str).toEqual('1');
-            done();
-         });
-      });
+            source.extractToObject('all', obj, 'propName');
+            source.extract('all', () => {
+               expect(obj.propName.str).toEqual('1');
+               done();
+            });
+         }));
    });
 
    describe('extract()', () => {
@@ -387,7 +390,7 @@ describe('STokenSource (unit)', () => {
       });
 
       it('passes a version and arbitrary params to the extractor', () => {
-         testExtractors.foo = jest.fn();
+         testExtractors.foo = vi.fn();
          source.setConfVer({
             type: CONFORMANCE_VERSION,
             version: 1.1,
@@ -417,29 +420,31 @@ describe('STokenSource (unit)', () => {
          expect((source.extractors[1].extractor as FooExtractor).params).toEqual(2);
       });
 
-      it('can be called multiple times before any text added', (done) => {
-         let first: SToken | undefined;
-         source.extract('tox', (sToken) => (first = sToken));
-         source.extract('all', (sToken) => {
-            expect([first?.str, sToken!.str]).toEqual([' 123', 'xTest']); // EXPECT
-            done();
-         });
+      it('can be called multiple times before any text added', () =>
+         new Promise<void>((done) => {
+            let first: SToken | undefined;
+            source.extract('tox', (sToken) => (first = sToken));
+            source.extract('all', (sToken) => {
+               expect([first?.str, sToken!.str]).toEqual([' 123', 'xTest']); // EXPECT
+               done();
+            });
 
-         source.addText(' 123xTest');
-         source.endText();
-      });
+            source.addText(' 123xTest');
+            source.endText();
+         }));
 
-      it('can be called multiple times after text added', (done) => {
-         let first: SToken | undefined;
-         source.addText(' 456xTest');
-         source.endText();
+      it('can be called multiple times after text added', () =>
+         new Promise<void>((done) => {
+            let first: SToken | undefined;
+            source.addText(' 456xTest');
+            source.endText();
 
-         source.extract('tox', (sToken) => (first = sToken));
-         source.extract('all', (sToken) => {
-            expect([first?.str, sToken!.str]).toEqual([' 456', 'xTest']); // EXPECT
-            done();
-         });
-      });
+            source.extract('tox', (sToken) => (first = sToken));
+            source.extract('all', (sToken) => {
+               expect([first?.str, sToken!.str]).toEqual([' 456', 'xTest']); // EXPECT
+               done();
+            });
+         }));
    });
 
    describe('check()', () => {
@@ -469,26 +474,28 @@ describe('STokenSource (unit)', () => {
    });
 
    describe('SToken generation system', () => {
-      it('returns a SToken with text from all the segments', (done) => {
-         source.addText('1');
-         source.addText('22');
-         source.addText('333');
-         source.endText();
-         source.extract('all', (sToken) => {
-            expect(sToken).toEqual(
-               new SToken('122333', '122333', new Range(new EntityId(), 0, 0, 0, 6, 0, 6)),
-            );
-            done();
-         });
-      });
+      it('returns a SToken with text from all the segments', () =>
+         new Promise<void>((done) => {
+            source.addText('1');
+            source.addText('22');
+            source.addText('333');
+            source.endText();
+            source.extract('all', (sToken) => {
+               expect(sToken).toEqual(
+                  new SToken('122333', '122333', new Range(new EntityId(), 0, 0, 0, 6, 0, 6)),
+               );
+               done();
+            });
+         }));
 
-      it('returns undefined when nothing was retrieved', (done) => {
-         source.endText();
-         source.extract('all', (sToken) => {
-            expect(sToken).toBeUndefined();
-            done();
-         });
-      });
+      it('returns undefined when nothing was retrieved', () =>
+         new Promise<void>((done) => {
+            source.endText();
+            source.extract('all', (sToken) => {
+               expect(sToken).toBeUndefined();
+               done();
+            });
+         }));
 
       it('returns no STokens when the finish criteria for the specified extractor has not been met', () => {
          source.addText('these are letters without the terminating one');
@@ -497,153 +504,163 @@ describe('STokenSource (unit)', () => {
          expect(sTokenSpy).not.toHaveBeenCalled();
       });
 
-      it('returns a STokens as soon as the finish criteria for the specified extractor has not been met', (done) => {
-         source.addText('these are letters with an x');
-         source.extract('tox', () => {
-            done();
-         }); // EXPECTATION (simply that it calls back)
-      });
+      it('returns a STokens as soon as the finish criteria for the specified extractor has not been met', () =>
+         new Promise<void>((done) => {
+            source.addText('these are letters with an x');
+            source.extract('tox', () => {
+               done();
+            }); // EXPECTATION (simply that it calls back)
+         }));
 
       describe('ranges', () => {
-         it('delivers a default range across multiple segments', (done) => {
-            source.addText('1');
-            source.addText('22');
-            source.addText('333');
-            source.endText();
+         it('delivers a default range across multiple segments', () =>
+            new Promise<void>((done) => {
+               source.addText('1');
+               source.addText('22');
+               source.addText('333');
+               source.endText();
 
-            source.extract('all', (sToken) => {
-               expect(sToken!.ranges).toEqual([new Range(new EntityId(), 0, 0, 0, 6, 0, 6)]);
-               done();
-            });
-         });
+               source.extract('all', (sToken) => {
+                  expect(sToken!.ranges).toEqual([new Range(new EntityId(), 0, 0, 0, 6, 0, 6)]);
+                  done();
+               });
+            }));
 
-         it('returns a SToken with ranges for the segments', (done) => {
-            const loc2 = new EntityId('sys2', 'pub2');
-            const loc3 = new EntityId('sys3', 'pub3');
-            source.addText('9', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
-            source.addText('88', new Range(loc2, 100, 100, 100, 9, 9, 9));
-            source.addText('77777', new Range(loc3, 200, 200, 200, 9, 9, 9));
-            source.endText();
+         it('returns a SToken with ranges for the segments', () =>
+            new Promise<void>((done) => {
+               const loc2 = new EntityId('sys2', 'pub2');
+               const loc3 = new EntityId('sys3', 'pub3');
+               source.addText('9', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
+               source.addText('88', new Range(loc2, 100, 100, 100, 9, 9, 9));
+               source.addText('77777', new Range(loc3, 200, 200, 200, 9, 9, 9));
+               source.endText();
 
-            source.extract('all', (sToken) => {
-               expect(sToken!.ranges).toEqual([
-                  new Range(new EntityId(), 3, 2, 1, 4, 2, 2),
-                  new Range(loc2, 100, 100, 100, 102, 100, 102),
-                  new Range(loc3, 200, 200, 200, 205, 200, 205),
-               ]);
-               done();
-            });
-         });
+               source.extract('all', (sToken) => {
+                  expect(sToken!.ranges).toEqual([
+                     new Range(new EntityId(), 3, 2, 1, 4, 2, 2),
+                     new Range(loc2, 100, 100, 100, 102, 100, 102),
+                     new Range(loc3, 200, 200, 200, 205, 200, 205),
+                  ]);
+                  done();
+               });
+            }));
 
-         it('delivers a default range to a segment without a range', (done) => {
-            const loc2 = new EntityId('sys2', 'pub2');
+         it('delivers a default range to a segment without a range', () =>
+            new Promise<void>((done) => {
+               const loc2 = new EntityId('sys2', 'pub2');
 
-            source.addText('9', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
-            source.addText('88', new Range(loc2, 100, 100, 100, 9, 9, 9));
-            source.addText('77777');
-            source.endText();
+               source.addText('9', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
+               source.addText('88', new Range(loc2, 100, 100, 100, 9, 9, 9));
+               source.addText('77777');
+               source.endText();
 
-            source.extract('all', (sToken) => {
-               expect(sToken!.ranges).toEqual([
-                  new Range(new EntityId(), 3, 2, 1, 4, 2, 2),
-                  new Range(loc2, 100, 100, 100, 107, 100, 107),
-               ]);
-               done();
-            });
-         });
+               source.extract('all', (sToken) => {
+                  expect(sToken!.ranges).toEqual([
+                     new Range(new EntityId(), 3, 2, 1, 4, 2, 2),
+                     new Range(loc2, 100, 100, 100, 107, 100, 107),
+                  ]);
+                  done();
+               });
+            }));
 
-         it('treats equal locations, that are different instances, as the same', (done) => {
-            const loc2 = new EntityId(); // same location as the new EntityId()
+         it('treats equal locations, that are different instances, as the same', () =>
+            new Promise<void>((done) => {
+               const loc2 = new EntityId(); // same location as the new EntityId()
 
-            source.addText('9', new Range(new EntityId(), 3, 2, 1, 4, 2, 2));
-            source.addText('88', new Range(loc2, 4, 2, 2, 6, 2, 4));
-            source.addText('77777');
-            source.endText();
+               source.addText('9', new Range(new EntityId(), 3, 2, 1, 4, 2, 2));
+               source.addText('88', new Range(loc2, 4, 2, 2, 6, 2, 4));
+               source.addText('77777');
+               source.endText();
 
-            source.extract('all', (sToken) => {
-               expect(sToken!.ranges).toEqual([new Range(new EntityId(), 3, 2, 1, 11, 2, 9)]);
-               done();
-            });
-         });
+               source.extract('all', (sToken) => {
+                  expect(sToken!.ranges).toEqual([new Range(new EntityId(), 3, 2, 1, 11, 2, 9)]);
+                  done();
+               });
+            }));
 
-         it('correctly computes range when retrieving multiple STokens from a ranged segment', (done) => {
-            source.addText('a]b', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
-            source.endText();
+         it('correctly computes range when retrieving multiple STokens from a ranged segment', () =>
+            new Promise<void>((done) => {
+               source.addText('a]b', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
+               source.endText();
 
-            source.extract('tox', ']', sTokenSpy);
-            source.extract('tox', 'b', (sToken) => {
-               // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-               expect(sTokenSpy.mock.calls[0][0].ranges[0]).toEqual(
-                  new Range(new EntityId(), 3, 2, 1, 4, 2, 2),
-               );
-               expect(sToken!.ranges[0]).toEqual(new Range(new EntityId(), 4, 2, 2, 5, 2, 3));
-               done();
-            });
-         });
+               source.extract('tox', ']', sTokenSpy);
+               source.extract('tox', 'b', (sToken) => {
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                  expect(sTokenSpy.mock.calls[0][0].ranges[0]).toEqual(
+                     new Range(new EntityId(), 3, 2, 1, 4, 2, 2),
+                  );
+                  expect(sToken!.ranges[0]).toEqual(new Range(new EntityId(), 4, 2, 2, 5, 2, 3));
+                  done();
+               });
+            }));
 
-         it('delivers a simple range when matching a pseudo space', (done) => {
-            source.addPseudoSpace();
-            source.endText();
+         it('delivers a simple range when matching a pseudo space', () =>
+            new Promise<void>((done) => {
+               source.addPseudoSpace();
+               source.endText();
 
-            source.extract('all', (sToken) => {
-               const expected = new SToken(' ', '', [
-                  new Range(new EntityId(PSEUDO_SYSTEMID), 0, 0, 0, 0, 0, 0),
-               ]);
+               source.extract('all', (sToken) => {
+                  const expected = new SToken(' ', '', [
+                     new Range(new EntityId(PSEUDO_SYSTEMID), 0, 0, 0, 0, 0, 0),
+                  ]);
 
-               expect(sToken).toEqual(expected);
-               done();
-            });
-         });
+                  expect(sToken).toEqual(expected);
+                  done();
+               });
+            }));
 
-         it('delivers ranges including that of the pseudo space and a following segment', (done) => {
-            source.addPseudoSpace();
-            source.addText('123', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
-            source.endText();
+         it('delivers ranges including that of the pseudo space and a following segment', () =>
+            new Promise<void>((done) => {
+               source.addPseudoSpace();
+               source.addText('123', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
+               source.endText();
 
-            source.extract('all', (sToken) => {
-               const expected = new SToken(' 123', '123', [
-                  new Range(new EntityId(PSEUDO_SYSTEMID), 0, 0, 0, 0, 0, 0),
-                  new Range(new EntityId(), 3, 2, 1, 6, 2, 4),
-               ]);
+               source.extract('all', (sToken) => {
+                  const expected = new SToken(' 123', '123', [
+                     new Range(new EntityId(PSEUDO_SYSTEMID), 0, 0, 0, 0, 0, 0),
+                     new Range(new EntityId(), 3, 2, 1, 6, 2, 4),
+                  ]);
 
-               expect(sToken).toEqual(expected);
-               done();
-            });
-         });
+                  expect(sToken).toEqual(expected);
+                  done();
+               });
+            }));
 
-         it('delivers ranges including that of a segment followed by a pseudo space', (done) => {
-            source.addText('123', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
-            source.addPseudoSpace();
-            source.endText();
+         it('delivers ranges including that of a segment followed by a pseudo space', () =>
+            new Promise<void>((done) => {
+               source.addText('123', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
+               source.addPseudoSpace();
+               source.endText();
 
-            source.extract('all', (sToken) => {
-               const expected = new SToken('123 ', '123', [
-                  new Range(new EntityId(), 3, 2, 1, 6, 2, 4),
-                  new Range(new EntityId(PSEUDO_SYSTEMID), 0, 0, 0, 0, 0, 0),
-               ]);
+               source.extract('all', (sToken) => {
+                  const expected = new SToken('123 ', '123', [
+                     new Range(new EntityId(), 3, 2, 1, 6, 2, 4),
+                     new Range(new EntityId(PSEUDO_SYSTEMID), 0, 0, 0, 0, 0, 0),
+                  ]);
 
-               expect(sToken).toEqual(expected);
-               done();
-            });
-         });
+                  expect(sToken).toEqual(expected);
+                  done();
+               });
+            }));
 
-         it('delivers ranges including that of a segment followed by a pseudo space', (done) => {
-            source.addText('123', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
-            source.addPseudoSpace();
-            source.addText('123', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
-            source.endText();
+         it('delivers ranges including that of a segment followed by a pseudo space', () =>
+            new Promise<void>((done) => {
+               source.addText('123', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
+               source.addPseudoSpace();
+               source.addText('123', new Range(new EntityId(), 3, 2, 1, 9, 9, 9));
+               source.endText();
 
-            source.extract('all', (sToken) => {
-               const expected = new SToken('123 123', '123123', [
-                  new Range(new EntityId(), 3, 2, 1, 6, 2, 4),
-                  new Range(new EntityId(PSEUDO_SYSTEMID), 0, 0, 0, 0, 0, 0),
-                  new Range(new EntityId(), 3, 2, 1, 6, 2, 4),
-               ]);
+               source.extract('all', (sToken) => {
+                  const expected = new SToken('123 123', '123123', [
+                     new Range(new EntityId(), 3, 2, 1, 6, 2, 4),
+                     new Range(new EntityId(PSEUDO_SYSTEMID), 0, 0, 0, 0, 0, 0),
+                     new Range(new EntityId(), 3, 2, 1, 6, 2, 4),
+                  ]);
 
-               expect(sToken).toEqual(expected);
-               done();
-            });
-         });
+                  expect(sToken).toEqual(expected);
+                  done();
+               });
+            }));
       });
    });
 });

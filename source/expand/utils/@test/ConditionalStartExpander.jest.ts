@@ -1,11 +1,11 @@
 /* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, EntityId, Problem } from 'basic';
 import { STokenSource, toSToken } from 'basic';
 import { ParameterEntityReferencePToken, TextPToken } from 'pToken';
 import { ConditionalStartPToken, resumeParseConditional } from 'token';
 import { makeParameterEntityDeclaration, makeParameterEntityReference } from 'token-test';
+import { describe, expect, it, vi, type MockedFunction } from 'vitest';
 
 import { ExpandParams, RetrieveResults } from '../../types';
 import { addProtoReplacementText } from '../addProtoReplacementText';
@@ -14,24 +14,25 @@ import { EntityContextStack } from '../EntityContextStack';
 import { EntityDetails } from '../EntityDetails';
 import { entityValueToSTokenSource } from '../entityValueToSTokenSource';
 
-jest.mock('../../../token/conditionalStart', () => {
-   const realConditional: Record<string, unknown> = jest.requireActual(
-      '../../../token/conditionalStart',
-   );
+vi.mock('../../../token/conditionalStart', async () => {
+   const realConditional = (await vi.importActual('../../../token/conditionalStart')) as Record<
+      string,
+      unknown
+   >;
    return {
       ...realConditional,
-      resumeParseConditional: jest.fn(),
+      resumeParseConditional: vi.fn(),
    };
 });
-jest.mock('../addProtoReplacementText');
-jest.mock('../entityValueToSTokenSource');
+vi.mock('../addProtoReplacementText');
+vi.mock('../entityValueToSTokenSource');
 
 describe('ConditionalStartExpander (unit)', () => {
    let expand: ExpandParams;
    let start: ConditionalStartPToken;
-   let mockAddProtoReplacementText: jest.MockedFunction<typeof addProtoReplacementText>;
-   let mockResumeParseConditional: jest.MockedFunction<typeof resumeParseConditional>;
-   let mockEntityValueToSTokenSource: jest.MockedFunction<typeof entityValueToSTokenSource>;
+   let mockAddProtoReplacementText: MockedFunction<typeof addProtoReplacementText>;
+   let mockResumeParseConditional: MockedFunction<typeof resumeParseConditional>;
+   let mockEntityValueToSTokenSource: MockedFunction<typeof entityValueToSTokenSource>;
 
    beforeEach(() => {
       expand = {
@@ -65,13 +66,13 @@ describe('ConditionalStartExpander (unit)', () => {
 
       expand.entityDetails.addEntity(makeParameterEntityDeclaration(), [], undefined);
 
-      mockAddProtoReplacementText = addProtoReplacementText as jest.MockedFunction<
+      mockAddProtoReplacementText = addProtoReplacementText as MockedFunction<
          typeof addProtoReplacementText
       >;
-      mockResumeParseConditional = resumeParseConditional as jest.MockedFunction<
+      mockResumeParseConditional = resumeParseConditional as MockedFunction<
          typeof resumeParseConditional
       >;
-      mockEntityValueToSTokenSource = entityValueToSTokenSource as jest.MockedFunction<
+      mockEntityValueToSTokenSource = entityValueToSTokenSource as MockedFunction<
          typeof entityValueToSTokenSource
       >;
 
@@ -82,7 +83,7 @@ describe('ConditionalStartExpander (unit)', () => {
    });
 
    it('immediately declares itself as done when called with a conditional start without an unexpanded', () => {
-      const done = jest.fn();
+      const done = vi.fn();
       const start = new ConditionalStartPToken({
          open: toSToken('<!['),
       });
@@ -92,7 +93,7 @@ describe('ConditionalStartExpander (unit)', () => {
       expect(done).toHaveBeenCalledWith({
          done: true,
          newStart: start,
-         extraText: expect.any(STokenSource),
+         extraText: expect.any(STokenSource) as never,
       });
    });
 
@@ -123,7 +124,7 @@ describe('ConditionalStartExpander (unit)', () => {
    });
 
    it('declares the processing done if there are no entity details for the peRef', () => {
-      const done = jest.fn();
+      const done = vi.fn();
       mockAddProtoReplacementText.mockImplementation((x, y, z, cb) => {
          // eslint-disable-next-line @typescript-eslint/no-explicit-any
          cb({} as any);
@@ -145,12 +146,12 @@ describe('ConditionalStartExpander (unit)', () => {
       expect(done).toHaveBeenCalledWith({
          done: true,
          newStart: start,
-         extraText: expect.any(Object),
+         extraText: expect.any(Object) as never,
       });
    });
 
    it('declares the processing done if the resume parse found a bracket (and the source is consumed)', () => {
-      const done = jest.fn();
+      const done = vi.fn();
       mockAddProtoReplacementText.mockImplementation((x, y, z, cb) => {
          // eslint-disable-next-line @typescript-eslint/no-explicit-any
          cb({} as any);
@@ -186,12 +187,12 @@ describe('ConditionalStartExpander (unit)', () => {
                includedBracket: true,
             },
          }),
-         extraText: expect.any(Object),
+         extraText: expect.any(Object) as never,
       });
    });
 
    it('declares the processing done if the bracket was not found, but the source is not consumed', () => {
-      const done = jest.fn();
+      const done = vi.fn();
       mockAddProtoReplacementText.mockImplementation((x, y, z, cb) => {
          // eslint-disable-next-line @typescript-eslint/no-explicit-any
          cb({} as any);
@@ -221,12 +222,12 @@ describe('ConditionalStartExpander (unit)', () => {
                secondPropName: 'bar',
             },
          }),
-         extraText: expect.any(Object),
+         extraText: expect.any(Object) as never,
       });
    });
 
    it('declares the processing not yet done if no brackt was found and the source is empty', () => {
-      const done = jest.fn();
+      const done = vi.fn();
       mockAddProtoReplacementText.mockImplementation((x, y, z, cb) => {
          // eslint-disable-next-line @typescript-eslint/no-explicit-any
          cb({} as any);
@@ -255,7 +256,7 @@ describe('ConditionalStartExpander (unit)', () => {
    });
 
    it('finish() forces a done: true situation', () => {
-      const done = jest.fn();
+      const done = vi.fn();
       mockAddProtoReplacementText.mockImplementation((x, y, z, cb) => {
          // eslint-disable-next-line @typescript-eslint/no-explicit-any
          cb({} as any);
@@ -280,13 +281,13 @@ describe('ConditionalStartExpander (unit)', () => {
 
       expect(done).toHaveBeenCalledWith({
          done: true,
-         newStart: expect.any(ConditionalStartPToken),
-         extraText: expect.any(Object),
+         newStart: expect.any(ConditionalStartPToken) as never,
+         extraText: expect.any(Object) as never,
       });
    });
 
    it('expandPToken() will result in a done situation', () => {
-      const done = jest.fn();
+      const done = vi.fn();
       mockAddProtoReplacementText.mockImplementation((x, y, z, cb) => {
          // eslint-disable-next-line @typescript-eslint/no-explicit-any
          cb({} as any);
@@ -311,13 +312,13 @@ describe('ConditionalStartExpander (unit)', () => {
 
       expect(done).toHaveBeenCalledWith({
          done: true,
-         newStart: expect.any(ConditionalStartPToken),
-         extraText: expect.any(Object),
+         newStart: expect.any(ConditionalStartPToken) as never,
+         extraText: expect.any(Object) as never,
       });
    });
 
    it('expandPToken() calls back expand parameter', () => {
-      const expanded = jest.fn();
+      const expanded = vi.fn();
       mockAddProtoReplacementText.mockImplementation((x, y, z, cb) => {
          // eslint-disable-next-line @typescript-eslint/no-explicit-any
          cb({} as any);

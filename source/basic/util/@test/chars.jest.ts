@@ -1,6 +1,6 @@
-/* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { expect } from '@jest/globals';
+import { expect } from 'vitest';
 
 import { isName, isNmToken, isChar, isRestrictedChar, isSpace } from '../chars';
 

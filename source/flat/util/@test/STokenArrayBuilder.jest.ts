@@ -1,7 +1,7 @@
-/* Copyright ® 2018-2022 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
+import { describe, expect, it } from 'vitest';
 
 import { STokenArrayBuilder } from '../STokenArrayBuilder';
 

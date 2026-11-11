@@ -1,9 +1,10 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { NotationDeclarationPToken } from 'pToken';
+import { vi } from 'vitest';
 
 import { externalIdCheck } from '../../common/externalIdCheck';
 import { nameCheck } from '../../common/nameCheck';
@@ -12,9 +13,9 @@ import { warningCodes } from '../../error/warningCodes';
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { notationDeclarationCheck } from '../notationDeclarationCheck';
 
-jest.mock('../../common/nameCheck');
-jest.mock('../../common/nameXmlCheck');
-jest.mock('../../common/externalIdCheck');
+vi.mock('../../common/nameCheck');
+vi.mock('../../common/nameXmlCheck');
+vi.mock('../../common/externalIdCheck');
 
 const WFEID = wellFormedErrorCodes.id;
 const WID = warningCodes.id;

@@ -1,6 +1,5 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { CONFORMANCE_VERSION, ENTITY_ID, EntityId, ConformanceVersion } from 'basic';
 import { SToken, STokenSource } from 'basic';
 import { ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, ParseToken, ParseType } from 'pToken';
@@ -33,6 +32,7 @@ import {
    makeGeneralEntityReference,
    makeSpace,
 } from 'token-test';
+import { describe, expect, it, vi, type Mock } from 'vitest';
 
 import { parseXmlDecl, parsePlainInstruction } from '../bridge/instruction';
 import { PTokenParser } from '../pTokenParser3';
@@ -41,17 +41,17 @@ import { parseGeneralEntityReference } from '../token/generalEntityReference';
 import { parseParameterEntityReference } from '../token/parameterEntityReference';
 import * as peRef from '../token/parameterEntityReference';
 
-jest.mock('../../token/comment');
-jest.mock('../../token/elementStart');
-jest.mock('../../token/elementEnd');
-jest.mock('../../token/bridge/declaration');
-jest.mock('../../token/bridge/section');
-jest.mock('../../token/charData');
-jest.mock('../../token/space');
-jest.mock('../bridge/instruction');
-jest.mock('../token/charRef');
-jest.mock('../token/generalEntityReference');
-jest.mock('../token/parameterEntityReference');
+vi.mock('../../token/comment');
+vi.mock('../../token/elementStart');
+vi.mock('../../token/elementEnd');
+vi.mock('../../token/bridge/declaration');
+vi.mock('../../token/bridge/section');
+vi.mock('../../token/charData');
+vi.mock('../../token/space');
+vi.mock('../bridge/instruction');
+vi.mock('../token/charRef');
+vi.mock('../token/generalEntityReference');
+vi.mock('../token/parameterEntityReference');
 
 describe('pTokenParser (unit)', () => {
    let sTokenSource: STokenSource;
@@ -61,7 +61,7 @@ describe('pTokenParser (unit)', () => {
       sTokenSource = new STokenSource();
       pTokenParser = new PTokenParser(sTokenSource, { parseType: ParseType.DOCUMENT });
 
-      (parseSpace as jest.Mock).mockImplementation((source, cb) => {
+      (parseSpace as Mock).mockImplementation((source, cb) => {
          cb(undefined);
       });
    });
@@ -185,7 +185,7 @@ describe('pTokenParser (unit)', () => {
       pTokenParser = new PTokenParser(mockSource, {
          parseType: ParseType.DOCUMENT,
       });
-      (parseComment as jest.Mock).mockImplementation((source, start, cb) => {
+      (parseComment as Mock).mockImplementation((source, start, cb) => {
          console.log('in parseComment');
          cb(makeComment());
       });
@@ -364,7 +364,7 @@ describe('pTokenParser (unit)', () => {
    // });
 
    // xit('calls parseDeclaration() when encountering a <!', (done) => {
-   //    (parseDeclaration as jest.Mock).mockImplementation((source, start, cb) => {
+   //    (parseDeclaration as Mock).mockImplementation((source, start, cb) => {
    //       cb(makeAttListDeclaration());
    //    });
    //    sTokenSource.addText('<!');
@@ -381,7 +381,7 @@ describe('pTokenParser (unit)', () => {
    // });
 
    // xit('calls parseCharRef() when it encounters a &#', (done) => {
-   //    (parseCharRef as jest.Mock).mockImplementation((source, start, cb) => {
+   //    (parseCharRef as Mock).mockImplementation((source, start, cb) => {
    //       cb(makeCharRef());
    //    });
    //    sTokenSource.addText('&#');
@@ -398,7 +398,7 @@ describe('pTokenParser (unit)', () => {
    // });
 
    // xit('calls parseCharData() when it encounters a charater', (done) => {
-   //    (parseCharData as jest.Mock).mockImplementation((source, start, cb) => {
+   //    (parseCharData as Mock).mockImplementation((source, start, cb) => {
    //       cb(makeCharData());
    //    });
    //    sTokenSource.addText('a');
@@ -415,7 +415,7 @@ describe('pTokenParser (unit)', () => {
    // });
 
    // xit('calls parseCharData() in the internal subset', (done) => {
-   //    (parseCharData as jest.Mock).mockImplementation((source, start, cb) => {
+   //    (parseCharData as Mock).mockImplementation((source, start, cb) => {
    //       cb(makeCharData());
    //    });
    //    sTokenSource.addText('<!DOCTYPE foo [ asdf</foo>');
@@ -432,7 +432,7 @@ describe('pTokenParser (unit)', () => {
    // });
 
    // xit('calls parseComment()', (done) => {
-   //    (parseComment as jest.Mock).mockImplementation((source, start, cb) => {
+   //    (parseComment as Mock).mockImplementation((source, start, cb) => {
    //       cb(makeComment());
    //    });
    //    sTokenSource.addText('<!--');
@@ -449,7 +449,7 @@ describe('pTokenParser (unit)', () => {
    // });
 
    // xit('calls parseElementStart() when it encounters just a <', (done) => {
-   //    (parseElementStart as jest.Mock).mockImplementation((source, start, cb) => {
+   //    (parseElementStart as Mock).mockImplementation((source, start, cb) => {
    //       cb(makeElementStart());
    //    });
    //    sTokenSource.addText('<');
@@ -466,7 +466,7 @@ describe('pTokenParser (unit)', () => {
    // });
 
    // xit('calls parseElementEnd() when it encountes just a </', (done) => {
-   //    (parseElementEnd as jest.Mock).mockImplementation((source, start, cb) => {
+   //    (parseElementEnd as Mock).mockImplementation((source, start, cb) => {
    //       cb(makeElementEnd());
    //    });
    //    sTokenSource.addText('</');
@@ -484,7 +484,7 @@ describe('pTokenParser (unit)', () => {
    // });
 
    // xit('calls parseGeneralEntityReference()', (done) => {
-   //    (parseGeneralEntityReference as jest.Mock).mockImplementation((source, start, cb) => {
+   //    (parseGeneralEntityReference as Mock).mockImplementation((source, start, cb) => {
    //       cb(makeGeneralEntityReference());
    //    });
    //    sTokenSource.addText('&');
@@ -503,10 +503,10 @@ describe('pTokenParser (unit)', () => {
    // xit('calls parseParameterEntityReference() when encountering a % in the document type', (done) => {
    //    const resultsSpace = [{}];
    //    const parameterEntity = [{}];
-   //    (parseSpace as jest.Mock).mockImplementation((source, cb) => {
+   //    (parseSpace as Mock).mockImplementation((source, cb) => {
    //       cb(resultsSpace.shift());
    //    });
-   //    (parseParameterEntityReference as jest.Mock).mockImplementation((source, cb) => {
+   //    (parseParameterEntityReference as Mock).mockImplementation((source, cb) => {
    //       cb(parameterEntity.shift());
    //    });
    //    sTokenSource.addText('%');
@@ -523,7 +523,7 @@ describe('pTokenParser (unit)', () => {
    // });
 
    // xit('does not call parseParameterEntityReference() if not in a DTD', (done) => {
-   //    (parseParameterEntityReference as jest.Mock).mockImplementation((source, cb) => {
+   //    (parseParameterEntityReference as Mock).mockImplementation((source, cb) => {
    //       cb({});
    //    });
    //    sTokenSource.addText('%');
@@ -536,7 +536,7 @@ describe('pTokenParser (unit)', () => {
    // });
 
    // xit('calls parseXmlDecl() if encountering <? in a DOCUMENT ', (done) => {
-   //    (parseXmlDecl as jest.Mock).mockImplementation((source, start, cb) => {
+   //    (parseXmlDecl as Mock).mockImplementation((source, start, cb) => {
    //       cb({});
    //    });
    //    sTokenSource.addText('<?');
@@ -554,7 +554,7 @@ describe('pTokenParser (unit)', () => {
    // });
 
    // xit('calls parsePlainInstruction() if encountering <? in a non-DOCUMENT ', (done) => {
-   //    (parsePlainInstruction as jest.Mock).mockImplementation((source, start, cb) => {
+   //    (parsePlainInstruction as Mock).mockImplementation((source, start, cb) => {
    //       cb({});
    //    });
    //    sTokenSource.addText('<?');
@@ -572,12 +572,12 @@ describe('pTokenParser (unit)', () => {
    // });
 
    // xit('does not call space.parse() when this is in element content (whitebox)', (done) => {
-   //    (parseElementStart as jest.Mock).mockImplementation((source, start, cb) => {
+   //    (parseElementStart as Mock).mockImplementation((source, start, cb) => {
    //       cb({
    //          type: ELEMENT_START_PTOKEN,
    //       });
    //    });
-   //    (parseSpace as jest.Mock).mockImplementation((source, cb) => {
+   //    (parseSpace as Mock).mockImplementation((source, cb) => {
    //       cb(makeSpace());
    //    });
    //    sTokenSource.addText('<');
@@ -590,7 +590,7 @@ describe('pTokenParser (unit)', () => {
    // });
 
    // xit('call space.parse() when this is not in element content', (done) => {
-   //    (parseSpace as jest.Mock).mockImplementation((source, cb) => {
+   //    (parseSpace as Mock).mockImplementation((source, cb) => {
    //       cb(makeSpace());
    //    });
    //    sTokenSource.addText('');
@@ -603,7 +603,7 @@ describe('pTokenParser (unit)', () => {
    // });
 
    // xit('calls parseSection() when encountering <![', (done) => {
-   //    (parseSection as jest.Mock).mockImplementation((source, start, cb) => {
+   //    (parseSection as Mock).mockImplementation((source, start, cb) => {
    //       cb(makeCdata());
    //    });
    //    sTokenSource.addText('<![');

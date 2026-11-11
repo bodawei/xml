@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { STokenSource, toSToken } from 'basic';
+import { describe, expect, it } from 'vitest';
 
 import {
    ElementDeclarationPToken,
@@ -12,77 +12,80 @@ import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 
 describe('elementDeclaration', () => {
    describe('parseElementDeclaration()', () => {
-      it('parses a PERef (check unsasigned calls)', (done) => {
-         const source = new STokenSource();
-         source.addText('%foo;>');
-         source.endText();
+      it('parses a PERef (check unsasigned calls)', () =>
+         new Promise<void>((done) => {
+            const source = new STokenSource();
+            source.addText('%foo;>');
+            source.endText();
 
-         parseElementDeclaration(source, { open: toSToken('<!') }, (result) => {
-            const expected = new ElementDeclarationPToken({
-               open: toSToken('<!'),
-               unexpanded: {
-                  tokens: [
-                     new ParameterEntityReferencePToken({
-                        open: toSToken('%'),
-                        openSpace: undefined,
-                        name: toSToken('foo'),
-                        nameSpace: undefined,
-                        close: toSToken(';'),
-                     }),
-                  ],
-                  propName: 'name',
-               },
-               close: toSToken('>'),
+            parseElementDeclaration(source, { open: toSToken('<!') }, (result) => {
+               const expected = new ElementDeclarationPToken({
+                  open: toSToken('<!'),
+                  unexpanded: {
+                     tokens: [
+                        new ParameterEntityReferencePToken({
+                           open: toSToken('%'),
+                           openSpace: undefined,
+                           name: toSToken('foo'),
+                           nameSpace: undefined,
+                           close: toSToken(';'),
+                        }),
+                     ],
+                     propName: 'name',
+                  },
+                  close: toSToken('>'),
+               });
+
+               // @ts-expect-error 2329/matchers
+               expect(result).toEqualRangeless(expected);
+               done?.();
             });
+         }));
 
-            // @ts-expect-error 2329/matchers
-            expect(result).toEqualRangeless(expected);
-            done?.();
-         });
-      });
+      it('parses an empty PERef after a simple content model', () =>
+         new Promise<void>((done) => {
+            const source = new STokenSource();
+            source.addText('elementName ANY %foo;>');
+            source.endText();
 
-      it('parses an empty PERef after a simple content model', (done) => {
-         const source = new STokenSource();
-         source.addText('elementName ANY %foo;>');
-         source.endText();
+            parseElementDeclaration(source, { open: toSToken('<!') }, (result) => {
+               const expected = new ElementDeclarationPToken({
+                  open: toSToken('<!'),
+                  name: toSToken('elementName'),
+                  nameSpace: toSToken(' '),
+                  contentSpec: toSToken('ANY'),
+                  contentSpecSpace: toSToken(' '),
+                  unexpanded: {
+                     tokens: [
+                        new ParameterEntityReferencePToken({
+                           open: toSToken('%'),
+                           openSpace: undefined,
+                           name: toSToken('foo'),
+                           nameSpace: undefined,
+                           close: toSToken(';'),
+                        }),
+                     ],
+                     propName: 'trailing',
+                  },
+                  close: toSToken('>'),
+               });
 
-         parseElementDeclaration(source, { open: toSToken('<!') }, (result) => {
-            const expected = new ElementDeclarationPToken({
-               open: toSToken('<!'),
-               name: toSToken('elementName'),
-               nameSpace: toSToken(' '),
-               contentSpec: toSToken('ANY'),
-               contentSpecSpace: toSToken(' '),
-               unexpanded: {
-                  tokens: [
-                     new ParameterEntityReferencePToken({
-                        open: toSToken('%'),
-                        openSpace: undefined,
-                        name: toSToken('foo'),
-                        nameSpace: undefined,
-                        close: toSToken(';'),
-                     }),
-                  ],
-                  propName: 'trailing',
-               },
-               close: toSToken('>'),
+               // @ts-expect-error 2329/matchers
+               expect(result).toEqualRangeless(expected);
+               done?.();
             });
+         }));
 
-            // @ts-expect-error 2329/matchers
-            expect(result).toEqualRangeless(expected);
-            done?.();
-         });
-      });
+      it('parses a complex content model', () =>
+         new Promise<void>((done) => {
+            const source = new STokenSource();
+            source.addText(
+               'AnElement ( one* | two +|(threeA,threeB?)+ | ( fourA, (fourB1 | fourB2)*, fourC))? >',
+            );
+            source.endText();
 
-      it('parses a complex content model', (done) => {
-         const source = new STokenSource();
-         source.addText(
-            'AnElement ( one* | two +|(threeA,threeB?)+ | ( fourA, (fourB1 | fourB2)*, fourC))? >',
-         );
-         source.endText();
-
-         parseElementDeclaration(source, { open: toSToken('<!') }, (result) => {
-            expect(result).toMatchInlineSnapshot(`
+            parseElementDeclaration(source, { open: toSToken('<!') }, (result) => {
+               expect(result).toMatchInlineSnapshot(`
                ElementDeclarationPToken {
                  "close": SToken {
                    "originalStr": ">",
@@ -1040,225 +1043,86 @@ describe('elementDeclaration', () => {
                  "unexpanded": undefined,
                }
             `);
-            done?.();
-         });
-      });
-
-      it('parses an empty PERef after a complex content model', (done) => {
-         const source = new STokenSource();
-         source.addText(
-            'AnElement ( one* | two +|(threeA,threeB?)+ | ( fourA, (fourB1 | fourB2)*, fourC))? %foo;>',
-         );
-         source.endText();
-
-         parseElementDeclaration(source, { open: toSToken('<!') }, (result) => {
-            // @ts-expect-error 2329/matchers
-            expect(result.unexpanded).toEqualRangeless({
-               tokens: [
-                  new ParameterEntityReferencePToken({
-                     open: toSToken('%'),
-                     openSpace: undefined,
-                     name: toSToken('foo'),
-                     nameSpace: undefined,
-                     close: toSToken(';'),
-                  }),
-               ],
-               propName: 'midSpec',
+               done?.();
             });
-            done?.();
-         });
-      });
+         }));
+
+      it('parses an empty PERef after a complex content model', () =>
+         new Promise<void>((done) => {
+            const source = new STokenSource();
+            source.addText(
+               'AnElement ( one* | two +|(threeA,threeB?)+ | ( fourA, (fourB1 | fourB2)*, fourC))? %foo;>',
+            );
+            source.endText();
+
+            parseElementDeclaration(source, { open: toSToken('<!') }, (result) => {
+               // @ts-expect-error 2329/matchers
+               expect(result.unexpanded).toEqualRangeless({
+                  tokens: [
+                     new ParameterEntityReferencePToken({
+                        open: toSToken('%'),
+                        openSpace: undefined,
+                        name: toSToken('foo'),
+                        nameSpace: undefined,
+                        close: toSToken(';'),
+                     }),
+                  ],
+                  propName: 'midSpec',
+               });
+               done?.();
+            });
+         }));
    });
 
    describe('resumeParseElementDeclaration()', () => {
-      it('resumes an entity declaration from the start', (done) => {
-         const source = new STokenSource();
-         source.addText('foobar ANY');
-         source.endText();
+      it('resumes an entity declaration from the start', () =>
+         new Promise<void>((done) => {
+            const source = new STokenSource();
+            source.addText('foobar ANY');
+            source.endText();
 
-         resumeParseElementDeclaration(
-            source,
-            new ElementDeclarationPToken({
-               open: toSToken('<!'),
-               unexpanded: {
-                  tokens: [],
-                  propName: 'name',
-               },
-               close: toSToken('>'),
-            }),
-            (result) => {
-               const expected = new ElementDeclarationPToken({
+            resumeParseElementDeclaration(
+               source,
+               new ElementDeclarationPToken({
                   open: toSToken('<!'),
-                  name: toSToken('foobar'),
-                  nameSpace: toSToken(' '),
-                  contentSpec: toSToken('ANY'),
                   unexpanded: {
                      tokens: [],
                      propName: 'name',
                   },
                   close: toSToken('>'),
-               });
+               }),
+               (result) => {
+                  const expected = new ElementDeclarationPToken({
+                     open: toSToken('<!'),
+                     name: toSToken('foobar'),
+                     nameSpace: toSToken(' '),
+                     contentSpec: toSToken('ANY'),
+                     unexpanded: {
+                        tokens: [],
+                        propName: 'name',
+                     },
+                     close: toSToken('>'),
+                  });
 
-               // @ts-expect-error 2329/matchers
-               expect(result).toEqualRangeless(expected);
-               done?.();
-            },
-         );
-      });
-
-      it('resumes an entity declaration from the start', (done) => {
-         const source = new STokenSource();
-         source.addText('\ta | ( c, d ))');
-         source.endText();
-
-         resumeParseElementDeclaration(
-            source,
-            new ElementDeclarationPToken({
-               open: toSToken('<!'),
-               contentModel: {
-                  open: toSToken('('),
-                  delimitedParticles: [],
+                  // @ts-expect-error 2329/matchers
+                  expect(result).toEqualRangeless(expected);
+                  done?.();
                },
-               unexpanded: {
-                  tokens: [],
-                  propName: 'midSpec',
-               },
-               close: toSToken('>'),
-            }),
-            (result) => {
-               const expected = new ElementDeclarationPToken({
+            );
+         }));
+
+      it('resumes an entity declaration from the start', () =>
+         new Promise<void>((done) => {
+            const source = new STokenSource();
+            source.addText('\ta | ( c, d ))');
+            source.endText();
+
+            resumeParseElementDeclaration(
+               source,
+               new ElementDeclarationPToken({
                   open: toSToken('<!'),
                   contentModel: {
                      open: toSToken('('),
-                     openSpace: toSToken('\t'),
-                     delimitedParticles: [
-                        {
-                           particle: {
-                              name: toSToken('a'),
-                              nameSpace: toSToken(' '),
-                              repeat: undefined,
-                              repeatSpace: undefined,
-                           },
-                           delimiter: toSToken('|'),
-                           delimiterSpace: toSToken(' '),
-                        },
-                        {
-                           particle: {
-                              open: toSToken('('),
-                              openSpace: toSToken(' '),
-                              delimitedParticles: [
-                                 {
-                                    particle: {
-                                       name: toSToken('c'),
-                                       nameSpace: undefined,
-                                       repeat: undefined,
-                                       repeatSpace: undefined,
-                                    },
-                                    delimiter: toSToken(','),
-                                    delimiterSpace: toSToken(' '),
-                                 },
-                                 {
-                                    particle: {
-                                       name: toSToken('d'),
-                                       nameSpace: toSToken(' '),
-                                       repeat: undefined,
-                                       repeatSpace: undefined,
-                                    },
-                                    delimiter: undefined,
-                                    delimiterSpace: undefined,
-                                 },
-                              ],
-                              close: toSToken(')'),
-                              closeSpace: undefined,
-                              repeat: undefined,
-                              repeatSpace: undefined,
-                           },
-                           delimiter: undefined,
-                           delimiterSpace: undefined,
-                        },
-                     ],
-                     close: toSToken(')'),
-                     closeSpace: undefined,
-                     repeat: undefined,
-                     repeatSpace: undefined,
-                  },
-                  unexpanded: {
-                     tokens: [],
-                     propName: 'midSpec',
-                  },
-                  close: toSToken('>'),
-               });
-
-               // @ts-expect-error 2329/matchers
-               expect(result).toEqualRangeless(expected);
-               done?.();
-            },
-         );
-      });
-
-      it('resumes an entity declaration with a simple content spec and a trailing empty peref', (done) => {
-         const source = new STokenSource();
-         source.addText('\t');
-         source.endText();
-
-         resumeParseElementDeclaration(
-            source,
-            new ElementDeclarationPToken({
-               open: toSToken('<!'),
-               contentSpec: toSToken('ANY'),
-               contentSpecSpace: toSToken(' '),
-               unexpanded: {
-                  tokens: [],
-                  propName: 'trailing',
-               },
-               close: toSToken('>'),
-            }),
-            (result) => {
-               const expected = new ElementDeclarationPToken({
-                  open: toSToken('<!'),
-                  contentSpec: toSToken('ANY'),
-                  contentSpecSpace: toSToken(' \t'),
-                  unexpanded: {
-                     tokens: [],
-                     propName: 'trailing',
-                  },
-                  close: toSToken('>'),
-               });
-
-               // @ts-expect-error 2329/matchers
-               expect(result).toEqualRangeless(expected);
-               done?.();
-            },
-         );
-      });
-
-      it('resumes an entity declaration with a complex content model and a trailing empty peref', (done) => {
-         const source = new STokenSource();
-         source.addText('\t');
-         source.endText();
-
-         resumeParseElementDeclaration(
-            source,
-            new ElementDeclarationPToken({
-               open: toSToken('<!'),
-               contentModel: {
-                  open: toSToken('('),
-                  close: toSToken(')'),
-                  delimitedParticles: [],
-               },
-               unexpanded: {
-                  tokens: [],
-                  propName: 'midSpec',
-               },
-               close: toSToken('>'),
-            }),
-            (result) => {
-               const expected = new ElementDeclarationPToken({
-                  open: toSToken('<!'),
-                  contentModel: {
-                     open: toSToken('('),
-                     close: toSToken(')'),
-                     closeSpace: toSToken('\t'),
                      delimitedParticles: [],
                   },
                   unexpanded: {
@@ -1266,13 +1130,157 @@ describe('elementDeclaration', () => {
                      propName: 'midSpec',
                   },
                   close: toSToken('>'),
-               });
+               }),
+               (result) => {
+                  const expected = new ElementDeclarationPToken({
+                     open: toSToken('<!'),
+                     contentModel: {
+                        open: toSToken('('),
+                        openSpace: toSToken('\t'),
+                        delimitedParticles: [
+                           {
+                              particle: {
+                                 name: toSToken('a'),
+                                 nameSpace: toSToken(' '),
+                                 repeat: undefined,
+                                 repeatSpace: undefined,
+                              },
+                              delimiter: toSToken('|'),
+                              delimiterSpace: toSToken(' '),
+                           },
+                           {
+                              particle: {
+                                 open: toSToken('('),
+                                 openSpace: toSToken(' '),
+                                 delimitedParticles: [
+                                    {
+                                       particle: {
+                                          name: toSToken('c'),
+                                          nameSpace: undefined,
+                                          repeat: undefined,
+                                          repeatSpace: undefined,
+                                       },
+                                       delimiter: toSToken(','),
+                                       delimiterSpace: toSToken(' '),
+                                    },
+                                    {
+                                       particle: {
+                                          name: toSToken('d'),
+                                          nameSpace: toSToken(' '),
+                                          repeat: undefined,
+                                          repeatSpace: undefined,
+                                       },
+                                       delimiter: undefined,
+                                       delimiterSpace: undefined,
+                                    },
+                                 ],
+                                 close: toSToken(')'),
+                                 closeSpace: undefined,
+                                 repeat: undefined,
+                                 repeatSpace: undefined,
+                              },
+                              delimiter: undefined,
+                              delimiterSpace: undefined,
+                           },
+                        ],
+                        close: toSToken(')'),
+                        closeSpace: undefined,
+                        repeat: undefined,
+                        repeatSpace: undefined,
+                     },
+                     unexpanded: {
+                        tokens: [],
+                        propName: 'midSpec',
+                     },
+                     close: toSToken('>'),
+                  });
 
-               // @ts-expect-error 2329/matchers
-               expect(result).toEqualRangeless(expected);
-               done?.();
-            },
-         );
-      });
+                  // @ts-expect-error 2329/matchers
+                  expect(result).toEqualRangeless(expected);
+                  done?.();
+               },
+            );
+         }));
+
+      it('resumes an entity declaration with a simple content spec and a trailing empty peref', () =>
+         new Promise<void>((done) => {
+            const source = new STokenSource();
+            source.addText('\t');
+            source.endText();
+
+            resumeParseElementDeclaration(
+               source,
+               new ElementDeclarationPToken({
+                  open: toSToken('<!'),
+                  contentSpec: toSToken('ANY'),
+                  contentSpecSpace: toSToken(' '),
+                  unexpanded: {
+                     tokens: [],
+                     propName: 'trailing',
+                  },
+                  close: toSToken('>'),
+               }),
+               (result) => {
+                  const expected = new ElementDeclarationPToken({
+                     open: toSToken('<!'),
+                     contentSpec: toSToken('ANY'),
+                     contentSpecSpace: toSToken(' \t'),
+                     unexpanded: {
+                        tokens: [],
+                        propName: 'trailing',
+                     },
+                     close: toSToken('>'),
+                  });
+
+                  // @ts-expect-error 2329/matchers
+                  expect(result).toEqualRangeless(expected);
+                  done?.();
+               },
+            );
+         }));
+
+      it('resumes an entity declaration with a complex content model and a trailing empty peref', () =>
+         new Promise<void>((done) => {
+            const source = new STokenSource();
+            source.addText('\t');
+            source.endText();
+
+            resumeParseElementDeclaration(
+               source,
+               new ElementDeclarationPToken({
+                  open: toSToken('<!'),
+                  contentModel: {
+                     open: toSToken('('),
+                     close: toSToken(')'),
+                     delimitedParticles: [],
+                  },
+                  unexpanded: {
+                     tokens: [],
+                     propName: 'midSpec',
+                  },
+                  close: toSToken('>'),
+               }),
+               (result) => {
+                  const expected = new ElementDeclarationPToken({
+                     open: toSToken('<!'),
+                     contentModel: {
+                        open: toSToken('('),
+                        close: toSToken(')'),
+                        closeSpace: toSToken('\t'),
+                        delimitedParticles: [],
+                     },
+                     unexpanded: {
+                        tokens: [],
+                        propName: 'midSpec',
+                     },
+                     close: toSToken('>'),
+                  });
+
+                  // @ts-expect-error 2329/matchers
+                  expect(result).toEqualRangeless(expected);
+                  done?.();
+               },
+            );
+         }));
    });
 });

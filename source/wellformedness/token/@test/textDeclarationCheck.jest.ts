@@ -1,10 +1,10 @@
-/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
 import { SToken, toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { TextDeclarationPToken, InstructionStart } from 'pToken';
+import { describe, expect, it, vi } from 'vitest';
 
 import { charCheck } from '../../common/charCheck';
 import { errorCodes } from '../../error/errorCodes';
@@ -12,7 +12,7 @@ import { fatalErrorCodes } from '../../error/fatalErrorCodes';
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { textDeclarationCheck } from '../textDeclarationCheck';
 
-jest.mock('../../common/charCheck');
+vi.mock('../../common/charCheck');
 
 const EID = errorCodes.id;
 const FEID = fatalErrorCodes.id;

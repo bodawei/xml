@@ -1,11 +1,11 @@
 /* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, Range, EntityId } from 'basic';
 import { SToken, toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { AttListDeclarationPToken } from 'pToken';
 import { WordListPToken, WordListType } from 'token';
+import { describe, expect, it, vi, type MockedFunction } from 'vitest';
 
 import { literalCheck } from '../../common/literalCheck';
 import { nameCheck } from '../../common/nameCheck';
@@ -15,10 +15,10 @@ import { warningCodes } from '../../error/warningCodes';
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { attListDeclarationCheck } from '../attListDeclarationCheck';
 
-jest.mock('../../common/literalCheck');
-jest.mock('../../common/nameCheck');
-jest.mock('../../common/nameXmlCheck');
-jest.mock('../../common/wordlistCheck');
+vi.mock('../../common/literalCheck');
+vi.mock('../../common/nameCheck');
+vi.mock('../../common/nameXmlCheck');
+vi.mock('../../common/wordlistCheck');
 
 const WFEID = wellFormedErrorCodes.id;
 const WID = warningCodes.id;
@@ -27,7 +27,7 @@ describe('attListDeclarationCheck()', () => {
    let collector: ParamCollector;
    let confVer: ConformanceVersion;
    let aldPToken: AttListDeclarationPToken;
-   let mockLiteralCheck: jest.MockedFunction<typeof literalCheck>;
+   let mockLiteralCheck: MockedFunction<typeof literalCheck>;
 
    beforeEach(() => {
       aldPToken = new AttListDeclarationPToken({
@@ -52,7 +52,7 @@ describe('attListDeclarationCheck()', () => {
       collector = new ParamCollector();
       confVer = new ConformanceVersion();
 
-      mockLiteralCheck = literalCheck as jest.MockedFunction<typeof literalCheck>;
+      mockLiteralCheck = literalCheck as MockedFunction<typeof literalCheck>;
    });
 
    it('reports an error if the declaration type is not all caps', () => {

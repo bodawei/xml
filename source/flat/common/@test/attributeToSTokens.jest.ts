@@ -1,12 +1,13 @@
-/* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { toSToken } from 'basic';
 import { AttributePToken } from 'token';
+import { vi, type Mock } from 'vitest';
 
 import { attributeToSTokens } from '../attributeToSTokens';
 import { literalToSTokens } from '../literalToSTokens';
 
-jest.mock('../literalToSTokens');
+vi.mock('../literalToSTokens');
 
 describe('attribute (unit)', () => {
    let attributesPChunk: Array<AttributePToken>;
@@ -30,7 +31,7 @@ describe('attribute (unit)', () => {
             trailingSpace: undefined,
          },
       ];
-      (literalToSTokens as jest.Mock).mockReturnValue([toSToken('literal')]);
+      (literalToSTokens as Mock).mockReturnValue([toSToken('literal')]);
    });
 
    it('calls literalToSTokens()', () => {

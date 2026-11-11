@@ -1,6 +1,6 @@
 /* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
-type DoneFn = (reason?: string | Error) => void;
+type DoneFn = () => void;
 /*
  * Simple locking routine. Calls the provided function when the
  * returned function has been called doneCount times.

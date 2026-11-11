@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { STokenSource, toSToken } from 'basic';
+import { describe, expect, it } from 'vitest';
 
 import { ContentModelP, parseContentModel } from '../contentModel';
 
@@ -42,58 +42,61 @@ describe('ContentModel (integration)', () => {
    });
 
    describe('parseContentModel()', () => {
-      it('parses a basic content spec', (done) => {
-         const source = new STokenSource();
-         source.addText('( one+ | two)* ');
-         source.endText();
+      it('parses a basic content spec', () =>
+         new Promise<void>((done) => {
+            const source = new STokenSource();
+            source.addText('( one+ | two)* ');
+            source.endText();
 
-         parseContentModel(source, (result) => {
-            // @ts-expect-error 2329/matchers
-            expect(result).toEqualRangeless(contentSpec);
-            done();
-         });
-      });
+            parseContentModel(source, (result) => {
+               // @ts-expect-error 2329/matchers
+               expect(result).toEqualRangeless(contentSpec);
+               done();
+            });
+         }));
 
-      it('parses content spec with a PE Ref in it', (done) => {
-         const source = new STokenSource();
-         source.addText('( one+ | %fred;');
-         source.endText();
+      it('parses content spec with a PE Ref in it', () =>
+         new Promise<void>((done) => {
+            const source = new STokenSource();
+            source.addText('( one+ | %fred;');
+            source.endText();
 
-         parseContentModel(source, (result) => {
-            // @ts-expect-error 2329/matchers
-            expect(result).toEqualRangeless(
-               new ContentModelP({
-                  open: toSToken('('),
-                  openSpace: toSToken(' '),
-                  delimitedParticles: [
-                     {
-                        particle: {
-                           name: toSToken('one'),
-                           nameSpace: undefined,
-                           repeat: toSToken('+'),
-                           repeatSpace: toSToken(' '),
+            parseContentModel(source, (result) => {
+               // @ts-expect-error 2329/matchers
+               expect(result).toEqualRangeless(
+                  new ContentModelP({
+                     open: toSToken('('),
+                     openSpace: toSToken(' '),
+                     delimitedParticles: [
+                        {
+                           particle: {
+                              name: toSToken('one'),
+                              nameSpace: undefined,
+                              repeat: toSToken('+'),
+                              repeatSpace: toSToken(' '),
+                           },
+                           delimiter: toSToken('|'),
+                           delimiterSpace: toSToken(' '),
                         },
-                        delimiter: toSToken('|'),
-                        delimiterSpace: toSToken(' '),
-                     },
-                  ],
-                  close: undefined,
-                  closeSpace: undefined,
-                  repeat: undefined,
-                  repeatSpace: undefined,
-               }),
-            );
-            done();
-         });
-      });
+                     ],
+                     close: undefined,
+                     closeSpace: undefined,
+                     repeat: undefined,
+                     repeatSpace: undefined,
+                  }),
+               );
+               done();
+            });
+         }));
 
-      it('parses a nested content spec with various delimiters', (done) => {
-         const source = new STokenSource();
-         source.addText('( one+ | ( ( two | three)+ , four)? | five)');
-         source.endText();
+      it('parses a nested content spec with various delimiters', () =>
+         new Promise<void>((done) => {
+            const source = new STokenSource();
+            source.addText('( one+ | ( ( two | three)+ , four)? | five)');
+            source.endText();
 
-         parseContentModel(source, (result) => {
-            expect(result).toMatchInlineSnapshot(`
+            parseContentModel(source, (result) => {
+               expect(result).toMatchInlineSnapshot(`
                ContentModelP {
                  "close": SToken {
                    "originalStr": ")",
@@ -705,8 +708,8 @@ describe('ContentModel (integration)', () => {
                  "repeatSpace": undefined,
                }
             `);
-            done();
-         });
-      });
+               done();
+            });
+         }));
    });
 });

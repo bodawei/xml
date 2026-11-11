@@ -1,13 +1,13 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { ElementEmptyPToken } from 'token';
+import { describe, expect, it, vi, type Mock } from 'vitest';
 
 import { AttributeX, cloneAttributeX } from '../../common/attributeX';
 import { ElementEmptyXToken, ELEMENT_EMPTY_XTOKEN } from '../elementEmptyXToken';
 
-jest.mock('../../common/attributeX');
+vi.mock('../../common/attributeX');
 
 describe('ElementEmptyXToken (unit)', () => {
    let elementEmptyPToken: ElementEmptyPToken;
@@ -21,7 +21,7 @@ describe('ElementEmptyXToken (unit)', () => {
          close: toSToken('>'),
       });
 
-      (cloneAttributeX as jest.Mock).mockReturnValue({ name: 'clonedAttr' });
+      (cloneAttributeX as Mock).mockReturnValue({ name: 'clonedAttr' });
    });
 
    it('constructs with a string and attributes', () => {
@@ -56,7 +56,9 @@ describe('ElementEmptyXToken (unit)', () => {
    });
 
    it('returns a token with the expected fields defined', () => {
-      (AttributeX as jest.Mock).mockImplementation(() => ({ name: 'foo', value: [] }));
+      (AttributeX as Mock).mockImplementation(function () {
+         return { name: 'foo', value: [] };
+      });
 
       const token = new ElementEmptyXToken(elementEmptyPToken);
 

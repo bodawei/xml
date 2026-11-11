@@ -1,15 +1,15 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { CharDataPToken } from 'token';
+import { describe, expect, it, vi } from 'vitest';
 
 import { charCheck } from '../../common/charCheck';
 import { charDataCheck } from '../charDataCheck';
 
-jest.mock('../../common/charCheck');
+vi.mock('../../common/charCheck');
 
 describe('commentCheck()', () => {
    let confVer: ConformanceVersion;

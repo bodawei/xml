@@ -1,6 +1,5 @@
 /* Copyright ® 2019-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import {
@@ -22,6 +21,7 @@ import {
    GeneralEntityStartPToken,
    CharDataPToken,
 } from 'token';
+import { describe, expect, it } from 'vitest';
 
 import { CheckState, CHECKER_DONE } from '../checkUtils';
 import { ContentChecker } from '../ContentChecker';

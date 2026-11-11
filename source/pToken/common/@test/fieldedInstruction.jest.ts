@@ -1,8 +1,8 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { MockSTokenSource } from 'pToken-test';
+import { describe, expect, it, vi, type MockedFunction } from 'vitest';
 
 import literal from '../../../token/common/literal';
 import { InstructionStart } from '../../bridge/instruction';
@@ -115,14 +115,12 @@ describe('FieldedInstruction (unit)', () => {
    });
 
    describe('parseFieldedInstruction()', () => {
-      let callback: jest.MockedFunction<(result: FieldedInstruction) => void>;
-      let litParse: jest.MockedFunction<typeof literal.parse>;
+      let callback: MockedFunction<(result: FieldedInstruction) => void>;
+      let litParse: MockedFunction<typeof literal.parse>;
 
       beforeEach(() => {
-         callback = jest.fn();
-         litParse = jest.spyOn(literal, 'parse').mockImplementation() as jest.MockedFunction<
-            typeof literal.parse
-         >;
+         callback = vi.fn();
+         litParse = vi.spyOn(literal, 'parse').mockImplementation(() => undefined);
       });
 
       it('does a basic parsing', () => {

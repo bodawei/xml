@@ -62,7 +62,7 @@ There are serveral parts to the handling of problems in Tiramisu
 * Collectors are classes whose instances are used to gather a set of Problems.  At runtime, a ProblemCollector is most commonly used, while in many unit test situations, a ParamCollector implementation is used.  In both the wellformed and validity processors, examining a single PToken may generate zero or many Problems, and so a Collector is used to allow that set of Problems to be delivered as a unit to the root processor for delivery to its own output stream.
    * ProblemCollectors take a set of parameters and createa a Problem instance. Most notably, it allows the context to be specified once, which in turn allows most things reporting Problems to be able to not "remember" or even "know" what that context is.
    * ParamCollector also takes a set of parameters, but keeps track of the parameters themselves for testing purposes.
-* makeProblemMatcher() creates a jest matcher corresponding to a particular Problem subtype. Each subsystem that subclasses Problem will use makeProblemMatcher to create a matcher to help check for those Problems in tests.
+* makeProblemMatcher() creates a vitest matcher corresponding to a particular Problem subtype. Each subsystem that subclasses Problem will use makeProblemMatcher to create a matcher to help check for those Problems in tests.
 
 ## Style guide
 ### Codes

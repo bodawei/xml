@@ -16,9 +16,9 @@
       "lint:all": "oxlint source/basic source/valid",
       "lint:ci": "oxlint --max-warnings 0 source/valid source/token source/node source/demo",
       "lint:fix": "oxlint --fix source",
-      "jest:all": "jest --config ./jest.config.js --coverage",
+      "vitest:all": "vitest run --coverage",
       "test:jasmine": "node --no-experimental-strip-types --import ./build/babelRegister.mjs -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/jasmine.json",
-      "jest": "jest --config ./jest.config.js --watch --coverage",
+      "vitest": "vitest --watch --coverage",
       "test": "nodemon --ext ts --exec  'node --no-experimental-strip-types --import ./build/babelRegister.mjs -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/jasmine.json' "
    },
    "devDependencies": {
@@ -26,20 +26,19 @@
       "@babel/preset-env": "8.0.7",
       "@babel/preset-typescript": "8.0.7",
       "@babel/register": "8.0.6",
-      "@jest/globals": "30.5.2",
       "@types/jasmine": "7.0.0",
-      "@types/jest": "30.0.0",
       "@types/node": "26.6.6",
+      "@vitest/coverage-v8": "5.1.0",
       "jasmine": "7.0.0",
       "jasmine-core": "7.0.2",
-      "jest": "30.5.2",
       "nodemon": "3.1.14",
       "oxfmt": "^0.77.0",
       "oxlint": "^1.93.0",
       "oxlint-tsgolint": "^7.0.2006",
       "properties-parser": "0.6.0",
       "tsconfig-paths": "4.2.0",
-      "typescript": "7.0.2"
+      "typescript": "7.0.2",
+      "vitest": "5.1.0"
    },
    "dependencies": {
       "bcp47-validate": "1.0.0"

@@ -1,6 +1,5 @@
 /* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken, SToken } from 'basic';
 import {
    AttListDeclarationPToken,
@@ -26,6 +25,7 @@ import {
    makeParameterEntityDeclaration,
    makeGeneralEntityDeclaration,
 } from 'token-test';
+import { describe, expect, it } from 'vitest';
 
 import { AttributePToken, AttrValue } from '../../token/common/attribute';
 import { isAugmentedAttribute, AttFixer, AugmentedAttributePToken } from '../attFixer';

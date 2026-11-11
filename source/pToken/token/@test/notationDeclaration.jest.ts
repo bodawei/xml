@@ -1,8 +1,8 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { MockSTokenSource } from 'pToken-test';
+import { describe, expect, it, vi, type MockedFunction } from 'vitest';
 
 import * as externalId from '../../common/externalId';
 import * as parseUnexpanded from '../../common/parseUnexpanded';
@@ -54,22 +54,18 @@ describe('notationdeDeclaration (unit)', () => {
    });
 
    describe('parseNotationDeclaration()', () => {
-      let callback: jest.MockedFunction<(pToken: NotationDeclarationPToken) => void>;
-      let externalIDParseSpy: jest.MockedFunction<typeof externalId.parseExternalId>;
-      let parseUnexpSpy: jest.MockedFunction<typeof parseUnexpanded.parseUnexpanded>;
+      let callback: MockedFunction<(pToken: NotationDeclarationPToken) => void>;
+      let externalIDParseSpy: MockedFunction<typeof externalId.parseExternalId>;
+      let parseUnexpSpy: MockedFunction<typeof parseUnexpanded.parseUnexpanded>;
 
       beforeEach(() => {
-         callback = jest.fn();
-         externalIDParseSpy = jest.spyOn(externalId, 'parseExternalId') as jest.MockedFunction<
-            typeof externalId.parseExternalId
-         >;
+         callback = vi.fn();
+         externalIDParseSpy = vi.spyOn(externalId, 'parseExternalId');
          externalIDParseSpy.mockImplementation((_1, _2, cb) => {
             cb({ externalId: {} });
          });
 
-         parseUnexpSpy = jest.spyOn(parseUnexpanded, 'parseUnexpanded') as jest.MockedFunction<
-            typeof parseUnexpanded.parseUnexpanded
-         >;
+         parseUnexpSpy = vi.spyOn(parseUnexpanded, 'parseUnexpanded');
          parseUnexpSpy.mockImplementation((source, name, cb) => {
             cb(undefined);
          });
@@ -302,248 +298,252 @@ describe('notationdeDeclaration (unit)', () => {
    });
 
    describe('resumeParseNotationDeclaration()', () => {
-      let resumeParseSpy: jest.MockedFunction<typeof externalId.resumeParseExternalId>;
+      let resumeParseSpy: MockedFunction<typeof externalId.resumeParseExternalId>;
 
       beforeEach(() => {
-         resumeParseSpy = jest.spyOn(externalId, 'resumeParseExternalId') as jest.MockedFunction<
-            typeof externalId.resumeParseExternalId
-         >;
+         resumeParseSpy = vi.spyOn(externalId, 'resumeParseExternalId');
          resumeParseSpy.mockImplementation((_1, _2, _3, _4, cb) => {
             cb({ externalId: {} });
          });
       });
 
-      it('restores everything at and after the name', (done) => {
-         const notationDeclaration = new NotationDeclarationPToken({
-            open: toSToken('<!'),
-            name: undefined,
-            nameSpace: undefined,
-            externalId: undefined,
-            externalIdSpace: undefined,
-            unexpanded: {
-               tokens: [],
-               propName: 'name',
-            },
-            close: toSToken('>'),
-         });
-         const mockSource = new MockSTokenSource([
-            [undefined, 'space'],
-            ['theName', 'word', ['>']],
-            ['\t', 'space'],
-            ['\n', 'space'],
-            [undefined, 'all'],
-         ]);
+      it('restores everything at and after the name', () =>
+         new Promise<void>((done) => {
+            const notationDeclaration = new NotationDeclarationPToken({
+               open: toSToken('<!'),
+               name: undefined,
+               nameSpace: undefined,
+               externalId: undefined,
+               externalIdSpace: undefined,
+               unexpanded: {
+                  tokens: [],
+                  propName: 'name',
+               },
+               close: toSToken('>'),
+            });
+            const mockSource = new MockSTokenSource([
+               [undefined, 'space'],
+               ['theName', 'word', ['>']],
+               ['\t', 'space'],
+               ['\n', 'space'],
+               [undefined, 'all'],
+            ]);
 
-         resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
-            // @ts-expect-error 2329/matchers
-            expect(result).toEqualRangeless(
-               new NotationDeclarationPToken({
-                  open: toSToken('<!'),
-                  name: toSToken('theName'),
-                  nameSpace: toSToken('\t'),
-                  externalId: {},
-                  externalIdSpace: toSToken('\n'),
-                  unexpanded: {
-                     tokens: [],
-                     propName: 'name',
-                  },
-                  close: toSToken('>'),
-               }),
-            );
+            resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
+               // @ts-expect-error 2329/matchers
+               expect(result).toEqualRangeless(
+                  new NotationDeclarationPToken({
+                     open: toSToken('<!'),
+                     name: toSToken('theName'),
+                     nameSpace: toSToken('\t'),
+                     externalId: {},
+                     externalIdSpace: toSToken('\n'),
+                     unexpanded: {
+                        tokens: [],
+                        propName: 'name',
+                     },
+                     close: toSToken('>'),
+                  }),
+               );
 
-            done();
-         });
+               done();
+            });
 
-         mockSource.respondInAsyncTime();
-      });
+            mockSource.respondInAsyncTime();
+         }));
 
-      it('restores everything at and after the name with a leading space', (done) => {
-         const notationDeclaration = new NotationDeclarationPToken({
-            open: toSToken('<!'),
-            name: undefined,
-            nameSpace: undefined,
-            externalId: undefined,
-            externalIdSpace: undefined,
-            unexpanded: {
-               tokens: [],
-               propName: 'name',
-            },
-            close: toSToken('>'),
-         });
-         const mockSource = new MockSTokenSource([
-            ['\n', 'space'],
-            ['theName', 'word', ['>']],
-            ['\t', 'space'],
-            ['\n', 'space'],
-            [undefined, 'all'],
-         ]);
+      it('restores everything at and after the name with a leading space', () =>
+         new Promise<void>((done) => {
+            const notationDeclaration = new NotationDeclarationPToken({
+               open: toSToken('<!'),
+               name: undefined,
+               nameSpace: undefined,
+               externalId: undefined,
+               externalIdSpace: undefined,
+               unexpanded: {
+                  tokens: [],
+                  propName: 'name',
+               },
+               close: toSToken('>'),
+            });
+            const mockSource = new MockSTokenSource([
+               ['\n', 'space'],
+               ['theName', 'word', ['>']],
+               ['\t', 'space'],
+               ['\n', 'space'],
+               [undefined, 'all'],
+            ]);
 
-         resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
-            // @ts-expect-error 2329/matchers
-            expect(result).toEqualRangeless(
-               new NotationDeclarationPToken({
-                  open: toSToken('<!'),
-                  declTypeSpace: toSToken('\n'),
-                  name: toSToken('theName'),
-                  nameSpace: toSToken('\t'),
-                  externalId: {},
-                  externalIdSpace: toSToken('\n'),
-                  unexpanded: {
-                     tokens: [],
-                     propName: 'name',
-                  },
-                  close: toSToken('>'),
-               }),
-            );
+            resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
+               // @ts-expect-error 2329/matchers
+               expect(result).toEqualRangeless(
+                  new NotationDeclarationPToken({
+                     open: toSToken('<!'),
+                     declTypeSpace: toSToken('\n'),
+                     name: toSToken('theName'),
+                     nameSpace: toSToken('\t'),
+                     externalId: {},
+                     externalIdSpace: toSToken('\n'),
+                     unexpanded: {
+                        tokens: [],
+                        propName: 'name',
+                     },
+                     close: toSToken('>'),
+                  }),
+               );
 
-            done();
-         });
+               done();
+            });
 
-         mockSource.respondInAsyncTime();
-      });
+            mockSource.respondInAsyncTime();
+         }));
 
-      it('restores everything at and after some part of the external ID', (done) => {
-         const notationDeclaration = new NotationDeclarationPToken({
-            open: toSToken('<!'),
-            name: toSToken('aName'),
-            nameSpace: toSToken(' '),
-            externalId: undefined,
-            externalIdSpace: undefined,
-            unexpanded: {
-               tokens: [],
-               propName: 'externalType',
-            },
-            close: toSToken('>'),
-         });
-         const mockSource = new MockSTokenSource([
-            [undefined, 'space'],
-            ['\t\t', 'space'],
-            [undefined, 'all'],
-         ]);
+      it('restores everything at and after some part of the external ID', () =>
+         new Promise<void>((done) => {
+            const notationDeclaration = new NotationDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('aName'),
+               nameSpace: toSToken(' '),
+               externalId: undefined,
+               externalIdSpace: undefined,
+               unexpanded: {
+                  tokens: [],
+                  propName: 'externalType',
+               },
+               close: toSToken('>'),
+            });
+            const mockSource = new MockSTokenSource([
+               [undefined, 'space'],
+               ['\t\t', 'space'],
+               [undefined, 'all'],
+            ]);
 
-         resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
-            // @ts-expect-error 2329/matchers
-            expect(result).toEqualRangeless(
-               new NotationDeclarationPToken({
-                  open: toSToken('<!'),
-                  name: toSToken('aName'),
-                  nameSpace: toSToken(' '),
-                  externalId: {},
-                  externalIdSpace: toSToken('\t\t'),
-                  unexpanded: {
-                     tokens: [],
-                     propName: 'externalType',
-                  },
-                  close: toSToken('>'),
-               }),
-            );
+            resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
+               // @ts-expect-error 2329/matchers
+               expect(result).toEqualRangeless(
+                  new NotationDeclarationPToken({
+                     open: toSToken('<!'),
+                     name: toSToken('aName'),
+                     nameSpace: toSToken(' '),
+                     externalId: {},
+                     externalIdSpace: toSToken('\t\t'),
+                     unexpanded: {
+                        tokens: [],
+                        propName: 'externalType',
+                     },
+                     close: toSToken('>'),
+                  }),
+               );
 
-            done();
-         });
+               done();
+            });
 
-         mockSource.respondInAsyncTime();
-      });
+            mockSource.respondInAsyncTime();
+         }));
 
-      it('adds trailing space', (done) => {
-         const notationDeclaration = new NotationDeclarationPToken({
-            open: toSToken('<!'),
-            name: toSToken('aName'),
-            nameSpace: toSToken(' '),
-            externalId: {},
-            externalIdSpace: toSToken('\t\t'),
-            unexpanded: {
-               tokens: [],
-               propName: 'trailing',
-            },
-            close: toSToken('>'),
-         });
-         const mockSource = new MockSTokenSource([['\n', 'space']]);
+      it('adds trailing space', () =>
+         new Promise<void>((done) => {
+            const notationDeclaration = new NotationDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('aName'),
+               nameSpace: toSToken(' '),
+               externalId: {},
+               externalIdSpace: toSToken('\t\t'),
+               unexpanded: {
+                  tokens: [],
+                  propName: 'trailing',
+               },
+               close: toSToken('>'),
+            });
+            const mockSource = new MockSTokenSource([['\n', 'space']]);
 
-         resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
-            // @ts-expect-error 2329/matchers
-            expect(result).toEqualRangeless(
-               new NotationDeclarationPToken({
-                  open: toSToken('<!'),
-                  name: toSToken('aName'),
-                  nameSpace: toSToken(' '),
-                  externalId: {},
-                  externalIdSpace: toSToken('\t\t\n'),
-                  unexpanded: {
-                     tokens: [],
-                     propName: 'trailing',
-                  },
-                  close: toSToken('>'),
-               }),
-            );
+            resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
+               // @ts-expect-error 2329/matchers
+               expect(result).toEqualRangeless(
+                  new NotationDeclarationPToken({
+                     open: toSToken('<!'),
+                     name: toSToken('aName'),
+                     nameSpace: toSToken(' '),
+                     externalId: {},
+                     externalIdSpace: toSToken('\t\t\n'),
+                     unexpanded: {
+                        tokens: [],
+                        propName: 'trailing',
+                     },
+                     close: toSToken('>'),
+                  }),
+               );
 
-            done();
-         });
+               done();
+            });
 
-         mockSource.respondInAsyncTime();
-      });
+            mockSource.respondInAsyncTime();
+         }));
 
-      it('adds any trailing text to the extra', (done) => {
-         const notationDeclaration = new NotationDeclarationPToken({
-            open: toSToken('<!'),
-            name: toSToken('aName'),
-            nameSpace: toSToken(' '),
-            externalId: undefined,
-            externalIdSpace: undefined,
-            unexpanded: {
-               tokens: [],
-               propName: 'externalType',
-            },
-            close: toSToken('>'),
-         });
-         const mockSource = new MockSTokenSource([
-            [undefined, 'space'],
-            ['\t\t', 'space'],
-            ['blah', 'all'],
-         ]);
+      it('adds any trailing text to the extra', () =>
+         new Promise<void>((done) => {
+            const notationDeclaration = new NotationDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('aName'),
+               nameSpace: toSToken(' '),
+               externalId: undefined,
+               externalIdSpace: undefined,
+               unexpanded: {
+                  tokens: [],
+                  propName: 'externalType',
+               },
+               close: toSToken('>'),
+            });
+            const mockSource = new MockSTokenSource([
+               [undefined, 'space'],
+               ['\t\t', 'space'],
+               ['blah', 'all'],
+            ]);
 
-         resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
-            // @ts-expect-error 2329/matchers
-            expect(result).toEqualRangeless(
-               new NotationDeclarationPToken({
-                  open: toSToken('<!'),
-                  name: toSToken('aName'),
-                  nameSpace: toSToken(' '),
-                  externalId: {},
-                  externalIdSpace: toSToken('\t\t'),
-                  unexpanded: {
-                     tokens: [],
-                     propName: 'externalType',
-                  },
-                  extra: toSToken('blah'),
-                  close: toSToken('>'),
-               }),
-            );
+            resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
+               // @ts-expect-error 2329/matchers
+               expect(result).toEqualRangeless(
+                  new NotationDeclarationPToken({
+                     open: toSToken('<!'),
+                     name: toSToken('aName'),
+                     nameSpace: toSToken(' '),
+                     externalId: {},
+                     externalIdSpace: toSToken('\t\t'),
+                     unexpanded: {
+                        tokens: [],
+                        propName: 'externalType',
+                     },
+                     extra: toSToken('blah'),
+                     close: toSToken('>'),
+                  }),
+               );
 
-            done();
-         });
+               done();
+            });
 
-         mockSource.respondInAsyncTime();
-      });
+            mockSource.respondInAsyncTime();
+         }));
 
-      it('does no harm when there is nothing in the unexpanded', (done) => {
-         const notationDeclaration = new NotationDeclarationPToken({
-            open: toSToken('<!'),
-            name: toSToken('aName'),
-            nameSpace: toSToken(' '),
-            externalId: undefined,
-            externalIdSpace: undefined,
-            unexpanded: undefined,
-            close: toSToken('>'),
-         });
-         const mockSource = new MockSTokenSource([[undefined, 'space']]);
+      it('does no harm when there is nothing in the unexpanded', () =>
+         new Promise<void>((done) => {
+            const notationDeclaration = new NotationDeclarationPToken({
+               open: toSToken('<!'),
+               name: toSToken('aName'),
+               nameSpace: toSToken(' '),
+               externalId: undefined,
+               externalIdSpace: undefined,
+               unexpanded: undefined,
+               close: toSToken('>'),
+            });
+            const mockSource = new MockSTokenSource([[undefined, 'space']]);
 
-         resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
-            expect(result).toBe(notationDeclaration);
+            resumeParseNotationDeclaration(mockSource, notationDeclaration, (result) => {
+               expect(result).toBe(notationDeclaration);
 
-            done();
-         });
+               done();
+            });
 
-         mockSource.respondInAsyncTime();
-      });
+            mockSource.respondInAsyncTime();
+         }));
    });
 });

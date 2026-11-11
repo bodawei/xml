@@ -1,6 +1,5 @@
 /* Copyright ® 2019-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { strOrBlank, toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import {
@@ -45,6 +44,7 @@ import {
    makeElementDeclaration,
    makeDocTypeEnd,
 } from 'token-test';
+import { describe, expect, it, vi } from 'vitest';
 
 import * as checkUtils from '../checkUtils';
 import { CheckState, CHECKER_DONE } from '../checkUtils';
@@ -79,8 +79,8 @@ describe('MarkupDeclChecker (unit)', () => {
    let textDecl: TextDeclarationPToken;
 
    beforeEach(() => {
-      jest.restoreAllMocks();
-      jest.resetAllMocks();
+      vi.restoreAllMocks();
+      vi.resetAllMocks();
       collector = new ParamCollector();
       checkState = new CheckState();
       attributeListDeclaration = makeAttListDeclaration();
@@ -574,7 +574,9 @@ describe('MarkupDeclChecker (unit)', () => {
 
    describe('ATTLIST', () => {
       it('calls scanAttributeValues() on the attributes in the ATTLIST', () => {
-         const spy = jest.spyOn(checkUtils, 'scanAttributeValues').mockImplementation();
+         const spy = vi
+            .spyOn(checkUtils, 'scanAttributeValues')
+            .mockImplementation(() => undefined);
          checker = new MarkupDeclChecker(docTypeStart, collector, checkState, []);
 
          checker.check(attributeListDeclaration, collector);

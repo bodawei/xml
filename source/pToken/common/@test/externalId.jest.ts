@@ -1,22 +1,22 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { TextPToken } from 'pToken';
 import { MockSTokenSource } from 'pToken-test';
+import { describe, expect, it, vi, type Mock } from 'vitest';
 
 import literal, { LiteralPToken } from '../../../token/common/literal'; // ick
 import { ExternalIdP, parseExternalId, resumeParseExternalId } from '../externalId';
 
-jest.mock('../../../token/common/literal');
+vi.mock('../../../token/common/literal');
 
 describe('ExternalId (unit)', () => {
-   let callback: jest.Mock;
-   let literalParse: jest.Mock;
+   let callback: Mock;
+   let literalParse: Mock;
 
    beforeEach(() => {
-      callback = jest.fn();
-      literalParse = literal.parse as jest.Mock;
+      callback = vi.fn();
+      literalParse = literal.parse as Mock;
       literalParse.mockImplementation((_1: any, options: any, callback: () => void) => {
          callback();
       });
@@ -449,195 +449,202 @@ describe('ExternalId (unit)', () => {
          const sourceStr = withSpace ? undefined : toSToken('\t');
          const destStr = withSpace ? toSToken(' ') : toSToken(' \t');
 
-         it(`copes with not finding an external type${suffix}`, (done) => {
-            const mockSource = new MockSTokenSource([['BOGUS', 'peekWord', ['"', "'"]]]);
+         it(`copes with not finding an external type${suffix}`, () =>
+            new Promise<void>((done) => {
+               const mockSource = new MockSTokenSource([['BOGUS', 'peekWord', ['"', "'"]]]);
 
-            resumeParseExternalId(mockSource, 'externalType', sourceStr, undefined, (result) => {
-               // @ts-expect-error 2329/matchers
-               expect(result).toEqualRangeless({
-                  preSpace: sourceStr,
-                  externalId: undefined,
-               });
-               done();
-            });
-            mockSource.respondInAsyncTime();
-         });
-
-         it(`adds an externalType${suffix}`, (done) => {
-            const mockSource = new MockSTokenSource([
-               ['PUBLIC', 'peekWord', ['"', "'"]],
-               ['PUBLIC', 'word', ['"', "'"]],
-               [' ', 'space'],
-               // Find the public value
-            ]);
-
-            resumeParseExternalId(mockSource, 'externalType', sourceStr, undefined, (result) => {
-               // @ts-expect-error 2329/matchers
-               expect(result).toEqualRangeless({
-                  preSpace: sourceStr,
-                  externalId: new ExternalIdP({
-                     externalType: toSToken('PUBLIC'),
-                     externalTypeSpace: toSToken(' '),
-                     public: undefined,
-                     publicSpace: undefined,
-                     system: undefined,
-                  }),
-               });
-               done();
-            });
-            mockSource.respondInAsyncTime();
-         });
-
-         it(`adds an externalType with a system${suffix}`, (done) => {
-            literalParse.mockImplementation((_1: any, options: any, cb: (arg: any) => void) => {
-               cb({ value: [] });
-            });
-            const mockSource = new MockSTokenSource([
-               ['SYSTEM', 'peekWord', ['"', "'"]],
-               ['SYSTEM', 'word', ['"', "'"]],
-               [' ', 'space'],
-               // Find the system value
-            ]);
-
-            resumeParseExternalId(mockSource, 'externalType', sourceStr, undefined, (result) => {
-               // @ts-expect-error 2329/matchers
-               expect(result).toEqualRangeless({
-                  preSpace: sourceStr,
-                  externalId: new ExternalIdP({
-                     externalType: toSToken('SYSTEM'),
-                     externalTypeSpace: toSToken(' '),
-                     public: undefined,
-                     publicSpace: undefined,
-                     system: { value: [] },
-                  }),
-               });
-               done();
-            });
-            mockSource.respondInAsyncTime();
-         });
-
-         it(`adds a public value${suffix}`, (done) => {
-            literalParse.mockImplementation((_1: any, options: any, cb: (arg: any) => void) => {
-               cb({ value: [] });
-            });
-            const mockSource = new MockSTokenSource([
-               // Find the public value
-               ['\n', 'space'],
-               // Find the system value
-            ]);
-
-            resumeParseExternalId(
-               mockSource,
-               'public',
-               sourceStr,
-               {
-                  externalType: toSToken('PUBLIC'),
-                  externalTypeSpace: toSToken(' '),
-               },
-               (result) => {
+               resumeParseExternalId(mockSource, 'externalType', sourceStr, undefined, (result) => {
                   // @ts-expect-error 2329/matchers
                   expect(result).toEqualRangeless({
-                     externalId: new ExternalIdP({
-                        externalType: toSToken('PUBLIC'),
-                        externalTypeSpace: destStr,
-                        public: {
-                           value: [],
-                        },
-                        publicSpace: toSToken('\n'),
-                        system: {
-                           value: [],
-                        },
-                     }),
+                     preSpace: sourceStr,
+                     externalId: undefined,
                   });
                   done();
-               },
-            );
-            mockSource.respondInAsyncTime();
-         });
+               });
+               mockSource.respondInAsyncTime();
+            }));
 
-         it(`adds an absent public value${suffix}`, (done) => {
-            const mockSource = new MockSTokenSource([
-               // Find the public value
-            ]);
+         it(`adds an externalType${suffix}`, () =>
+            new Promise<void>((done) => {
+               const mockSource = new MockSTokenSource([
+                  ['PUBLIC', 'peekWord', ['"', "'"]],
+                  ['PUBLIC', 'word', ['"', "'"]],
+                  [' ', 'space'],
+                  // Find the public value
+               ]);
 
-            resumeParseExternalId(
-               mockSource,
-               'public',
-               sourceStr,
-               {
-                  externalType: toSToken('PUBLIC'),
-                  externalTypeSpace: toSToken(' '),
-               },
-               (result) => {
+               resumeParseExternalId(mockSource, 'externalType', sourceStr, undefined, (result) => {
                   // @ts-expect-error 2329/matchers
                   expect(result).toEqualRangeless({
+                     preSpace: sourceStr,
                      externalId: new ExternalIdP({
                         externalType: toSToken('PUBLIC'),
-                        externalTypeSpace: destStr,
+                        externalTypeSpace: toSToken(' '),
                         public: undefined,
                         publicSpace: undefined,
+                        system: undefined,
                      }),
                   });
                   done();
-               },
-            );
-            mockSource.respondInAsyncTime();
-         });
+               });
+               mockSource.respondInAsyncTime();
+            }));
 
-         it(`adds a system value to a PUBLIC ExternalId${suffix}`, (done) => {
-            const mockSource = new MockSTokenSource([
-               // Find the system value
-            ]);
+         it(`adds an externalType with a system${suffix}`, () =>
+            new Promise<void>((done) => {
+               literalParse.mockImplementation((_1: any, options: any, cb: (arg: any) => void) => {
+                  cb({ value: [] });
+               });
+               const mockSource = new MockSTokenSource([
+                  ['SYSTEM', 'peekWord', ['"', "'"]],
+                  ['SYSTEM', 'word', ['"', "'"]],
+                  [' ', 'space'],
+                  // Find the system value
+               ]);
 
-            resumeParseExternalId(
-               mockSource,
-               'system',
-               sourceStr,
-               {
-                  externalType: toSToken('PUBLIC'),
-                  publicSpace: toSToken(' '),
-               },
-               (result) => {
+               resumeParseExternalId(mockSource, 'externalType', sourceStr, undefined, (result) => {
                   // @ts-expect-error 2329/matchers
                   expect(result).toEqualRangeless({
-                     externalId: new ExternalIdP({
-                        externalType: toSToken('PUBLIC'),
-                        public: undefined,
-                        publicSpace: destStr,
-                     }),
-                  });
-                  done();
-               },
-            );
-            mockSource.respondInAsyncTime();
-         });
-
-         it(`adds a system value to a SYSTEM ExternalId${suffix}`, (done) => {
-            const mockSource = new MockSTokenSource([
-               // Find the system value
-            ]);
-
-            resumeParseExternalId(
-               mockSource,
-               'system',
-               sourceStr,
-               {
-                  externalType: toSToken('SYSTEM'),
-                  externalTypeSpace: toSToken(' '),
-               },
-               (result) => {
-                  // @ts-expect-error 2329/matchers
-                  expect(result).toEqualRangeless({
+                     preSpace: sourceStr,
                      externalId: new ExternalIdP({
                         externalType: toSToken('SYSTEM'),
-                        externalTypeSpace: destStr,
+                        externalTypeSpace: toSToken(' '),
+                        public: undefined,
+                        publicSpace: undefined,
+                        system: { value: [] },
                      }),
                   });
                   done();
-               },
-            );
-            mockSource.respondInAsyncTime();
-         });
+               });
+               mockSource.respondInAsyncTime();
+            }));
+
+         it(`adds a public value${suffix}`, () =>
+            new Promise<void>((done) => {
+               literalParse.mockImplementation((_1: any, options: any, cb: (arg: any) => void) => {
+                  cb({ value: [] });
+               });
+               const mockSource = new MockSTokenSource([
+                  // Find the public value
+                  ['\n', 'space'],
+                  // Find the system value
+               ]);
+
+               resumeParseExternalId(
+                  mockSource,
+                  'public',
+                  sourceStr,
+                  {
+                     externalType: toSToken('PUBLIC'),
+                     externalTypeSpace: toSToken(' '),
+                  },
+                  (result) => {
+                     // @ts-expect-error 2329/matchers
+                     expect(result).toEqualRangeless({
+                        externalId: new ExternalIdP({
+                           externalType: toSToken('PUBLIC'),
+                           externalTypeSpace: destStr,
+                           public: {
+                              value: [],
+                           },
+                           publicSpace: toSToken('\n'),
+                           system: {
+                              value: [],
+                           },
+                        }),
+                     });
+                     done();
+                  },
+               );
+               mockSource.respondInAsyncTime();
+            }));
+
+         it(`adds an absent public value${suffix}`, () =>
+            new Promise<void>((done) => {
+               const mockSource = new MockSTokenSource([
+                  // Find the public value
+               ]);
+
+               resumeParseExternalId(
+                  mockSource,
+                  'public',
+                  sourceStr,
+                  {
+                     externalType: toSToken('PUBLIC'),
+                     externalTypeSpace: toSToken(' '),
+                  },
+                  (result) => {
+                     // @ts-expect-error 2329/matchers
+                     expect(result).toEqualRangeless({
+                        externalId: new ExternalIdP({
+                           externalType: toSToken('PUBLIC'),
+                           externalTypeSpace: destStr,
+                           public: undefined,
+                           publicSpace: undefined,
+                        }),
+                     });
+                     done();
+                  },
+               );
+               mockSource.respondInAsyncTime();
+            }));
+
+         it(`adds a system value to a PUBLIC ExternalId${suffix}`, () =>
+            new Promise<void>((done) => {
+               const mockSource = new MockSTokenSource([
+                  // Find the system value
+               ]);
+
+               resumeParseExternalId(
+                  mockSource,
+                  'system',
+                  sourceStr,
+                  {
+                     externalType: toSToken('PUBLIC'),
+                     publicSpace: toSToken(' '),
+                  },
+                  (result) => {
+                     // @ts-expect-error 2329/matchers
+                     expect(result).toEqualRangeless({
+                        externalId: new ExternalIdP({
+                           externalType: toSToken('PUBLIC'),
+                           public: undefined,
+                           publicSpace: destStr,
+                        }),
+                     });
+                     done();
+                  },
+               );
+               mockSource.respondInAsyncTime();
+            }));
+
+         it(`adds a system value to a SYSTEM ExternalId${suffix}`, () =>
+            new Promise<void>((done) => {
+               const mockSource = new MockSTokenSource([
+                  // Find the system value
+               ]);
+
+               resumeParseExternalId(
+                  mockSource,
+                  'system',
+                  sourceStr,
+                  {
+                     externalType: toSToken('SYSTEM'),
+                     externalTypeSpace: toSToken(' '),
+                  },
+                  (result) => {
+                     // @ts-expect-error 2329/matchers
+                     expect(result).toEqualRangeless({
+                        externalId: new ExternalIdP({
+                           externalType: toSToken('SYSTEM'),
+                           externalTypeSpace: destStr,
+                        }),
+                     });
+                     done();
+                  },
+               );
+               mockSource.respondInAsyncTime();
+            }));
       });
    });
 });

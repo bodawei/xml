@@ -1,6 +1,6 @@
 /* Copyright ® 2022-2026 by 柏大衛. All rights reserved. */
 
-import type { expect } from '@jest/globals';
+import type { expect } from 'vitest';
 
 import { ProblemCodes } from '../../util/problemCodes';
 import { ParamCollector, ProblemParams } from './paramCollector';

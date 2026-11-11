@@ -1,7 +1,7 @@
 /* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { STokenSource } from 'basic';
+import { describe, expect, it } from 'vitest';
 
 import { PTokenStream } from '../pTokenStream';
 import { PToXTokenStream } from '../pToXTokenStream';
@@ -18,8 +18,9 @@ describe('PToXTokenStream (integration)', () => {
       pToXTokenStream = new PToXTokenStream({});
    });
 
-   it('converts a many featured document into a series of XTokens', (done) => {
-      source.addText(`<?xml version="1.0" ?>
+   it('converts a many featured document into a series of XTokens', () =>
+      new Promise<void>((done) => {
+         source.addText(`<?xml version="1.0" ?>
       <!DOCTYPE test [
          <!ELEMENT test ANY>
       ]>
@@ -27,21 +28,21 @@ describe('PToXTokenStream (integration)', () => {
       <doc>
          This is a test.
       </doc>`);
-      source.endText();
-      parseStream.pipe(pToXTokenStream);
+         source.endText();
+         parseStream.pipe(pToXTokenStream);
 
-      gatherStream(
-         pToXTokenStream,
-         (results) => {
-            const noPTokens = results.map((token) => {
-               if ('pToken' in token) {
-                  delete token.pToken;
-               }
+         gatherStream(
+            pToXTokenStream,
+            (results) => {
+               const noPTokens = results.map((token) => {
+                  if ('pToken' in token) {
+                     delete token.pToken;
+                  }
 
-               return token;
-            });
+                  return token;
+               });
 
-            expect(noPTokens).toMatchInlineSnapshot(`
+               expect(noPTokens).toMatchInlineSnapshot(`
                [
                  ConformanceVersion {
                    "edition": 5,
@@ -119,8 +120,8 @@ describe('PToXTokenStream (integration)', () => {
                  },
                ]
             `);
-         },
-         done!,
-      );
-   });
+            },
+            done!,
+         );
+      }));
 });

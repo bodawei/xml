@@ -1,19 +1,20 @@
-/* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
 import { Range } from 'basic';
 import { toSToken, SToken } from 'basic';
 import { CommentPToken } from 'token';
+import { vi, type Mock } from 'vitest';
 
 import { CommentExpanderStream } from '../CommentExpanderStream';
 
 describe('CommentExpanderStream (unit)', () => {
    let cfs: CommentExpanderStream;
-   let mockPush: jest.Mock;
+   let mockPush: Mock;
    let ranges: Array<Range>;
 
    beforeEach(() => {
       cfs = new CommentExpanderStream();
-      mockPush = jest.fn();
+      mockPush = vi.fn();
       cfs.push = mockPush;
       ranges = toSToken('junk').ranges;
    });

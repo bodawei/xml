@@ -1,3 +1,5 @@
+/* Copyright ® 2026 by 柏大衛. All rights reserved. */
+
 console.json = function json() {
    if (arguments.length === 1) {
       console.debug(JSON.stringify(arguments[0], undefined, 3));

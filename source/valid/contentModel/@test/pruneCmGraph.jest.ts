@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
+import { describe, expect, it } from 'vitest';
 
 import { MutableCmGraph } from '../cmGraphTypes';
 import { pruneCmGraph } from '../pruneCmGraph';

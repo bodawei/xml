@@ -1,6 +1,5 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import {
@@ -21,6 +20,7 @@ import {
    makeGeneralEntityEnd,
    makeGeneralEntityStart,
 } from 'token-test';
+import { describe, expect, it, vi } from 'vitest';
 
 import { ancestorPERefsValidate } from '../../common/ancestorPERefsValidate';
 import { attributeValueValidate } from '../../common/attributeValueValidate';
@@ -31,8 +31,8 @@ import { elementStartValidate } from '../elementStartValidate';
 
 const VID = validityErrorCodes.id;
 
-jest.mock('../../common/ancestorPERefsValidate');
-jest.mock('../../common/attributeValueValidate');
+vi.mock('../../common/ancestorPERefsValidate');
+vi.mock('../../common/attributeValueValidate');
 
 describe('elementStartValidate (unit)', () => {
    let elementDeclaration: ElementDeclarationPToken;

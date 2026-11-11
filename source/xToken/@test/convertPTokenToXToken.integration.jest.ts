@@ -1,6 +1,5 @@
 /* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { EntityId } from 'basic';
 import {
    makeAttListDeclaration,
@@ -32,6 +31,7 @@ import {
    makeUnknownDeclaration,
    makeXmlDecl,
 } from 'token-test';
+import { describe, expect, it } from 'vitest';
 
 import { convertPTokenToXToken } from '../convertPTokenToXToken';
 import { GeneralEntityEndXToken } from '../marker/generalEntityEndXToken';

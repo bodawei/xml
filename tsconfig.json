@@ -2,7 +2,7 @@
    "compilerOptions": {
       "strict": true,
       "skipLibCheck": true,
-      "types": ["node", "jasmine", "jest"],
+      "types": ["node", "jasmine", "vitest/globals", "vite/client"],
       "noImplicitAny": true,
       "allowJs": true,
       "pretty": true,
@@ -13,58 +13,30 @@
       "resolveJsonModule": true,
       "esModuleInterop": true,
       "paths": {
-         "attFixer": [
-            "./source/attFixer"
-         ],
-         "basic": [
-            "./source/basic"
-         ],
-         "basic-test": [
-            "./source/basic/@test/helper"
-         ],
-         "expand": [
-            "./source/expand"
-         ],
-         "flat": [
-            "./source/flat"
-         ],
-         "node": [
-            "./source/node"
-         ],
-         "pToken": [
-            "./source/pToken"
-         ],
-         "pTokenStream": [
-            "./source/pTokenStream"
-         ],
-         "pToken-test": [
-            "./source/pToken/@test/helper"
-         ],
-         "token": [
-            "./source/token"
-         ],
-         "token-test": [
-            "./source/token/@test/helper"
-         ],
-         "valid": [
-            "./source/valid"
-         ],
-         "wellformedness": [
-            "./source/wellformedness"
-         ],
-         "wellformedness-test": [
-            "./source/wellformedness/@test/helper"
-         ],
+         "attFixer": ["./source/attFixer"],
+         "basic": ["./source/basic"],
+         "basic-test": ["./source/basic/@test/helper"],
+         "expand": ["./source/expand"],
+         "flat": ["./source/flat"],
+         "node": ["./source/node"],
+         "pToken": ["./source/pToken"],
+         "pTokenStream": ["./source/pTokenStream"],
+         "pToken-test": ["./source/pToken/@test/helper"],
+         "token": ["./source/token"],
+         "token-test": ["./source/token/@test/helper"],
+         "valid": ["./source/valid"],
+         "wellformedness": ["./source/wellformedness"],
+         "wellformedness-test": ["./source/wellformedness/@test/helper"],
          "xToken": ["./source/xToken"],
          "xToken-test": ["./source/xToken/@test/helper"],
          "xTokenStream": ["./source/xTokenStream"]
       }
    },
    "include": [
-      "build/beforeJest.ts",
+      "build/vitestSetup.ts",
       "source/**/*.ts",
       "build/buildTestData.ts",
-      "bcp47-validate.d.ts", // We don't really need this declared here. 
+      "bcp47-validate.d.ts" // We don't really need this declared here.
    ],
    "exclude": [
       "node_modules",

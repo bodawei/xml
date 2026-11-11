@@ -1,17 +1,17 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { DocTypeStartPToken } from 'token';
+import { describe, expect, it, vi, type Mock } from 'vitest';
 
 import { externalIdToSTokens } from '../../common/externalIdToSTokens';
 import { docTypeStartToSTokens } from '../docTypeStartToSTokens';
 
-jest.mock('../../common/externalIdToSTokens');
+vi.mock('../../common/externalIdToSTokens');
 
 describe('docTypeStartToSTokens() (unit)', () => {
    it('returns all the STokens', () => {
-      (externalIdToSTokens as jest.Mock).mockReturnValue([toSToken('externalId')]);
+      (externalIdToSTokens as Mock).mockReturnValue([toSToken('externalId')]);
       const docTypeStartPToken = new DocTypeStartPToken({
          open: toSToken('<!'),
          postOpenSpace: toSToken(' '),

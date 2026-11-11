@@ -1,14 +1,14 @@
-/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { MockSTokenSource } from 'pToken-test';
+import { describe, expect, it, vi, type MockedFunction } from 'vitest';
 
 import { InstructionStart } from '../../bridge/instruction';
 import * as fieldedInstr from '../../common/fieldedInstruction';
 import { TEXTDECL_PTOKEN, parseTextDeclaration, TextDeclarationPToken } from '../textDeclaration';
 
-jest.mock('../../common/fieldedInstruction');
+vi.mock('../../common/fieldedInstruction');
 
 describe('textDeclaration (unit)', () => {
    let textDeclPToken: TextDeclarationPToken;
@@ -126,15 +126,13 @@ describe('textDeclaration (unit)', () => {
    });
 
    describe('parseTextDeclaration()', () => {
-      let callback: jest.MockedFunction<(result: TextDeclarationPToken) => void>;
-      let fieldedSpy: jest.MockedFunction<typeof fieldedInstr.parseFieldedInstruction>;
+      let callback: MockedFunction<(result: TextDeclarationPToken) => void>;
+      let fieldedSpy: MockedFunction<typeof fieldedInstr.parseFieldedInstruction>;
 
       beforeEach(() => {
-         callback = jest.fn();
-         fieldedSpy = jest.spyOn(fieldedInstr, 'parseFieldedInstruction') as jest.MockedFunction<
-            typeof fieldedInstr.parseFieldedInstruction
-         >;
-         fieldedSpy.mockImplementation();
+         callback = vi.fn();
+         fieldedSpy = vi.spyOn(fieldedInstr, 'parseFieldedInstruction');
+         fieldedSpy.mockImplementation(() => undefined);
       });
 
       it('calls parseInstructionCommon()', () => {

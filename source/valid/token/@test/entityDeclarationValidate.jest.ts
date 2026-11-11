@@ -1,9 +1,9 @@
-/* Copyright ® 2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { GeneralEntityDeclarationPToken, ParameterEntityReferencePToken } from 'pToken';
+import { describe, expect, it, vi } from 'vitest';
 
 import { entityDeclarationValueValidate } from '../../common/entityDeclarationValueValidate';
 import { ValidityState } from '../../common/validityState';
@@ -12,7 +12,7 @@ import { entityDeclarationValidate } from '../entityDeclarationValidate';
 
 const VID = validityErrorCodes.id;
 
-jest.mock('../../common/entityDeclarationValueValidate');
+vi.mock('../../common/entityDeclarationValueValidate');
 
 describe('entityDeclarationValidate (unit)', () => {
    let collector: ParamCollector;

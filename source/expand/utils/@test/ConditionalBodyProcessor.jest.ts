@@ -1,11 +1,11 @@
-/* Copyright ® 2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { EntityId, Range } from 'basic';
 import { STokenSource, strOrBlank, toSToken } from 'basic';
 import { ParseToken } from 'pToken';
 import { CommentPToken, ConditionalEndPToken, ConditionalStartPToken } from 'token';
 import { makeTextPToken } from 'token-test';
+import { describe, expect, it, vi, type MockedFunction } from 'vitest';
 import { Warning } from 'wellformedness'; // ick
 
 import { ConditionalBodyProcessor } from '../ConditionalBodyProcessor';
@@ -13,15 +13,15 @@ import { ConditionalBodyProcessor } from '../ConditionalBodyProcessor';
 type DeliverPToken = (token: ParseToken | undefined, expanded: () => void) => void;
 
 describe('ConditionalBodyProcessor (unit)', () => {
-   let expandToken: jest.MockedFunction<DeliverPToken>;
-   let bodyProcessor: jest.MockedFunction<
+   let expandToken: MockedFunction<DeliverPToken>;
+   let bodyProcessor: MockedFunction<
       (sTokenSource: STokenSource, handleNextToken: DeliverPToken) => void
    >;
    let source: STokenSource;
 
    beforeEach(() => {
-      expandToken = jest.fn();
-      bodyProcessor = jest.fn();
+      expandToken = vi.fn();
+      bodyProcessor = vi.fn();
       source = new STokenSource();
    });
 
@@ -75,20 +75,21 @@ describe('ConditionalBodyProcessor (unit)', () => {
       expect(expandToken).not.toHaveBeenCalled();
    });
 
-   it('adds text from a text ptoken to the sTokenSource', (done) => {
-      const source = new STokenSource();
-      const token = makeTextPToken('foo');
-      source.addText('x', new Range(new EntityId(), 0, 0, 0, 3, 0, 3)); // work around a bug
-      const cbp = new ConditionalBodyProcessor(source, bodyProcessor, expandToken);
+   it('adds text from a text ptoken to the sTokenSource', () =>
+      new Promise<void>((done) => {
+         const source = new STokenSource();
+         const token = makeTextPToken('foo');
+         source.addText('x', new Range(new EntityId(), 0, 0, 0, 3, 0, 3)); // work around a bug
+         const cbp = new ConditionalBodyProcessor(source, bodyProcessor, expandToken);
 
-      cbp.handleToken(token, () => {});
-      source.endText();
+         cbp.handleToken(token, () => {});
+         source.endText();
 
-      source.extract('all', (sToken) => {
-         expect(strOrBlank(sToken)).toEqual('xfoo');
-         done();
-      });
-   });
+         source.extract('all', (sToken) => {
+            expect(strOrBlank(sToken)).toEqual('xfoo');
+            done();
+         });
+      }));
 
    describe('text processing', () => {
       it('passes tokens directly on', () => {
@@ -114,7 +115,7 @@ describe('ConditionalBodyProcessor (unit)', () => {
       });
 
       it('responds that it has handled the end of the token stream', () => {
-         const handled = jest.fn();
+         const handled = vi.fn();
          const cbp = new ConditionalBodyProcessor(new STokenSource(), bodyProcessor, expandToken);
          const handler = bodyProcessor.mock.calls[0][1];
 
@@ -125,8 +126,8 @@ describe('ConditionalBodyProcessor (unit)', () => {
       });
 
       it('delivers a previously terminating token once the end of the token stream has been reached', () => {
-         const handled = jest.fn();
-         const expanded = jest.fn();
+         const handled = vi.fn();
+         const expanded = vi.fn();
          const close = new ConditionalEndPToken({ open: toSToken(']]>') });
          const cbp = new ConditionalBodyProcessor(new STokenSource(), bodyProcessor, expandToken);
          const handler = bodyProcessor.mock.calls[0][1];
@@ -138,8 +139,8 @@ describe('ConditionalBodyProcessor (unit)', () => {
       });
 
       it('wraps up all callbacks once the end of the token stream has been reached after receiving an end', () => {
-         const handled = jest.fn();
-         const expanded = jest.fn();
+         const handled = vi.fn();
+         const expanded = vi.fn();
          const close = new ConditionalEndPToken({ open: toSToken(']]>') });
          const cbp = new ConditionalBodyProcessor(new STokenSource(), bodyProcessor, expandToken);
          const handler = bodyProcessor.mock.calls[0][1];

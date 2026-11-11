@@ -1,17 +1,17 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { ExternalIdP } from 'pToken';
+import { describe, expect, it, vi, type Mock } from 'vitest';
 
 import { externalIdToSTokens } from '../externalIdToSTokens';
 import { literalToSTokens } from '../literalToSTokens';
 
-jest.mock('../literalToSTokens');
+vi.mock('../literalToSTokens');
 
 describe('externalIdToSTokens()', () => {
    beforeEach(() => {
-      (literalToSTokens as jest.Mock).mockReturnValue([toSToken('literal')]);
+      (literalToSTokens as Mock).mockReturnValue([toSToken('literal')]);
    });
 
    it('calls literalToSTokens() for the PUBLIC value', () => {

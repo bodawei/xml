@@ -1,6 +1,5 @@
-/* Copyright ® 2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import {
@@ -15,6 +14,7 @@ import {
    makeParameterEntityStart,
    makeTextPToken,
 } from 'token-test';
+import { describe, expect, it } from 'vitest';
 
 import { validityErrorCodes } from '../../error/validityErrorCodes';
 import { ancestorPERefsValidate } from '../ancestorPERefsValidate';

@@ -1,8 +1,8 @@
 /* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
-import { expect } from '@jest/globals';
 import { PROBLEM, Problem, WARNING_SEVERITY } from 'basic';
 import { PToken } from 'token';
+import { expect } from 'vitest';
 
 import { ErrorDetails } from './types';
 

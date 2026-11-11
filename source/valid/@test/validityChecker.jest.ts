@@ -1,6 +1,5 @@
 /* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, ProblemCollector, toSToken } from 'basic';
 import { ConditionalEndPToken, ConditionalStartPToken, ElidedEntityDeclarationPToken } from 'token';
 import {
@@ -22,6 +21,7 @@ import {
    makeParameterEntityStart,
    makeXmlDecl,
 } from 'token-test';
+import { describe, expect, it, vi, type MockedFunction, type Mock } from 'vitest';
 
 import { contentUpdateState } from '../common/contentUpdateState';
 import { contentValidate } from '../common/contentValidate';
@@ -57,59 +57,59 @@ import { parameterEntityStartValidate } from '../token/parameterEntityStartValid
 import { xmlDeclarationUpdateState } from '../token/xmlDeclarationUpdateState';
 import { ValidityChecker } from '../validityChecker';
 
-jest.mock('../common/contentValidate');
-jest.mock('../common/contentUpdateState');
-jest.mock('../common/elementDeclarationPreprocess');
-jest.mock('../common/entityDeclarationValueValidate');
-jest.mock('../token/attListDeclarationValidate');
-jest.mock('../token/attListDeclarationUpdateState');
-jest.mock('../token/conditionalEndUpdateState');
-jest.mock('../token/conditionalEndValidate');
-jest.mock('../token/conditionalStartUpdateState');
-jest.mock('../token/conditionalStartValidate');
-jest.mock('../token/docTypeStartUpdateState');
-jest.mock('../token/docTypeEndValidate');
-jest.mock('../token/elementDeclarationUpdateState');
-jest.mock('../token/elementDeclarationValidate');
-jest.mock('../token/elementEndUpdateState');
-jest.mock('../token/elementEndValidate');
-jest.mock('../token/elementStartUpdateState');
-jest.mock('../token/elementStartValidate');
-jest.mock('../token/elidedEntityDeclarationUpdateState');
-jest.mock('../token/entityDeclarationValidate');
-jest.mock('../token/externalSubsetEndUpdateState');
-jest.mock('../token/externalSubsetStartUpdateState');
-jest.mock('../token/generalEntityDeclarationUpdateState');
-jest.mock('../token/generalEntityReferenceValidate');
-jest.mock('../token/generalEntityStartValidate');
-jest.mock('../token/notationDeclarationUpdateState');
-jest.mock('../token/notationDeclarationValidate');
-jest.mock('../token/parameterEntityDeclarationUpdateState');
-jest.mock('../token/parameterEntityReferenceValidate');
-jest.mock('../token/parameterEntityStartValidate');
-jest.mock('../token/xmlDeclarationUpdateState');
+vi.mock('../common/contentValidate');
+vi.mock('../common/contentUpdateState');
+vi.mock('../common/elementDeclarationPreprocess');
+vi.mock('../common/entityDeclarationValueValidate');
+vi.mock('../token/attListDeclarationValidate');
+vi.mock('../token/attListDeclarationUpdateState');
+vi.mock('../token/conditionalEndUpdateState');
+vi.mock('../token/conditionalEndValidate');
+vi.mock('../token/conditionalStartUpdateState');
+vi.mock('../token/conditionalStartValidate');
+vi.mock('../token/docTypeStartUpdateState');
+vi.mock('../token/docTypeEndValidate');
+vi.mock('../token/elementDeclarationUpdateState');
+vi.mock('../token/elementDeclarationValidate');
+vi.mock('../token/elementEndUpdateState');
+vi.mock('../token/elementEndValidate');
+vi.mock('../token/elementStartUpdateState');
+vi.mock('../token/elementStartValidate');
+vi.mock('../token/elidedEntityDeclarationUpdateState');
+vi.mock('../token/entityDeclarationValidate');
+vi.mock('../token/externalSubsetEndUpdateState');
+vi.mock('../token/externalSubsetStartUpdateState');
+vi.mock('../token/generalEntityDeclarationUpdateState');
+vi.mock('../token/generalEntityReferenceValidate');
+vi.mock('../token/generalEntityStartValidate');
+vi.mock('../token/notationDeclarationUpdateState');
+vi.mock('../token/notationDeclarationValidate');
+vi.mock('../token/parameterEntityDeclarationUpdateState');
+vi.mock('../token/parameterEntityReferenceValidate');
+vi.mock('../token/parameterEntityStartValidate');
+vi.mock('../token/xmlDeclarationUpdateState');
 
 describe('ValidityChecker (unit)', () => {
    let version: ConformanceVersion;
    let checker: ValidityChecker;
-   let elementDeclarationUpdateStateMock: jest.MockedFunction<typeof elementDeclarationUpdateState>;
-   let conditionalStartUpdateStateMock: jest.MockedFunction<typeof conditionalStartUpdateState>;
-   let conditionalEndUpdateStateMock: jest.MockedFunction<typeof conditionalEndUpdateState>;
+   let elementDeclarationUpdateStateMock: MockedFunction<typeof elementDeclarationUpdateState>;
+   let conditionalStartUpdateStateMock: MockedFunction<typeof conditionalStartUpdateState>;
+   let conditionalEndUpdateStateMock: MockedFunction<typeof conditionalEndUpdateState>;
 
    beforeEach(() => {
       version = new ConformanceVersion();
       checker = new ValidityChecker();
 
-      elementDeclarationUpdateStateMock = elementDeclarationUpdateState as jest.MockedFunction<
+      elementDeclarationUpdateStateMock = elementDeclarationUpdateState as MockedFunction<
          typeof elementDeclarationUpdateState
       >;
-      conditionalStartUpdateStateMock = conditionalStartUpdateState as jest.MockedFunction<
+      conditionalStartUpdateStateMock = conditionalStartUpdateState as MockedFunction<
          typeof conditionalStartUpdateState
       >;
-      conditionalEndUpdateStateMock = conditionalEndUpdateState as jest.MockedFunction<
+      conditionalEndUpdateStateMock = conditionalEndUpdateState as MockedFunction<
          typeof conditionalEndUpdateState
       >;
-      const contentUpdateStateMock = contentUpdateState as jest.MockedFunction<
+      const contentUpdateStateMock = contentUpdateState as MockedFunction<
          typeof conditionalEndUpdateState
       >;
       elementDeclarationUpdateStateMock.mockImplementation((token, details, state) => state);
@@ -119,8 +119,8 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('stores the version passed to it and pass that on to other validations', () => {
-      (elementDeclarationPreprocess as jest.Mock).mockReturnValue({});
-      (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (elementDeclarationPreprocess as Mock).mockReturnValue({});
+      (elementDeclarationUpdateState as Mock).mockReturnValue(new ValidityState());
       const elDecl = makeElementDeclaration();
 
       checker.check(version);
@@ -135,8 +135,8 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('stores only the first version passed to it', () => {
-      (elementDeclarationPreprocess as jest.Mock).mockReturnValue({});
-      (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (elementDeclarationPreprocess as Mock).mockReturnValue({});
+      (elementDeclarationUpdateState as Mock).mockReturnValue(new ValidityState());
       const elDecl = makeElementDeclaration();
       checker.check(version);
 
@@ -172,7 +172,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('validates an ATTLIST declaration', () => {
-      (attListDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (attListDeclarationUpdateState as Mock).mockReturnValue(new ValidityState());
       const attListDecl = makeAttListDeclaration();
 
       checker.check(attListDecl);
@@ -185,7 +185,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed an ATTLIST declaration', () => {
-      (attListDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (attListDeclarationUpdateState as Mock).mockReturnValue(new ValidityState());
       const attListDecl = makeAttListDeclaration();
 
       checker.check(attListDecl);
@@ -235,7 +235,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed a docTypeStart', () => {
-      (docTypeStartUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (docTypeStartUpdateState as Mock).mockReturnValue(new ValidityState());
       const docTypeStart = makeDocTypeStart();
 
       checker.check(docTypeStart);
@@ -244,7 +244,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed an element start', () => {
-      (elementStartUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (elementStartUpdateState as Mock).mockReturnValue(new ValidityState());
       const elementEmpty = makeElementEmpty();
 
       checker.check(elementEmpty);
@@ -253,7 +253,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('validates an element start', () => {
-      (elementStartUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (elementStartUpdateState as Mock).mockReturnValue(new ValidityState());
       const elStart = makeElementStart();
 
       checker.check(elStart);
@@ -266,8 +266,8 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed an element declaration', () => {
-      (elementDeclarationPreprocess as jest.Mock).mockReturnValue({});
-      (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (elementDeclarationPreprocess as Mock).mockReturnValue({});
+      (elementDeclarationUpdateState as Mock).mockReturnValue(new ValidityState());
       const elDecl = makeElementDeclaration();
 
       checker.check(elDecl);
@@ -280,8 +280,8 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('validates an element declaration', () => {
-      (elementDeclarationPreprocess as jest.Mock).mockReturnValue({});
-      (elementDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (elementDeclarationPreprocess as Mock).mockReturnValue({});
+      (elementDeclarationUpdateState as Mock).mockReturnValue(new ValidityState());
       const elDecl = makeElementDeclaration();
       checker.check(version);
 
@@ -296,7 +296,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed an element end', () => {
-      (elementEndUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (elementEndUpdateState as Mock).mockReturnValue(new ValidityState());
       const elementEnd = makeElementEnd();
 
       checker.check(elementEnd);
@@ -305,7 +305,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('validates an element end', () => {
-      (elementEndUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (elementEndUpdateState as Mock).mockReturnValue(new ValidityState());
       const elementEnd = makeElementEnd();
 
       checker.check(elementEnd);
@@ -318,7 +318,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed an elided entity declaration', () => {
-      (elidedEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (elidedEntityDeclarationUpdateState as Mock).mockReturnValue(new ValidityState());
       const peDecl = makeParameterEntityDeclaration();
       const elided = new ElidedEntityDeclarationPToken(peDecl, peDecl.value);
 
@@ -341,7 +341,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed an external subset end', () => {
-      (externalSubsetEndUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (externalSubsetEndUpdateState as Mock).mockReturnValue(new ValidityState());
       const esSSEnd = makeExternalSubsetEnd();
 
       checker.check(esSSEnd);
@@ -350,7 +350,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed an external subset start', () => {
-      (externalSubsetStartUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (externalSubsetStartUpdateState as Mock).mockReturnValue(new ValidityState());
       const esSSStart = makeExternalSubsetStart();
 
       checker.check(esSSStart);
@@ -359,7 +359,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('validates a general entity declaration', () => {
-      (generalEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (generalEntityDeclarationUpdateState as Mock).mockReturnValue(new ValidityState());
       const geDecl = makeGeneralEntityDeclaration();
 
       checker.check(geDecl);
@@ -372,7 +372,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed a general entity declaration', () => {
-      (generalEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (generalEntityDeclarationUpdateState as Mock).mockReturnValue(new ValidityState());
       const geDecl = makeGeneralEntityDeclaration();
 
       checker.check(geDecl);
@@ -402,7 +402,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed a notation declaration', () => {
-      (notationDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (notationDeclarationUpdateState as Mock).mockReturnValue(new ValidityState());
       const notationDecl = makeNotationDeclaration();
 
       checker.check(notationDecl);
@@ -411,7 +411,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('validates a notation declaration', () => {
-      (notationDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (notationDeclarationUpdateState as Mock).mockReturnValue(new ValidityState());
       const notationDecl = makeNotationDeclaration();
 
       checker.check(notationDecl);
@@ -424,7 +424,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('validates a general entity declaration', () => {
-      (parameterEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (parameterEntityDeclarationUpdateState as Mock).mockReturnValue(new ValidityState());
       const peDecl = makeParameterEntityDeclaration();
 
       checker.check(peDecl);
@@ -461,7 +461,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed a parameter entity declaration', () => {
-      (parameterEntityDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (parameterEntityDeclarationUpdateState as Mock).mockReturnValue(new ValidityState());
       const peDecl = makeParameterEntityDeclaration();
 
       checker.check(peDecl);
@@ -485,7 +485,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('updates the state when passed an XML Declaration', () => {
-      (xmlDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (xmlDeclarationUpdateState as Mock).mockReturnValue(new ValidityState());
       const xmlDecl = makeXmlDecl();
 
       checker.check(xmlDecl);
@@ -494,7 +494,7 @@ describe('ValidityChecker (unit)', () => {
    });
 
    it('will not update the state twice when called with two XML Declarations', () => {
-      (xmlDeclarationUpdateState as jest.Mock).mockReturnValue(new ValidityState());
+      (xmlDeclarationUpdateState as Mock).mockReturnValue(new ValidityState());
       const xmlDecl = makeXmlDecl();
 
       checker.check(xmlDecl);

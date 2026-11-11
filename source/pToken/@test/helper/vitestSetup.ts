@@ -1,5 +1,7 @@
-import { expect } from '@jest/globals';
+/* Copyright ® 2026 by 柏大衛. All rights reserved. */
+
 import { SToken } from 'basic';
+import { expect, type MockedFunction } from 'vitest';
 
 interface Props {
    [name: string]: any;
@@ -44,7 +46,7 @@ function makeRangeless(item: undefined | Props): Props | undefined | null {
    return result;
 }
 
-function getTheOneArg(callback: jest.MockedFunction<any>) {
+function getTheOneArg(callback: MockedFunction<any>) {
    if (callback.mock?.calls) {
       const args = callback.mock.calls;
 
@@ -82,7 +84,7 @@ function fixUndef(value: Array<any> | Props | void): string | Props {
 }
 
 expect.extend({
-   toEqualRangeless(callbackSpy: jest.MockedFunction<any>, expectedProps?: Props) {
+   toEqualRangeless(callbackSpy: MockedFunction<any>, expectedProps?: Props) {
       if (!callbackSpy) {
          throw new Error('Did not get a spy as expected.');
       }

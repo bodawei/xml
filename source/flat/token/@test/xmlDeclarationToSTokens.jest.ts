@@ -1,13 +1,13 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { XmlDeclarationPToken } from 'pToken';
+import { describe, expect, it, vi, type Mock } from 'vitest';
 
 import { fieldedInstructionToSTokens } from '../../common/fieldedInstructionToSTokens';
 import { xmlDeclarationToSTokens } from '../xmlDeclarationToSTokens';
 
-jest.mock('../../common/fieldedInstructionToSTokens');
+vi.mock('../../common/fieldedInstructionToSTokens');
 
 describe('xmlDeclarationToSTokens (unit)', () => {
    let xmlDeclPToken: XmlDeclarationPToken;
@@ -37,7 +37,7 @@ describe('xmlDeclarationToSTokens (unit)', () => {
    });
 
    it('returns the result of fieldedInstructionToSTokens()', () => {
-      (fieldedInstructionToSTokens as jest.Mock).mockReturnValue([toSToken('field')]);
+      (fieldedInstructionToSTokens as Mock).mockReturnValue([toSToken('field')]);
 
       const result = xmlDeclarationToSTokens(xmlDeclPToken);
 

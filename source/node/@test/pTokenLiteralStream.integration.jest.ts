@@ -1,6 +1,5 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { STokenSource } from 'basic';
 import {
    CHARREF_PTOKEN,
@@ -8,6 +7,7 @@ import {
    TEXTDECL_PTOKEN,
    TEXT_PTOKEN,
 } from 'pToken';
+import { describe, expect, it } from 'vitest';
 
 import { PTokenLiteralStream } from '../pTokenLiteralStream';
 
@@ -39,50 +39,67 @@ describe('PTokenLiteralStream (integration)', () => {
       }
    }
 
-   it('produces a single text token if not told to look for perefs', (done) => {
-      expectInputToProduceTypes('one %two; three <four>', {}, [TEXT_PTOKEN], done);
-   });
+   it('produces a single text token if not told to look for perefs', () =>
+      new Promise<void>((done) => {
+         expectInputToProduceTypes('one %two; three <four>', {}, [TEXT_PTOKEN], done);
+      }));
 
-   it('produces a mixture of text and charRefs if asked to', (done) => {
-      expectInputToProduceTypes(
-         'one %two; &three &#x40; <four>',
-         {},
-         [TEXT_PTOKEN, TEXT_PTOKEN, TEXT_PTOKEN, CHARREF_PTOKEN, TEXT_PTOKEN],
-         done,
-      );
-   });
+   it('produces a mixture of text and charRefs if asked to', () =>
+      new Promise<void>((done) => {
+         expectInputToProduceTypes(
+            'one %two; &three &#x40; <four>',
+            {},
+            [TEXT_PTOKEN, TEXT_PTOKEN, TEXT_PTOKEN, CHARREF_PTOKEN, TEXT_PTOKEN],
+            done,
+         );
+      }));
 
-   it('produces a mixture of text, charrefs and parameter entity references if asked to', (done) => {
-      expectInputToProduceTypes(
-         'one %two; three &#65; <four>',
-         { peRef: true },
-         [TEXT_PTOKEN, PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXT_PTOKEN, CHARREF_PTOKEN, TEXT_PTOKEN],
-         done,
-      );
-   });
+   it('produces a mixture of text, charrefs and parameter entity references if asked to', () =>
+      new Promise<void>((done) => {
+         expectInputToProduceTypes(
+            'one %two; three &#65; <four>',
+            { peRef: true },
+            [
+               TEXT_PTOKEN,
+               PARAMETER_ENTITY_REFERENCE_PTOKEN,
+               TEXT_PTOKEN,
+               CHARREF_PTOKEN,
+               TEXT_PTOKEN,
+            ],
+            done,
+         );
+      }));
 
-   it('extracts a TextDeclaration if it starts with one', (done) => {
-      expectInputToProduceTypes(
-         '<?xml version="1.0" encoding="usascii"?>one %two; three &#65; <four>',
-         { peRef: true },
-         [
-            TEXTDECL_PTOKEN,
-            TEXT_PTOKEN,
-            PARAMETER_ENTITY_REFERENCE_PTOKEN,
-            TEXT_PTOKEN,
-            CHARREF_PTOKEN,
-            TEXT_PTOKEN,
-         ],
-         done,
-      );
-   });
+   it('extracts a TextDeclaration if it starts with one', () =>
+      new Promise<void>((done) => {
+         expectInputToProduceTypes(
+            '<?xml version="1.0" encoding="usascii"?>one %two; three &#65; <four>',
+            { peRef: true },
+            [
+               TEXTDECL_PTOKEN,
+               TEXT_PTOKEN,
+               PARAMETER_ENTITY_REFERENCE_PTOKEN,
+               TEXT_PTOKEN,
+               CHARREF_PTOKEN,
+               TEXT_PTOKEN,
+            ],
+            done,
+         );
+      }));
 
-   it('treats something that almost, but not quite, looks like a TextDeclaration as text', (done) => {
-      expectInputToProduceTypes(
-         '<?xml version="1.0" encoding="usascii">one %two; three &#65; <four>',
-         { peRef: true },
-         [TEXT_PTOKEN, PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXT_PTOKEN, CHARREF_PTOKEN, TEXT_PTOKEN],
-         done,
-      );
-   });
+   it('treats something that almost, but not quite, looks like a TextDeclaration as text', () =>
+      new Promise<void>((done) => {
+         expectInputToProduceTypes(
+            '<?xml version="1.0" encoding="usascii">one %two; three &#65; <four>',
+            { peRef: true },
+            [
+               TEXT_PTOKEN,
+               PARAMETER_ENTITY_REFERENCE_PTOKEN,
+               TEXT_PTOKEN,
+               CHARREF_PTOKEN,
+               TEXT_PTOKEN,
+            ],
+            done,
+         );
+      }));
 });

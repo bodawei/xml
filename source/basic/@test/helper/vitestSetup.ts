@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { expect } from '@jest/globals';
+import { expect } from 'vitest';
 
 import { ProblemCollector } from '../../util/problemCollector';
 import { ParamCollector } from './paramCollector';
@@ -10,11 +9,15 @@ function toHaveProblem(collector: ProblemCollector, expectedId: string) {
    let pass = false;
    let message = `The problem "${expectedId}" was not reported.`;
    let problems: Array<{ id: string }>;
+   const maybeCollector = collector as unknown as {
+      getParams?: () => Array<{ id: string }>;
+      getProblems?: () => Array<{ id: string }>;
+   };
 
-   if ((collector as any).getProblems) {
-      problems = (collector as any).getProblems() as Array<{ id: string }>;
+   if (maybeCollector.getProblems) {
+      problems = maybeCollector.getProblems();
    } else {
-      problems = (collector as any).getParams() as Array<{ id: string }>;
+      problems = maybeCollector.getParams?.() ?? [];
    }
 
    for (const actual of problems) {

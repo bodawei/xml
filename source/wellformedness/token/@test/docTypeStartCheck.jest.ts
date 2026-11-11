@@ -1,18 +1,18 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { DocTypeStartPToken } from 'token';
+import { describe, expect, it, vi } from 'vitest';
 
 import { externalIdCheck } from '../../common/externalIdCheck';
 import { nameCheck } from '../../common/nameCheck';
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { docTypeStartCheck } from '../docTypeStartCheck';
 
-jest.mock('../../common/nameCheck');
-jest.mock('../../common/externalIdCheck');
+vi.mock('../../common/nameCheck');
+vi.mock('../../common/externalIdCheck');
 
 const WFEID = wellFormedErrorCodes.id;
 

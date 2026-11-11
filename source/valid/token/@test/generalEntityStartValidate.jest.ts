@@ -1,11 +1,11 @@
-/* Copyright ® 2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { GeneralEntityReferencePToken } from 'pToken';
 import { GeneralEntityStartPToken } from 'token';
 import { makeGeneralEntityDeclaration, makeGeneralEntityStart } from 'token-test';
+import { describe, expect, it, vi } from 'vitest';
 
 import { ancestorPERefsValidate } from '../../common/ancestorPERefsValidate';
 import { geRefValidate } from '../../common/geRefValidate';
@@ -15,8 +15,8 @@ import { generalEntityStartValidate } from '../generalEntityStartValidate';
 
 const VID = validityErrorCodes.id;
 
-jest.mock('../../common/ancestorPERefsValidate');
-jest.mock('../../common/geRefValidate');
+vi.mock('../../common/ancestorPERefsValidate');
+vi.mock('../../common/geRefValidate');
 
 describe('generalEntityStartValidate (unit)', () => {
    let collector: ParamCollector;

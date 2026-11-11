@@ -1,10 +1,10 @@
-/* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, ProblemCollector } from 'basic';
 import { toSToken, STokenSource } from 'basic';
 import { parseAttListDeclaration } from 'pToken';
 import { DeclarationStart } from 'token';
+import { describe, expect, it } from 'vitest';
 
 import { warningCodes } from '../../error/warningCodes';
 import { WellFormedError, wellFormedErrorCodes } from '../../error/wellFormedError';
@@ -41,65 +41,70 @@ describe('attListDeclarationCheck()', () => {
    //    });
    // });
 
-   it('calls nameCheck() to report on invalid names', (done) => {
-      const source = new STokenSource();
-      source.addText('$foo>');
-      source.endText();
-      parseAttListDeclaration(source, declarationStart, (result) => {
-         attListDeclarationCheck(result, collector, new ConformanceVersion());
+   it('calls nameCheck() to report on invalid names', () =>
+      new Promise<void>((done) => {
+         const source = new STokenSource();
+         source.addText('$foo>');
+         source.endText();
+         parseAttListDeclaration(source, declarationStart, (result) => {
+            attListDeclarationCheck(result, collector, new ConformanceVersion());
 
-         expect(collector.getProblems()[0].id).toEqual(WFEID.ATTLISTDECL_ELEMENT_NAME_INVALID);
-         done();
-      });
-   });
+            expect(collector.getProblems()[0].id).toEqual(WFEID.ATTLISTDECL_ELEMENT_NAME_INVALID);
+            done();
+         });
+      }));
 
-   it('calls nameCheck() to report on invalid attribute names', (done) => {
-      const source = new STokenSource();
-      source.addText('elName $foo>');
-      source.endText();
-      parseAttListDeclaration(source, declarationStart, (result) => {
-         attListDeclarationCheck(result, collector, new ConformanceVersion());
+   it('calls nameCheck() to report on invalid attribute names', () =>
+      new Promise<void>((done) => {
+         const source = new STokenSource();
+         source.addText('elName $foo>');
+         source.endText();
+         parseAttListDeclaration(source, declarationStart, (result) => {
+            attListDeclarationCheck(result, collector, new ConformanceVersion());
 
-         expect(collector.getProblems()[0].id).toEqual(WFEID.ATTLISTDECL_ATTR_NAME_INVALID);
-         done();
-      });
-   });
+            expect(collector.getProblems()[0].id).toEqual(WFEID.ATTLISTDECL_ATTR_NAME_INVALID);
+            done();
+         });
+      }));
 
-   it('calls nameXmlCheck() to report on invalid attribute names', (done) => {
-      const source = new STokenSource();
-      source.addText('elName xml:foo>');
-      source.endText();
-      parseAttListDeclaration(source, declarationStart, (result) => {
-         attListDeclarationCheck(result, collector, new ConformanceVersion());
+   it('calls nameXmlCheck() to report on invalid attribute names', () =>
+      new Promise<void>((done) => {
+         const source = new STokenSource();
+         source.addText('elName xml:foo>');
+         source.endText();
+         parseAttListDeclaration(source, declarationStart, (result) => {
+            attListDeclarationCheck(result, collector, new ConformanceVersion());
 
-         expect(collector.getProblems()[0].id).toEqual(
-            warningCodes.id.ATTLISTDECL_ATTR_NAME_XML_RESERVED,
-         );
-         done();
-      });
-   });
+            expect(collector.getProblems()[0].id).toEqual(
+               warningCodes.id.ATTLISTDECL_ATTR_NAME_XML_RESERVED,
+            );
+            done();
+         });
+      }));
 
-   it('calls wordList.checkWellFormed() on an enumerated list', (done) => {
-      const source = new STokenSource();
-      source.addText('elName attr ( $badName ) >');
-      source.endText();
-      parseAttListDeclaration(source, declarationStart, (result) => {
-         attListDeclarationCheck(result, collector, new ConformanceVersion());
+   it('calls wordList.checkWellFormed() on an enumerated list', () =>
+      new Promise<void>((done) => {
+         const source = new STokenSource();
+         source.addText('elName attr ( $badName ) >');
+         source.endText();
+         parseAttListDeclaration(source, declarationStart, (result) => {
+            attListDeclarationCheck(result, collector, new ConformanceVersion());
 
-         expect(collector.getProblems()[0].id).toEqual(WFEID.WORDLIST_INVALID_NMTOKEN);
-         done();
-      });
-   });
+            expect(collector.getProblems()[0].id).toEqual(WFEID.WORDLIST_INVALID_NMTOKEN);
+            done();
+         });
+      }));
 
-   it('calls wordList.checkWellFormed() on a NOTATION list', (done) => {
-      const source = new STokenSource();
-      source.addText('elName attr2 NOTATION ( goodName | $badName ) >');
-      source.endText();
-      parseAttListDeclaration(source, declarationStart, (result) => {
-         attListDeclarationCheck(result, collector, new ConformanceVersion());
+   it('calls wordList.checkWellFormed() on a NOTATION list', () =>
+      new Promise<void>((done) => {
+         const source = new STokenSource();
+         source.addText('elName attr2 NOTATION ( goodName | $badName ) >');
+         source.endText();
+         parseAttListDeclaration(source, declarationStart, (result) => {
+            attListDeclarationCheck(result, collector, new ConformanceVersion());
 
-         expect(collector.getProblems()[0].id).toEqual(WFEID.WORDLIST_INVALID_NAME);
-         done();
-      });
-   });
+            expect(collector.getProblems()[0].id).toEqual(WFEID.WORDLIST_INVALID_NAME);
+            done();
+         });
+      }));
 });

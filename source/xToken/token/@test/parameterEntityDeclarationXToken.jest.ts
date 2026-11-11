@@ -1,6 +1,5 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import {
    CharRefPToken,
@@ -10,6 +9,7 @@ import {
    TextPToken,
 } from 'pToken';
 import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
+import { describe, expect, it } from 'vitest';
 
 import { ParameterEntityEndXToken } from '../../marker/parameterEntityEndXToken';
 import { ParameterEntityStartXToken } from '../../marker/parameterEntityStartXToken';

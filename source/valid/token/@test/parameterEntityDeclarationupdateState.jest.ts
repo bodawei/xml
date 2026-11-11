@@ -1,8 +1,8 @@
-/* Copyright ® 2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { ParameterEntityDeclarationPToken } from 'pToken';
 import { makeParameterEntityDeclaration } from 'token-test';
+import { describe, expect, it } from 'vitest';
 
 import { ValidityState } from '../../common/validityState';
 import { parameterEntityDeclarationUpdateState } from '../parameterEntityDeclarationUpdateState';

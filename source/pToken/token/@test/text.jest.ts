@@ -1,10 +1,10 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { EntityId, Range } from 'basic';
 import { toSToken, SToken } from 'basic';
 import { TextPToken, parseText, isTextPToken } from 'pToken';
 import { MockSTokenSource } from 'pToken-test';
+import { describe, expect, it } from 'vitest';
 
 describe('TextPToken (unit)', () => {
    describe('construction', () => {

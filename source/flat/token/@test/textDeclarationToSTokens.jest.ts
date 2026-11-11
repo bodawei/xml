@@ -1,17 +1,17 @@
-/* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { TextDeclarationPToken } from 'pToken';
+import { describe, expect, it, vi, type Mock } from 'vitest';
 
 import { fieldedInstructionToSTokens } from '../../common/fieldedInstructionToSTokens';
 import { textDeclarationToSTokens } from '../textDeclarationToSTokens';
 
-jest.mock('../../common/fieldedInstructionToSTokens');
+vi.mock('../../common/fieldedInstructionToSTokens');
 
 describe('textDeclarationToSTokens() (integration)', () => {
    it('returns the STokens', () => {
-      (fieldedInstructionToSTokens as jest.Mock).mockReturnValue([toSToken('fields')]);
+      (fieldedInstructionToSTokens as Mock).mockReturnValue([toSToken('fields')]);
       const textDeclPToken = new TextDeclarationPToken({
          open: toSToken('<?'),
          openSpace: undefined,

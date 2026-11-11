@@ -1,9 +1,10 @@
-/* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
 import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { ProcessingInstructionPToken } from 'pToken';
+import { vi } from 'vitest';
 
 import { charCheck } from '../../common/charCheck';
 import { nameCheck } from '../../common/nameCheck';
@@ -12,9 +13,9 @@ import { warningCodes } from '../../error/warningCodes';
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { processingInstructionCheck } from '../processingInstructionCheck';
 
-jest.mock('../../common/charCheck');
-jest.mock('../../common/nameXmlCheck');
-jest.mock('../../common/nameCheck');
+vi.mock('../../common/charCheck');
+vi.mock('../../common/nameXmlCheck');
+vi.mock('../../common/nameCheck');
 
 const WFEID = wellFormedErrorCodes.id;
 const WID = warningCodes.id;

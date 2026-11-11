@@ -1,23 +1,23 @@
-/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
+/* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { ParameterEntityDeclarationPToken, TextPToken } from 'pToken';
+import { describe, expect, it, vi, type Mock } from 'vitest';
 
 import { externalIdToSTokens } from '../../common/externalIdToSTokens';
 import { literalToSTokens } from '../../common/literalToSTokens';
 import { unexpandedToSTokens } from '../../common/unexpandedToSTokens';
 import { parameterEntityDeclarationToSTokens } from '../parameterEntityDeclarationToSTokens';
 
-jest.mock('../../common/externalIdToSTokens');
-jest.mock('../../common/unexpandedToSTokens');
-jest.mock('../../common/literalToSTokens');
+vi.mock('../../common/externalIdToSTokens');
+vi.mock('../../common/unexpandedToSTokens');
+vi.mock('../../common/literalToSTokens');
 
 describe('parameterEntityDeclarationToSTokens()', () => {
    beforeEach(() => {
-      (externalIdToSTokens as jest.Mock).mockReturnValue([toSToken('externalID')]);
-      (unexpandedToSTokens as jest.Mock).mockReturnValue([toSToken('unexpanded')]);
-      (literalToSTokens as jest.Mock).mockReturnValue([toSToken('literal')]);
+      (externalIdToSTokens as Mock).mockReturnValue([toSToken('externalID')]);
+      (unexpandedToSTokens as Mock).mockReturnValue([toSToken('unexpanded')]);
+      (literalToSTokens as Mock).mockReturnValue([toSToken('literal')]);
    });
    it('returns all the STokens from an parameter entity declaration with an entity value', () => {
       const pToken = new ParameterEntityDeclarationPToken({
