@@ -14,8 +14,8 @@ README goals and the current code; edit, reorder, or replace them as priorities 
 
 | ID  | Status | Project                                                                                 |
 | --- | ------ | --------------------------------------------------------------------------------------- |
-| P7  | next   | Bring all pkg dependencies up to date.                                                  |
-| P8  | idea   | Try swapping oxfmt in for prettier.                                                     |
+| P7  | done   | Bring all pkg dependencies up to date.                                                  |
+| P8  | done   | Try swapping oxfmt in for prettier.                                                     |
 | P9  | idea   | Bring oxlint into the picture.                                                          |
 | P10 | idea   | Replace jest with with vitest                                                           |
 | P11 | idea   | Kill jasmine, move those to vitest.                                                     |
@@ -122,12 +122,45 @@ formatting works and we have built in the preferred tool
 
 ### Current state
 
-This is unstarted
+**Done 2026-11-08.** `prettier` and `eslint-plugin-prettier` are removed; `oxfmt` 0.77 formats
+the repo from `.oxfmtrc.json` (migrated with `oxfmt --migrate=prettier`, identical options).
+`eslint-config-prettier` stays, to switch off formatting rules that conflict with the formatter.
+
+Measured on 649 `source/**/*.ts` files: `prettier --check` 2.2-2.5 s, `oxfmt --check` 0.25 s
+(about 10x); a full rewrite of every file takes 2.2 s vs 0.09 s. Output is nearly identical: after
+formatting, only 3 files differ, all in how a long union type argument is broken across lines
+(oxfmt puts one `|` member per line). The 91 files that were already non-conforming under
+prettier were left alone, so the non-conforming count is still 91. ESLint total dropped from 3249
+to 2795, exactly the 454 `prettier/prettier` findings that no longer exist.
 
 ### Next actions
 
--  [ ] Measure prettier performance, then try out oxfmt to see its performance (consider making a prettier config change so it has to touch every file, and then do the same with oxfmt)
--  [ ] if oxfmt causes no concerns, then replace prettier with oxfmt.
+-  [x] Measure prettier performance, then try out oxfmt.
+-  [x] oxfmt caused no concerns, so it replaces prettier.
+-  [ ] Optional: reformat the 91 non-conforming files in a separate, format-only commit.
+
+## P9: Try swapping oxlint
+
+### Goal
+
+oxlint is being touted as the newer bester faster eslint.  It is not clear if the right answer is: completely cut over to using oxlint, staying entirely with eslint, or some hybrid approach.  We'd like to explore all three routes: Get timings and number of lint errors from all eslint and all oxlint.  If we go completely oxlint, do we have the same nmber of lint errors?  Do we get the same rule coverage with oxlint as without?  In a hybrid approach, do we put oxlint under eslint's control or vice versa?  Can oxlint use eslint rules to supplement those it ships with?  Do things like prettier, now oxfmt, provide lint rules of oxlint?  In short, we know nothing about the technical options for proceeding with an existing project.
+
+### Done when
+
+We have decided which path to pursue and have done it.
+
+### Current state
+
+running entirely with the latest eslint.
+
+### Next actions
+
+-  [ ] Measure eslint perfomrance for the whole repo
+-  [ ] Measure oxlint perfomrance for the whole repo
+-  [ ] Explore recommended options for moving to use oxlint and fill out more actions from there.
+
+
+
 
 ## P1: Finish the `basic` extractor rewrite
 
