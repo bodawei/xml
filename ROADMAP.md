@@ -22,6 +22,7 @@ README goals and the current code; edit, reorder, or replace them as priorities 
 | P12 | idea   | Switch to one of the mono repo systems so we can lock down cross "package" dependencies |
 | P13 | idea   | Clarify/fix the impossible to "fix" core of the parsing loop                            |
 | P14 | idea   | Make `xToken` lint-perfect on as near to the stock oxlint settings as possible          |
+| P15 | idea   | Make the suite safe for shared-worker (`isolate: false`) runs                           |
 | P1  | onhold | Finish the `basic` extractor rewrite                                                    |
 | P2  | idea   | Support documents larger than memory                                                    |
 | P3  | idea   | Browser build                                                                           |
@@ -379,6 +380,48 @@ Also still open: `sort-keys` is currently scoped to the strict file set only, so
 -  [ ] Decide whether `no-misused-spread` stays off, or whether the token-spreading pattern should
        be expressed in a way that does not need the rule off.
 -  [ ] Only then consider holding other modules to the same bar.
+
+## P15: Make the suite safe for shared-worker (`isolate: false`) runs
+
+### Goal
+
+Make the test suite pass without Vitest's per-file isolation. `isolate: false` lets
+one worker reuse its module registry across files; it is Vitest's recommended fastest
+mode and makes watch reruns cheaper. Today the suite depends on a fresh module
+registry per file, which hides shared mutable state; that also makes test order
+matter and makes leaks easy to miss.
+
+Depends on P10. If P10 does not land, this stays shelved, or is re-scoped to
+whatever runner replaces Jest.
+
+### Done when
+
+-  `npx vitest run --no-isolate` passes every suite, with and without coverage.
+-  The same run passes with shuffled file/test order.
+-  Any deliberately process-wide module state is identified and reset or owned;
+   there are no order-dependent tests left.
+-  The result, including whether `isolate: false` is then adopted in the Vitest
+   config, is recorded in the P10 migration report (`doc/vitestMigration.md`). If
+   the speed gain is not worth it, the leaks are still fixed and the choice is
+   written down.
+
+### Current state
+
+Not started. Measured 2026-11-11 on the P10 branch: the normal isolated run passes
+265 files / 9768 tests, while `npx vitest run --no-isolate` fails **46 files / 181
+tests** in about 57 s. The failures have not been triaged yet; likely causes are
+module-level mutable singletons, `vi.mock` state shared between files, and helpers
+that cache per-file data.
+
+### Next actions
+
+-  [ ] Capture the 46 failing files and group them by cause.
+-  [ ] Fix shared helpers first (anything under `@test/helper`) if they are
+       implicated, then the individual specs.
+-  [ ] Re-run `--no-isolate` after each group and track the failing-file count.
+-  [ ] Add a shuffled-order run (`--sequence.shuffle`) to verification.
+-  [ ] Decide whether to set `isolate: false` in the Vitest config, and record the
+       result in `doc/vitestMigration.md`.
 
 ## P1: Finish the `basic` extractor rewrite
 
