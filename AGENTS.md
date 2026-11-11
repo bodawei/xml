@@ -37,10 +37,11 @@ Do not treat these as regressions, and do not fix them as part of unrelated work
 
 -  `npm run lint` reports pre-existing errors, notably in `source/wellformedness/`,
    and some in `source/basic/` and `source/valid/`.
--  Do not run repo-wide `npm run lint:fix` casually. It rewrites 140 files: `sort-keys`
-   reorders object literals, and `no-unnecessary-type-assertion` strips `!` and `as any`
-   (the result still type-checks, but it is not a diff to make by accident, and it leaves
-   the matching `eslint-disable` comments stale). `npm run lint` does not fix anything.
+-  Do not run repo-wide `npm run lint:fix` casually: it rewrites 140 files. `README.md`
+   explains which three fixers are the problem and why. `npm run lint` fixes nothing, and
+   `.vscode/settings.json` already switches those three off for fix-on-save. Note that
+   `-A`/`--allow` cannot narrow a run to one rule here, because `.oxlintrc.jsonc` lists
+   every rule explicitly and per-rule settings beat the category flags.
 -  `sort-keys` accounts for most of the count (1285 of 1785 findings). oxlint reports one
    finding per unsorted object; ESLint reported one per misplaced key, so the same code used
    to count as 2351.
