@@ -21,6 +21,7 @@ README goals and the current code; edit, reorder, or replace them as priorities 
 | P11 | idea   | Kill jasmine, move those to vitest.                                                     |
 | P12 | idea   | Switch to one of the mono repo systems so we can lock down cross "package" dependencies |
 | P13 | idea   | Clarify/fix the impossible to "fix" core of the parsing loop                            |
+| P14 | idea   | Make `xToken` lint-perfect on as near to the stock oxlint settings as possible          |
 | P1  | onhold | Finish the `basic` extractor rewrite                                                    |
 | P2  | idea   | Support documents larger than memory                                                    |
 | P3  | idea   | Browser build                                                                           |
@@ -257,6 +258,102 @@ should get from a `lint` command.
 -  [ ] Optional: `oxlint --type-check` can also report TypeScript compiler diagnostics, which
        could merge the Lint and Type check CI jobs. Not done: `npm run check:types` is the
        documented command and `tsc` is already 0.8 s.
+
+## P14: Make `xToken` lint-perfect on close-to-stock oxlint settings
+
+### Goal
+
+`AGENTS.md` calls `source/xToken/` the canonical reference, "a finished version that could be
+shipped". It should earn that: clean against a configuration that leans on oxlint's own defaults,
+including the `unicorn` and `oxc` plugins and the `correctness` category, rather than against the
+hand-trimmed rule list inherited from the ESLint config.
+
+Depends on P8 and P9 landing first. Picking up stock settings is only cheap now that there is a
+single linter with a single config to widen.
+
+### Done when
+
+`xToken` reports zero findings under whatever widened configuration this project settles on, and
+that configuration is recorded in `.oxlintrc.jsonc` with the rules it deliberately leaves off and
+why.
+
+### Current state
+
+Not started. Measured 2026-11-10 on the P9 branches, over `xToken`'s 76 files:
+
+-  **Formatting is already perfect.** `oxfmt --check` is clean, as it now is for the whole tree.
+-  **247 findings** under the committed config: 236 `sort-keys`, plus 9
+   `no-unsafe-enum-comparison`, 1 `no-duplicate-type-constituents`, 1
+   `switch-exhaustiveness-check`.
+-  **255** on oxlint's actual defaults, i.e. adding the `unicorn` and `oxc` plugins and switching
+   the `correctness` category on. The 8 new ones are all `no-misused-spread`, which the old ESLint
+   config switched off deliberately: this code spreads token class instances into modified props
+   objects (`{ ...pToken, externalId }`) and losing the prototype is the intent. At `correctness`
+   only, `unicorn` contributes 0 and `oxc` 1 repo-wide.
+-  **1376** with every non-nursery category on (49 distinct rules): eslint 672, typescript 306,
+   import 215, unicorn 169, oxc 14.
+
+So the gap is small on stock defaults and large only if every category is switched on. Most of
+that 1376 comes from rules that contradict conventions this repo has already chosen, and those
+are the easy "no" decisions:
+
+| rule | n | why not |
+| --- | --- | --- |
+| `import/no-relative-parent-imports` | 140 | the codebase imports by relative path by design |
+| `eslint/sort-imports` | 139 | sorts by binding name; oxfmt's `sortImports` owns ordering (P9) |
+| `eslint/no-undefined` | 96 | `undefined` is used deliberately throughout the token model |
+| `typescript/prefer-readonly-parameter-types` | 78 | known to be very noisy |
+| `unicorn/filename-case` | 74 | wants kebab-case; `AGENTS.md` mandates camelCase |
+| `import/no-named-export` | 70 | the whole public surface is named exports |
+| `eslint/one-var`, `no-ternary`, `no-magic-numbers`, `max-lines-per-function`, `max-statements` | 139 | style opinions, not defects |
+
+The candidates actually worth a decision are a much shorter list: `consistent-type-imports` (101,
+auto-fixable), `explicit-member-accessibility` (59), `unicorn/switch-case-braces` (50,
+auto-fixable), `no-unsafe-type-assertion` (35), `unicorn/no-zero-fractions` (18),
+`init-declarations` (18), `func-style` (16), `consistent-type-exports` (10),
+`unicorn/text-encoding-identifier-case` (6).
+
+`sort-keys` alone is 236 of the current 247, and 1285 of the repo's 1785. **Decision: adopt it
+and apply the fixer.** That was checked rather than assumed, on a scratch copy of the tree with
+every other rule switched off (measured 2026-11-10):
+
+-  Iterating `oxlint --fix` takes the repo from **1285 findings to 7**, rewriting 134 files. One
+   pass is not enough: the fixer handles one object per pass, so a single run only reaches 257.
+   It converges after four passes.
+-  Afterwards `tsc` is clean, Jest passes 265 suites / 9768 tests including all **68 snapshots**,
+   and Jasmine passes 336 specs.
+-  **Object spreads are never reordered.** The only `...` lines the fixer touched were array
+   spreads inside a property value that moved as a unit, so the deliberate
+   `{ ...pToken, externalId }` pattern is untouched. That was the main semantic risk and it is
+   not real.
+
+The 7 that survive are all **computed-key tables**, in four files: `wellformedness/ContentChecker.ts`
+(3), `wellformedness/checkMap.ts` (1), `conformance/@test/data/expectedCodes.ts` (2) and
+`conformance/@test/build/buildTestData.ts` (1). The fixer cannot reorder `[ELEMENT_START_PTOKEN]:`
+style keys because it cannot know the constant's value, and no option waives them: oxlint's
+`sort-keys` accepts only `caseSensitive`, `natural`, `minKeys` and `allowLineSeparatedGroups` --
+there is no `ignoreComputedKeys` (that option exists in ESLint, not here), and
+`allowLineSeparatedGroups: true` still leaves all 7. They want 7
+`oxlint-disable-next-line sort-keys` comments, which is the right answer regardless: those tables
+are ordered by XML spec production order with comment-grouped sections, and sorting them by
+constant name would destroy real information.
+
+Also still open: `sort-keys` is currently scoped to the strict file set only, so `basic` and
+`valid` are exempt. Widening it is part of this project.
+
+### Next actions
+
+-  [ ] Apply the `sort-keys` fixer repo-wide, in its own commit: run `oxlint --fix` to
+       convergence (four passes), then `oxfmt`, then add the 7 `oxlint-disable-next-line`
+       comments with a one-line reason each. Verified safe; see above.
+-  [ ] Decide whether `sort-keys` should also cover `basic` and `valid`, which it exempts today.
+-  [ ] Triage the shortlist above rule by rule; widen `.oxlintrc.jsonc` to match, recording the
+       deliberate exclusions and their reasons the way the current config already does.
+-  [ ] Fix the residue in `xToken` so it reports zero, including the 9 `no-unsafe-enum-comparison`
+       and the 1 `switch-exhaustiveness-check` it reports today.
+-  [ ] Decide whether `no-misused-spread` stays off, or whether the token-spreading pattern should
+       be expressed in a way that does not need the rule off.
+-  [ ] Only then consider holding other modules to the same bar.
 
 ## P1: Finish the `basic` extractor rewrite
 

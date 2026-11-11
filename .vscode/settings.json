@@ -7,7 +7,41 @@
     "editor.autoClosingBrackets": "never",
     "editor.lightbulb.enabled": "off",
     "editor.codeActionsOnSave": {
+      // Run oxfmt first, then oxlint's fixes. Formatting is a code action rather than
+      // editor.formatOnSave so that the order of the two is defined.
+      "source.format.oxc": "always",
+      "source.fixAll.oxc": "always",
       "source.fixAll": "explicit"
+   },
+
+   // oxlint + oxfmt on save, via the `oxc.oxc-vscode` extension. It bundles no binaries:
+   // it runs `oxlint --lsp` and `oxfmt --lsp` out of node_modules, so the editor uses the
+   // same pinned versions as CI. Type-aware linting needs no setting here; oxc.typeAware
+   // defaults to reading `options.typeAware` from .oxlintrc.jsonc, which is already on.
+   "editor.formatOnSave": false,
+   "editor.formatOnSaveMode": "file",
+   "[typescript]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+   "[javascript]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+   "[json]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+   "[jsonc]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+
+   // Only safe fixes. The documented default is inconsistent between oxc's own sources
+   // (safe_fix in the extension docs, safe_fix_or_suggestion in the language server
+   // README), and suggestions are allowed to change behaviour, so pin it.
+   "oxc.fixKind": "safe_fix",
+
+   // Three fixers are too destructive to run unreviewed on every save. See README.
+   // Each rule is listed twice: the language server README keys this map on the
+   // plugin-qualified name, the extension docs show the bare name, and neither says
+   // whether the other works. Unmatched keys are ignored, so both spellings are safe.
+   // Collapse to one form once someone confirms which the extension uses.
+   "oxc.lint.customization": {
+      "sort-keys": { "autofix": false },
+      "eslint/sort-keys": { "autofix": false },
+      "no-unnecessary-type-assertion": { "autofix": false },
+      "typescript/no-unnecessary-type-assertion": { "autofix": false },
+      "no-redundant-type-constituents": { "autofix": false },
+      "typescript/no-redundant-type-constituents": { "autofix": false }
    },
 
     "workbench.colorCustomizations": {
