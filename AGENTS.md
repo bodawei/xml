@@ -28,7 +28,7 @@ pipeline: `basic` → `pToken` → `token` / `xToken` / `flat` → `wellformedne
 | All Jest specs     | `npm run jest:all`                                           |
 | One Jest spec      | `npx jest --config ./jest.config.js <path> --coverage=false` |
 | Type-check         | `npm run check:types` (TypeScript 7; should report no errors) |
-| Lint touched files | `npx eslint --config ./eslint.config.mjs <files>`            |
+| Lint touched files | `npx oxlint <files>`                                         |
 | Format check       | `npx oxfmt --check <files>`                                  |
 
 ## Known pre-existing failures
@@ -37,11 +37,17 @@ Do not treat these as regressions, and do not fix them as part of unrelated work
 
 -  `npm run lint` reports pre-existing errors, notably in `source/wellformedness/`,
    and some in `source/basic/` and `source/valid/`.
--  `@typescript-eslint/no-deprecated`, `no-unnecessary-condition` and
-   `no-unnecessary-type-assertion` are turned off in `eslint.config.mjs` because they crash
-   `ts7-eslint`. Do not "fix" that by turning them back on until `ts7-eslint` is fixed.
--  Do not run repo-wide `npm run lint` casually: it is configured with `--fix` and
-   rewrites files.
+-  Do not run repo-wide `npm run lint:fix` casually. It rewrites 140 files: `sort-keys`
+   reorders object literals, and `no-unnecessary-type-assertion` strips `!` and `as any`
+   (the result still type-checks, but it is not a diff to make by accident, and it leaves
+   the matching `eslint-disable` comments stale). `npm run lint` does not fix anything.
+-  `sort-keys` accounts for most of the count (1285 of 1785 findings). oxlint reports one
+   finding per unsorted object; ESLint reported one per misplaced key, so the same code used
+   to count as 2351.
+-  `typescript/no-unnecessary-condition` (46) and `typescript/no-unnecessary-type-assertion`
+   (15) are also pre-existing. They were off under `ts7-eslint`, which crashed in them, and
+   are on again under oxlint (ROADMAP P9). Fixing them means verifying the types are actually
+   right, which is its own piece of work.
 
 ## Code style
 
@@ -51,8 +57,9 @@ Do not treat these as regressions, and do not fix them as part of unrelated work
    doubt, ask before doing something different, or if something in that directory
    seems inconsistent.
 -  `source/basic/` and `source/valid/` follow the same conventions and are the two
-   modules under the strict ESLint configuration; use them for foundational patterns
-   that `xToken` does not cover.
+   modules under the `import` rules and typescript-eslint's recommended-type-checked
+   set in `.oxlintrc.jsonc`; use them for foundational patterns that `xToken` does not
+   cover.
 -  Match: the copyright header, camelCase filenames, 3-space indentation, import
    grouping (external, then internal aliases such as `basic` / `pToken` / `token`,
    then relative), declarations before logic with a blank line after, and a `@test/`
@@ -66,7 +73,8 @@ Do not treat these as regressions, and do not fix them as part of unrelated work
    Do this for files you edit by hand; do not mass-update untouched files.
 -  `source/basic/extractor/*New.ts` is a mid-rewrite experiment; use completed files
    as the design model, not unfinished ones.
--  oxfmt (config in `.oxfmtrc.json`, Prettier-compatible) and ESLint are authoritative for formatting. Run them on the files you
+-  oxfmt (config in `.oxfmtrc.json`, Prettier-compatible) is authoritative for formatting,
+   and oxlint (config in `.oxlintrc.jsonc`) for everything else. Run both on the files you
    touch before finishing.
 -  If the exemplar and `doc/codingStyle.md` disagree, the written doc wins.
 -  Error and problem tokens must cite spec sections at the end of the message in the
@@ -94,8 +102,7 @@ Do not treat these as regressions, and do not fix them as part of unrelated work
 ## Definition of done
 
 -  Relevant specs pass: `npm run jest:all` and/or `npm test`.
--  `npx eslint --config ./eslint.config.mjs` passes for the files you touched (no new
-   errors or warnings).
+-  `npx oxlint` passes for the files you touched (no new errors or warnings).
 -  `npx oxfmt --check` passes for the files you touched.
 -  Type-check your changes: `npm run check:types` should report no errors.
 -  `ROADMAP.md` is updated if the work changed a project's state.

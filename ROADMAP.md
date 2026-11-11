@@ -16,7 +16,7 @@ README goals and the current code; edit, reorder, or replace them as priorities 
 | --- | ------ | --------------------------------------------------------------------------------------- |
 | P7  | done   | Bring all pkg dependencies up to date.                                                  |
 | P8  | done   | Try swapping oxfmt in for prettier.                                                     |
-| P9  | idea   | Bring oxlint into the picture.                                                          |
+| P9  | done   | Bring oxlint into the picture.                                                          |
 | P10 | idea   | Replace jest with with vitest                                                           |
 | P11 | idea   | Kill jasmine, move those to vitest.                                                     |
 | P12 | idea   | Switch to one of the mono repo systems so we can lock down cross "package" dependencies |
@@ -107,8 +107,7 @@ on TypeScript 6.0.x.
 -  [x] Turn off `no-deprecated`, `no-unnecessary-condition`, `no-unnecessary-type-assertion` (they crash ts7-eslint)
 -  [x] DEP-13 (TS 7 swap): `tsc` 6.5× faster (2.39 s → 0.37 s); details in `doc/dependencyUpgrade.md`
 -  [x] Final bumps: `eslint-plugin-import-x` 4.18.1, `globals` 17.14.0; cleared the 2 high advisories (`braces`, `picomatch`)
--  [ ] Follow-up, not blocking P7: re-enable `no-deprecated`, `no-unnecessary-condition` and `no-unnecessary-type-assertion`
-       if `ts7-eslint` is fixed. If the linter is replaced first (P9), this item goes away with it.
+-  [x] Follow-up: the three rules are on again, under oxlint rather than `ts7-eslint` (P9).
 
 ## P8: Try swapping oxfmt in for prettier
 
@@ -143,7 +142,14 @@ to 2795, exactly the 454 `prettier/prettier` findings that no longer exist.
 
 ### Goal
 
-oxlint is being touted as the newer bester faster eslint.  It is not clear if the right answer is: completely cut over to using oxlint, staying entirely with eslint, or some hybrid approach.  We'd like to explore all three routes: Get timings and number of lint errors from all eslint and all oxlint.  If we go completely oxlint, do we have the same nmber of lint errors?  Do we get the same rule coverage with oxlint as without?  In a hybrid approach, do we put oxlint under eslint's control or vice versa?  Can oxlint use eslint rules to supplement those it ships with?  Do things like prettier, now oxfmt, provide lint rules of oxlint?  In short, we know nothing about the technical options for proceeding with an existing project.
+oxlint is being touted as the newer bester faster eslint. It is not clear if the right answer is:
+completely cut over to using oxlint, staying entirely with eslint, or some hybrid approach. We'd
+like to explore all three routes: Get timings and number of lint errors from all eslint and all
+oxlint. If we go completely oxlint, do we have the same number of lint errors? Do we get the same
+rule coverage with oxlint as without? In a hybrid approach, do we put oxlint under eslint's
+control or vice versa? Can oxlint use eslint rules to supplement those it ships with? Do things
+like prettier, now oxfmt, provide lint rules of oxlint? In short, we know nothing about the
+technical options for proceeding with an existing project.
 
 ### Done when
 
@@ -151,16 +157,93 @@ We have decided which path to pursue and have done it.
 
 ### Current state
 
-running entirely with the latest eslint.
+**Done 2026-11-10.** Complete cutover. `eslint`, `eslint-config-prettier`,
+`eslint-plugin-import-x`, `ts7-eslint`, `globals` and the unused local
+`eslint-plugin-custom-rules` are gone, along with `eslint.config.mjs` and `build/eslint/`.
+`oxlint` 1.93 reads `.oxlintrc.jsonc`; type-aware rules run through `oxlint-tsgolint`
+(`"options": { "typeAware": true }`), which needs the TypeScript 7 toolchain from DEP-13.
+
+`.oxlintrc.jsonc` was derived from `npx @oxlint/migrate --type-aware eslint.config.mjs` but is
+hand-written: the generated file lost the typescript-eslint sets (it only converts explicit
+`rules` entries, not `extends` presets) and filled the output with ~190 `@stylistic/*` entries
+from `eslint-config-prettier` that oxlint has no rules for. Each group's rules are therefore
+listed explicitly, extracted from `eslint --print-config` for one file per group.
+
+**Timings** (whole repo, warm, this laptop):
+
+| Command                             | ESLint 10 + ts7-eslint | oxlint 1.93 + tsgolint |
+| ----------------------------------- | ---------------------- | ---------------------- |
+| whole tree (647-649 `source/**/*.ts`) | 6.8-7.9 s            | 0.5 s (1.2 s cold)     |
+| `lint:ci` subset (204 files)        | 2.3 s                  | 0.35 s                 |
+
+**Findings.** 2795 under ESLint, 1785 under oxlint, and the difference is fully accounted for:
+
+-  `sort-keys` 2351 -> 1285. The same 136 files, no file added or dropped: oxlint reports one
+   finding per unsorted object, ESLint reported one per misplaced key.
+-  All 18 other rules that both linters run report **identical** counts (439 findings in total).
+-  `+46 no-unnecessary-condition` and `+15 no-unnecessary-type-assertion`: re-enabled, see below.
+   `no-deprecated` reports 0, as it did on TypeScript 6.
+-  `-3 import-x/order` and `-2` parse errors on `source/basic/extractor/*New.ts` (now in
+   `ignorePatterns`, matching the `tsconfig.json` exclude).
+
+**Rule coverage.** Of the 101 rules the ESLint config enabled, 90 exist in oxlint under the
+`typescript/` or `import/` name, and 8 more exist as the plain core rule (oxlint folds the
+TypeScript handling into `no-unused-vars`, `no-empty-function` and the like instead of shipping
+a typescript-eslint extension rule). Three have no equivalent:
+
+-  `import-x/order` - "won't be implemented", and `@oxlint/migrate --details` gives the reason:
+   "Not implementing this in Oxlint as its behavior is covered very well by Oxfmt's import
+   sorting." So the replacement is the formatter's `sortImports` option, not a lint rule. It is
+   off by default and not enabled here; see the follow-up below. The rule was reporting 3
+   findings, and import grouping is part of `doc/codingStyle.md`.
+-  `import-x/no-extraneous-dependencies` - was on for the `basic`/`valid` Jest files only, 0 findings.
+-  `@typescript-eslint/typedef` - every one of its options was `false`, so it reported nothing.
+
+The three rules DEP-13 had to switch off because `ts7-eslint` crashed in them
+(`no-deprecated`, `no-unnecessary-condition`, `no-unnecessary-type-assertion`) are on again:
+oxlint-tsgolint runs all three without crashing. That closes the P7 follow-up item.
+
+**Answers to the questions in the goal.** A hybrid is possible in either direction
+(`eslint-plugin-oxlint` switches off the ESLint rules oxlint covers, and oxlint can load real
+ESLint plugins through `jsPlugins`), but nothing here needed it: one `import/order` rule is not
+worth keeping a second linter, a second config and ~75 packages for. oxfmt contributes no lint
+rules; it just means no formatting rules have to be switched off, so `eslint-config-prettier`
+went away with ESLint.
+
+Two things were deliberately **not** done, to keep the cutover mechanical:
+
+-  oxlint turns its `unicorn` and `oxc` plugins on by default, and defaults the `correctness`
+   category to on. `.oxlintrc.jsonc` switches all of that off, so the configuration is exactly
+   what ESLint was running. Turning any of it on is a separate decision.
+-  The 70 `eslint-disable` comments in `source/` are left as they are. oxlint honours them
+   (`respectEslintDisableDirectives` defaults to true); rewriting them to `oxlint-disable` would
+   touch ~40 files for no behaviour change.
+
+One script change that is not a straight translation: `lint` and `lint:all` no longer pass
+`--fix`, and the fixing form moved to a new `lint:fix`. oxlint has fixers for rules ESLint only
+had suggestions for, so `oxlint --fix source` rewrites 140 files (1785 findings down to 712):
+`sort-keys` reorders object literals, and `no-unnecessary-type-assertion` strips `!` and
+`as any`. The result still type-checks and the suites still pass, but that is not a diff anyone
+should get from a `lint` command.
 
 ### Next actions
 
--  [ ] Measure eslint perfomrance for the whole repo
--  [ ] Measure oxlint perfomrance for the whole repo
--  [ ] Explore recommended options for moving to use oxlint and fill out more actions from there.
-
-
-
+-  [x] Measure eslint performance for the whole repo.
+-  [x] Measure oxlint performance for the whole repo.
+-  [x] Explore the options (full cutover / stay / hybrid) and pick one: full cutover.
+-  [ ] Optional: decide whether to turn on `correctness`, `unicorn` and `oxc`, and triage what
+       they report.
+-  [ ] Optional: replace `import-x/order` with oxfmt's `sortImports` (off by default; it takes
+       `groups`, `customGroups`, `internalPattern`, `newlinesBetween` and `partitionByNewline`,
+       and uses the `eslint-plugin-perfectionist/sort-imports` algorithm). It enforces the same
+       thing but as a format, so it rewrites rather than reports: `sortImports: true` changes
+       394 of 649 files, and `{ partitionByNewline: true, newlinesBetween: false }`, which keeps
+       the blank-line groups the code already has, changes 317. Note `partitionByNewline: true`
+       and `newlinesBetween: true` are rejected together. There is no zero-diff setting, so this
+       wants its own format-only commit, like the 91 files left over from P8.
+-  [ ] Optional: `oxlint --type-check` can also report TypeScript compiler diagnostics, which
+       could merge the Lint and Type check CI jobs. Not done: `npm run check:types` is the
+       documented command and `tsc` is already 0.8 s.
 
 ## P1: Finish the `basic` extractor rewrite
 

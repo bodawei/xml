@@ -12,9 +12,10 @@
       "build:flat": "node --no-experimental-strip-types --import ./build/babelRegister.mjs -r tsconfig-paths/register ./build/runTs.cjs ./source/node/@test/build/buildFlatDocs.ts ./source/conformance/@test/data/xmlconf.json ./source/node/@test/data/flatDocs.json",
       "check": "oxfmt 'source/attFixer/**/*.ts' 'source/conformance/**/*.ts' 'source/expand/**/*.ts' 'source/pToken/**/*.ts' 'source/wellformedness/**/*.ts' 'source/stringify/**/*.ts' 'source/xToken/**/*.ts'",
       "check:types": "./node_modules/typescript/bin/tsc",
-      "lint": "eslint --fix --config ./eslint.config.mjs source",
-      "lint:all": "eslint --fix --config ./eslint.config.mjs source/basic source/valid",
-      "lint:ci": "eslint --config ./eslint.config.mjs --max-warnings 0 source/valid source/token source/node source/demo",
+      "lint": "oxlint source",
+      "lint:all": "oxlint source/basic source/valid",
+      "lint:ci": "oxlint --max-warnings 0 source/valid source/token source/node source/demo",
+      "lint:fix": "oxlint --fix source",
       "jest:all": "jest --config ./jest.config.js --coverage",
       "test:jasmine": "node --no-experimental-strip-types --import ./build/babelRegister.mjs -r tsconfig-paths/register ./node_modules/.bin/jasmine --config=./build/jasmine.json",
       "jest": "jest --config ./jest.config.js --watch --coverage",
@@ -29,30 +30,18 @@
       "@types/jasmine": "7.0.0",
       "@types/jest": "30.0.0",
       "@types/node": "26.6.6",
-      "eslint": "10.14.0",
-      "eslint-config-prettier": "10.1.8",
-      "eslint-plugin-custom-rules": "file:build/eslint/eslint-plugin-custom-rules",
-      "eslint-plugin-import-x": "4.18.1",
-      "globals": "17.14.0",
       "jasmine": "7.0.0",
       "jasmine-core": "7.0.2",
       "jest": "30.5.2",
       "nodemon": "3.1.14",
       "oxfmt": "^0.77.0",
+      "oxlint": "^1.93.0",
+      "oxlint-tsgolint": "^7.0.2006",
       "properties-parser": "0.6.0",
-      "ts7-eslint": "0.2.1",
       "tsconfig-paths": "4.2.0",
       "typescript": "7.0.2"
    },
    "dependencies": {
       "bcp47-validate": "1.0.0"
-   },
-   "overrides": {
-      "@typescript-eslint/parser": {
-         "typescript": "$typescript"
-      },
-      "@typescript-eslint/eslint-plugin": {
-         "typescript": "$typescript"
-      }
    }
 }

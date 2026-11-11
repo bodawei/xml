@@ -1,0 +1,331 @@
+/* Copyright ® 2026 by 柏大衛. All rights reserved. */
+
+// oxlint configuration (P9). This replaces eslint.config.mjs; the rule groups, severities and
+// options are carried over from it one for one.
+//
+// Differences from the ESLint config it came from:
+//
+// -  Rule names: '@typescript-eslint/x' is 'typescript/x', and 'import-x/x' is 'import/x'. Where
+//    typescript-eslint only extended a core rule (no-unused-vars, no-empty-function and the
+//    like), oxlint folds the TypeScript handling into the core rule, so the core name is used.
+// -  Three rules have no oxlint equivalent and are gone: 'import-x/order' (3 findings; oxc's
+//    stated reason is that oxfmt's 'sortImports' covers it, which is off by default here -
+//    see ROADMAP P9),
+//    'import-x/no-extraneous-dependencies' (0 findings) and '@typescript-eslint/typedef' (all of
+//    its options were false, so it reported nothing).
+// -  The three rules the old config had to switch off because ts7-eslint crashed in them
+//    (no-deprecated, no-unnecessary-condition, no-unnecessary-type-assertion) are on again:
+//    oxlint runs them through oxlint-tsgolint, which does not crash.
+// -  'plugins' lists exactly the plugins the ESLint config used. oxlint turns 'unicorn' and 'oxc'
+//    on by default; both are left out so this cutover reports the same findings as ESLint did.
+//    Turning them on is a separate decision (ROADMAP P9).
+// -  'eslint-config-prettier' is gone. It existed to switch off ESLint's formatting rules, and
+//    none of them are enabled here. oxfmt still owns formatting (P8).
+//
+// Type-aware rules (the typescript-eslint 'type-checked' sets) run through oxlint-tsgolint, which
+// reads tsconfig.json itself. Do not add a '--tsconfig' flag: type-aware linting ignores it.
+{
+   "$schema": "./node_modules/oxlint/configuration_schema.json",
+
+   "plugins": ["eslint", "typescript", "import"],
+
+   // The ESLint config enabled rules only through the typescript-eslint sets, never a category of
+   // its own, so every category is off and each rule below is listed explicitly.
+   "categories": {
+      "correctness": "off",
+   },
+
+   "options": {
+      // Needs oxlint-tsgolint, and a TypeScript 7 toolchain (DEP-13).
+      "typeAware": true,
+   },
+
+   // 'env: browser, es6, node' in the old configs.
+   "env": {
+      "browser": true,
+      "builtin": true,
+      "node": true,
+   },
+
+   "ignorePatterns": [
+      // Unfinished rewrite (ROADMAP P1); excluded from tsconfig.json, so type-aware rules cannot
+      // see it either.
+      "source/basic/extractor/*New.ts",
+   ],
+
+   "overrides": [
+      // basic and valid: the import rules and typescript-eslint's recommended-type-checked set.
+      {
+         "files": ["source/basic/**/*.ts", "source/valid/**/*.ts"],
+         "rules": {
+            "import/no-duplicates": "error",
+            "no-array-constructor": "error",
+            "no-unused-expressions": [
+               "error",
+               { "allowShortCircuit": false, "allowTaggedTemplates": false, "allowTernary": false },
+            ],
+            "no-unused-vars": [
+               "error",
+               { "args": "after-used", "ignoreRestSiblings": true, "vars": "all" },
+            ],
+            "no-var": "error",
+            "prefer-const": "error",
+            "prefer-rest-params": "error",
+            "prefer-spread": "error",
+            "typescript/await-thenable": "error",
+            "typescript/ban-ts-comment": "error",
+            "typescript/no-array-delete": "error",
+            "typescript/no-base-to-string": "error",
+            "typescript/no-duplicate-enum-values": "error",
+            "typescript/no-duplicate-type-constituents": "error",
+            "typescript/no-empty-object-type": "error",
+            "typescript/no-explicit-any": "error",
+            "typescript/no-extra-non-null-assertion": "error",
+            "typescript/no-floating-promises": "error",
+            "typescript/no-for-in-array": "error",
+            "typescript/no-implied-eval": "error",
+            "typescript/no-misused-new": "error",
+            "typescript/no-misused-promises": "error",
+            "typescript/no-namespace": "error",
+            "typescript/no-non-null-asserted-optional-chain": "error",
+            "typescript/no-redundant-type-constituents": "error",
+            "typescript/no-require-imports": "error",
+            "typescript/no-this-alias": "error",
+            "typescript/no-unnecessary-type-assertion": "error",
+            "typescript/no-unnecessary-type-constraint": "error",
+            "typescript/no-unsafe-argument": "error",
+            "typescript/no-unsafe-assignment": "error",
+            "typescript/no-unsafe-call": "error",
+            "typescript/no-unsafe-declaration-merging": "error",
+            "typescript/no-unsafe-enum-comparison": "error",
+            "typescript/no-unsafe-function-type": "error",
+            "typescript/no-unsafe-member-access": "error",
+            "typescript/no-unsafe-return": "error",
+            "typescript/no-unsafe-unary-minus": "error",
+            "typescript/no-wrapper-object-types": "error",
+            "typescript/only-throw-error": "error",
+            "typescript/prefer-as-const": "error",
+            "typescript/prefer-namespace-keyword": "error",
+            "typescript/prefer-promise-reject-errors": "error",
+            "typescript/require-await": "error",
+            "typescript/restrict-plus-operands": "error",
+            "typescript/restrict-template-expressions": [
+               "error",
+               {
+                  "allowAny": false,
+                  "allowBoolean": false,
+                  "allowNullish": false,
+                  "allowNumber": true,
+                  "allowRegExp": false,
+               },
+            ],
+            "typescript/triple-slash-reference": [
+               "error",
+               { "lib": "never", "path": "never", "types": "never" },
+            ],
+            "typescript/unbound-method": ["error", { "ignoreStatic": true }],
+         },
+      },
+      {
+         "files": [
+            "source/basic/**/*.jest.ts",
+            "source/basic/**/beforeJest.ts",
+            "source/valid/**/*.jest.ts",
+            "source/valid/**/beforeJest.ts",
+         ],
+         "rules": {
+            "no-empty-function": "off",
+            "typescript/no-non-null-assertion": "off",
+            "typescript/no-unsafe-argument": "off",
+            "typescript/no-unsafe-call": "off",
+         },
+      },
+
+      // The rest of the modules: recommended + stylistic + strict, all type-checked.
+      {
+         "files": [
+            "source/flat/**/*.ts",
+            "source/xToken/**/*.ts",
+            "source/attFixer/**/*.ts",
+            "source/conformance/**/*.ts",
+            "source/demo/**/*.ts",
+            "source/expand/**/*.ts",
+            "source/pToken/**/*.ts",
+            "source/sToken/**/*.ts",
+            "source/wellformedness/**/*.ts",
+            "source/node/**/PToXTokenStream*.ts",
+            "source/**/charRef*.ts",
+            "source/**/parameterEntityReference*.ts",
+            "source/token/bridge/section.ts",
+            "source/token/conditional.ts",
+            "source/token/common/externalId.ts",
+         ],
+         "rules": {
+            "default-param-last": "error",
+            "no-array-constructor": "error",
+            "no-dupe-class-members": "error",
+            "no-empty-function": ["error", { "allow": ["arrowFunctions", "functions", "methods"] }],
+            "no-unused-expressions": [
+               "error",
+               { "allowShortCircuit": false, "allowTaggedTemplates": false, "allowTernary": false },
+            ],
+            "no-unused-vars": [
+               "error",
+               { "args": "after-used", "ignoreRestSiblings": true, "vars": "all" },
+            ],
+            "no-use-before-define": [
+               "error",
+               { "classes": true, "functions": true, "variables": true },
+            ],
+            "no-useless-constructor": "error",
+            "no-var": "error",
+            "prefer-const": "error",
+            "prefer-rest-params": "error",
+            "prefer-spread": "error",
+            "sort-keys": [
+               "error",
+               "asc",
+               { "caseSensitive": false, "minKeys": 2, "natural": true },
+            ],
+            "typescript/adjacent-overload-signatures": "error",
+            "typescript/array-type": ["error", { "default": "generic" }],
+            "typescript/await-thenable": "error",
+            "typescript/ban-ts-comment": "error",
+            "typescript/ban-tslint-comment": "error",
+            "typescript/class-literal-property-style": "error",
+            "typescript/consistent-generic-constructors": "error",
+            "typescript/consistent-indexed-object-style": "error",
+            "typescript/consistent-type-assertions": [
+               "error",
+               { "assertionStyle": "as", "objectLiteralTypeAssertions": "never" },
+            ],
+            "typescript/consistent-type-definitions": "error",
+            "typescript/dot-notation": "error",
+            "typescript/no-array-delete": "error",
+            "typescript/no-base-to-string": "error",
+            "typescript/no-confusing-non-null-assertion": "error",
+            "typescript/no-confusing-void-expression": "error",
+            "typescript/no-deprecated": "error",
+            "typescript/no-duplicate-enum-values": "error",
+            "typescript/no-duplicate-type-constituents": "error",
+            "typescript/no-dynamic-delete": "error",
+            "typescript/no-empty-interface": "error",
+            "typescript/no-empty-object-type": "error",
+            "typescript/no-explicit-any": "error",
+            "typescript/no-extra-non-null-assertion": "error",
+            "typescript/no-extraneous-class": "error",
+            "typescript/no-floating-promises": "error",
+            "typescript/no-for-in-array": "error",
+            "typescript/no-implied-eval": "error",
+            "typescript/no-inferrable-types": "error",
+            "typescript/no-invalid-void-type": "error",
+            "typescript/no-meaningless-void-operator": "error",
+            "typescript/no-misused-new": "error",
+            "typescript/no-misused-promises": "error",
+            "typescript/no-mixed-enums": "error",
+            "typescript/no-namespace": "error",
+            "typescript/no-non-null-asserted-nullish-coalescing": "error",
+            "typescript/no-non-null-asserted-optional-chain": "error",
+            "typescript/no-non-null-assertion": "error",
+            "typescript/no-redundant-type-constituents": "error",
+            "typescript/no-require-imports": "error",
+            "typescript/no-this-alias": "error",
+            "typescript/no-unnecessary-boolean-literal-compare": "error",
+            "typescript/no-unnecessary-condition": "error",
+            "typescript/no-unnecessary-template-expression": "error",
+            "typescript/no-unnecessary-type-arguments": "error",
+            "typescript/no-unnecessary-type-assertion": "error",
+            "typescript/no-unnecessary-type-constraint": "error",
+            "typescript/no-unnecessary-type-conversion": "error",
+            "typescript/no-unnecessary-type-parameters": "error",
+            "typescript/no-unsafe-argument": "error",
+            "typescript/no-unsafe-assignment": "error",
+            "typescript/no-unsafe-call": "error",
+            "typescript/no-unsafe-declaration-merging": "error",
+            "typescript/no-unsafe-enum-comparison": "error",
+            "typescript/no-unsafe-function-type": "error",
+            "typescript/no-unsafe-member-access": "error",
+            "typescript/no-unsafe-return": "error",
+            "typescript/no-unsafe-unary-minus": "error",
+            "typescript/no-useless-default-assignment": "error",
+            "typescript/no-wrapper-object-types": "error",
+            "typescript/non-nullable-type-assertion-style": "error",
+            "typescript/only-throw-error": "error",
+            "typescript/parameter-properties": "error",
+            "typescript/prefer-as-const": "error",
+            "typescript/prefer-find": "error",
+            "typescript/prefer-for-of": "error",
+            "typescript/prefer-function-type": "error",
+            "typescript/prefer-includes": "error",
+            "typescript/prefer-literal-enum-member": "error",
+            "typescript/prefer-namespace-keyword": "error",
+            "typescript/prefer-nullish-coalescing": "error",
+            "typescript/prefer-optional-chain": "error",
+            "typescript/prefer-promise-reject-errors": "error",
+            "typescript/prefer-reduce-type-parameter": "error",
+            "typescript/prefer-regexp-exec": "error",
+            "typescript/prefer-return-this-type": "error",
+            "typescript/prefer-string-starts-ends-with": "error",
+            "typescript/prefer-ts-expect-error": "error",
+            "typescript/related-getter-setter-pairs": "error",
+            "typescript/restrict-plus-operands": "error",
+            "typescript/restrict-template-expressions": [
+               "error",
+               {
+                  "allowAny": false,
+                  "allowBoolean": false,
+                  "allowNullish": false,
+                  "allowNumber": true,
+                  "allowRegExp": false,
+               },
+            ],
+            "typescript/return-await": "error",
+            "typescript/switch-exhaustiveness-check": "error",
+            "typescript/triple-slash-reference": [
+               "error",
+               { "lib": "never", "path": "never", "types": "never" },
+            ],
+            "typescript/unbound-method": ["error", { "ignoreStatic": true }],
+            "typescript/unified-signatures": "error",
+            "typescript/use-unknown-in-catch-callback-variable": "error",
+         },
+      },
+      {
+         "files": [
+            "source/flat/**/*.test.ts",
+            "source/flat/**/*.jest.ts",
+            "source/xToken/**/*.test.ts",
+            "source/xToken/**/*.jest.ts",
+            "source/attFixer/**/*.test.ts",
+            "source/attFixer/**/*.jest.ts",
+            "source/conformance/**/*.test.ts",
+            "source/conformance/**/*.jest.ts",
+            "source/demo/**/*.test.ts",
+            "source/demo/**/*.jest.ts",
+            "source/expand/**/*.test.ts",
+            "source/expand/**/*.jest.ts",
+            "source/pToken/**/*.test.ts",
+            "source/pToken/**/*.jest.ts",
+            "source/sToken/**/*.test.ts",
+            "source/sToken/**/*.jest.ts",
+            "source/wellformedness/**/*.test.ts",
+            "source/wellformedness/**/*.jest.ts",
+            "source/node/**/PToXTokenStream*.test.ts",
+            "source/node/**/PToXTokenStream*.jest.ts",
+            "source/**/charRef*.test.ts",
+            "source/**/charRef*.jest.ts",
+            "source/**/parameterEntityReference*.test.ts",
+            "source/**/parameterEntityReference*.jest.ts",
+         ],
+         "env": {
+            "jasmine": true,
+            "jest": true,
+         },
+         "rules": {
+            "no-empty-function": "off",
+            "typescript/no-non-null-assertion": "off",
+            "typescript/no-unsafe-call": "off",
+         },
+      },
+   ],
+}
