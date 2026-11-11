@@ -15,11 +15,6 @@ class ParameterEntityStartPToken {
    constructor(peReferencePToken: ParameterEntityReferencePToken) {
       this.referencePToken = peReferencePToken;
    }
-
 }
 
-
-export {
-   PARAMETER_ENTITY_START_PTOKEN,
-   ParameterEntityStartPToken,
-};
+export { PARAMETER_ENTITY_START_PTOKEN, ParameterEntityStartPToken };

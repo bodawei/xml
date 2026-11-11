@@ -1,7 +1,7 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
+import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import {
    GeneralEntityDeclarationPToken,
@@ -9,7 +9,6 @@ import {
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
 } from 'pToken';
-import { toSToken } from 'basic';
 import {
    ElementStartPToken,
    ElementEmptyPToken,
@@ -19,7 +18,6 @@ import {
 } from 'token';
 import { makeParameterExternalEntityDeclaration, makeParameterEntityReference } from 'token-test';
 
-import { wellFormedErrorCodes } from '../error/wellFormedError';
 import {
    scanAttributeValues,
    checkGeneralEntity,
@@ -27,6 +25,7 @@ import {
    isParamEntityExternal,
    CheckState,
 } from '../checkUtils';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
 
 const WFEID = wellFormedErrorCodes.id;
 

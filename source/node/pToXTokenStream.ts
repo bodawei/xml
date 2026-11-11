@@ -1,6 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { Transform } from 'stream';
+
 import { ParseToken } from 'pToken';
 import { convertPTokenToXToken } from 'xToken';
 
@@ -18,7 +19,7 @@ class PToXTokenStream extends Transform {
 
    _transform(token: ParseToken, encoding: string, done: () => void): void {
       const result = convertPTokenToXToken(token);
-      
+
       this.push(result);
 
       done();

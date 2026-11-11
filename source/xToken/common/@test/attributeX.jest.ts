@@ -4,8 +4,8 @@ import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { AttributePToken } from 'token';
 
-import { AttributeX } from '../attributeX';
 import { TextXToken } from '../../token/textXToken';
+import { AttributeX } from '../attributeX';
 import { cloneLiteralValueX, makeLiteralValueX } from '../literalValueX';
 
 jest.mock('../literalValueX');

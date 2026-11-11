@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
+import { STokenSource, toSToken } from 'basic';
 import { TextPToken } from 'pToken';
-import { STokenSource,  toSToken } from 'basic';
 
 import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
 
@@ -18,7 +18,7 @@ describe('docTypeStart (integration)', () => {
             externalTypeSpace: toSToken(' '),
             system: {
                openQuote: toSToken('"'),
-               value: [ new TextPToken({ text: toSToken('sys.dtd') }) ],
+               value: [new TextPToken({ text: toSToken('sys.dtd') })],
                closeQuote: toSToken('"'),
             },
          },
@@ -28,17 +28,15 @@ describe('docTypeStart (integration)', () => {
    });
 
    describe('parse()', () => {
-
       it('parses the doctype start', (done) => {
          const source = new STokenSource();
          source.addText('rootElement SYSTEM "sys.dtd" [');
          source.endText();
 
-         parseDocTypeStart(source, { open: toSToken('<!'), } as any, (parsing) => {
+         parseDocTypeStart(source, { open: toSToken('<!') } as any, (parsing) => {
             expect(parsing).toEqualRangeless(docTypeStartPToken);
             done();
          });
       });
-
    });
 });

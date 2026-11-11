@@ -1,6 +1,5 @@
 import { EntityId } from 'basic';
 /* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
-
 import { toSToken } from 'basic';
 import { GeneralEntityReferencePToken, ParameterEntityReferencePToken } from 'pToken';
 

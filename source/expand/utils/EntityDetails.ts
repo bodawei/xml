@@ -12,9 +12,9 @@ import {
 } from 'pToken';
 import { EntityValuePToken, ElidedEntityDeclarationPToken } from 'token';
 
+import { OpaqueEntityLoc } from '../types';
 import { ExternalDtdSubsetPseudoToken } from './ExternalDtdSubsetPseudoToken';
 import { lookupPredefinedEntityValue } from './lookupPredefinedEntityValue';
-import { OpaqueEntityLoc } from '../types';
 
 interface LoadingResult {
    details: PrivateGEDetails | PrivatePEDetails | undefined;

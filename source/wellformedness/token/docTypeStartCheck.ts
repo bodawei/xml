@@ -3,8 +3,8 @@
 import { ConformanceVersion, Collector } from 'basic';
 import { DocTypeStartPToken } from 'token';
 
-import { nameCheck } from '../common/nameCheck';
 import { externalIdCheck } from '../common/externalIdCheck';
+import { nameCheck } from '../common/nameCheck';
 import { wellFormedErrorCodes } from '../error/wellFormedError';
 
 const WFEID = wellFormedErrorCodes.id;

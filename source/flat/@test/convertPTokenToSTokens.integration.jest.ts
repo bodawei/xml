@@ -27,9 +27,9 @@ import {
    makeUnknownDeclaration,
    makeXmlDecl,
 } from 'token-test';
+import { Warning } from 'wellformedness'; // ick
 
 import { convertPTokenToSTokens } from '../convertPTokenToSTokens';
-import { Warning } from 'wellformedness'; // ick
 
 describe('convertPTokenToSTokens (integration)', () => {
    it('returns an AttListDeclaration', () => {

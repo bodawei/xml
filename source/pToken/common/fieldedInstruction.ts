@@ -1,10 +1,10 @@
 /* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
-import { TEXT_PTOKEN } from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'basic';
+import { TEXT_PTOKEN } from 'pToken';
 
-import { InstructionStart } from '../bridge/instruction';
 import literal from '../../token/common/literal';
+import { InstructionStart } from '../bridge/instruction';
 
 /**********************************************************************\
  An FieldedInstruction is actually just the very common parts that

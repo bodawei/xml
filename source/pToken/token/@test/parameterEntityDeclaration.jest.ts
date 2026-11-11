@@ -1,9 +1,8 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { TextPToken } from 'pToken';
 import { toSToken } from 'basic';
+import { TextPToken } from 'pToken';
 
 import {
    PARAMETER_ENTITY_DECLARATION_PTOKEN,

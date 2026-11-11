@@ -4,12 +4,10 @@ import { describe, expect, it } from '@jest/globals';
 import { STokenSource, toSToken } from 'basic';
 import { MockSTokenSource } from 'pToken-test';
 
-import * as peRefStuff from '../../token/parameterEntityReference';
 import * as textStuff from '../../../pToken/token/text';
-
+import * as peRefStuff from '../../token/parameterEntityReference';
 import { ParameterEntityReferencePToken } from '../../token/parameterEntityReference';
 import { TextPToken } from '../../token/text';
-
 import { parseUnexpanded, parseUnexpandedAfterPeRef } from '../parseUnexpanded';
 
 describe('parseUnexpanded (unit)', () => {

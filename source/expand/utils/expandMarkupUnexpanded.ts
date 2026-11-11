@@ -1,13 +1,12 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { doAsyncLoop, Problem } from 'basic';
-
+import { strOrBlank } from 'basic';
 import {
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    ParameterEntityReferencePToken,
    UnexpandedMarkupToken,
 } from 'pToken';
-import { strOrBlank } from 'basic';
 import {
    ElidedEntityDeclarationPToken,
    ParameterEntityStartPToken,

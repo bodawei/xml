@@ -2,14 +2,13 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
-import { ParamCollector } from 'basic-test';
 import { toSToken } from 'basic';
+import { ParamCollector } from 'basic-test';
 import { DocTypeStartPToken } from 'token';
 
 import { externalIdCheck } from '../../common/externalIdCheck';
 import { nameCheck } from '../../common/nameCheck';
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
-
 import { docTypeStartCheck } from '../docTypeStartCheck';
 
 jest.mock('../../common/nameCheck');

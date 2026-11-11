@@ -3,15 +3,15 @@
 import { STokenSource, toSToken } from 'basic';
 import { makeSTokenMaker } from 'pToken-test';
 
-import { DocTypeStartPToken } from '../docTypeStart';
 import { DocTypeEndPToken, parseDocTypeEnd } from '../docTypeEnd';
+import { DocTypeStartPToken } from '../docTypeStart';
 
 describe('docTypeEnd (integration)', () => {
    let docTypeEndPToken: DocTypeEndPToken;
    let startToken: DocTypeStartPToken;
 
    beforeEach(() => {
-      startToken = new DocTypeStartPToken({ open: toSToken('<!'), });
+      startToken = new DocTypeStartPToken({ open: toSToken('<!') });
       const makeSToken = makeSTokenMaker();
       docTypeEndPToken = new DocTypeEndPToken({
          docTypeStartPToken: startToken,
@@ -22,7 +22,6 @@ describe('docTypeEnd (integration)', () => {
    });
 
    describe('parse()', () => {
-
       it('produces a full PToken', (done) => {
          const source = new STokenSource();
          source.addText(']\t>');
@@ -33,7 +32,5 @@ describe('docTypeEnd (integration)', () => {
             done();
          });
       });
-
    });
-
 });

@@ -3,7 +3,6 @@
 import { SToken } from 'basic';
 
 import { Problem, ProblemConstructor, ProblemParam, ProblemPosition } from '../token/problem';
-
 import { Collector } from './collector';
 import { makeOffset } from './makeOffset';
 import { Offset } from './offset';

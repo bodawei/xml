@@ -11,7 +11,6 @@ import {
 } from 'token';
 
 import { validityErrorCodes } from '../error/validityErrorCodes';
-
 import { ValidityState } from './validityState';
 
 const VID = validityErrorCodes.id;

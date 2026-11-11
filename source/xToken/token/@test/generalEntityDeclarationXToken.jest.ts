@@ -1,6 +1,7 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
+import { toSToken } from 'basic';
 import {
    CharRefPToken,
    ExternalIdP,
@@ -8,18 +9,17 @@ import {
    ParameterEntityReferencePToken,
    TextPToken,
 } from 'pToken';
-import { toSToken } from 'basic';
 import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
 
-import { ParameterEntityStartXToken } from '../../marker/parameterEntityStartXToken';
 import { ParameterEntityEndXToken } from '../../marker/parameterEntityEndXToken';
+import { ParameterEntityStartXToken } from '../../marker/parameterEntityStartXToken';
+import { CharRefXToken } from '../charRefXToken';
 import {
    GeneralEntityDeclarationXToken,
    GENERAL_ENTITY_DECLARATION_XTOKEN,
 } from '../generalEntityDeclarationXToken';
 import { ParameterEntityReferenceXToken } from '../parameterEntityReferenceXToken';
 import { TextXToken } from '../textXToken';
-import { CharRefXToken } from '../charRefXToken';
 
 describe('GeneralEntityDeclarationXToken()', () => {
    let pToken: GeneralEntityDeclarationPToken;

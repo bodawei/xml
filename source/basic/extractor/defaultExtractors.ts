@@ -1,10 +1,9 @@
 /* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
-import { Extractor } from './Extractor';
-
 import { AllExtractor } from './AllExtractor';
 import { CharExtractor } from './CharExtractor';
 import { DigitExtractor } from './DigitExtractor';
+import { Extractor } from './Extractor';
 import { MatchExtractor } from './MatchExtractor';
 import { MultiMatchExtractor } from './MultiMatchExtractor';
 import { PeekDecl } from './PeekDecl';

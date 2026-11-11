@@ -9,9 +9,8 @@ import {
 } from 'pToken';
 import { LiteralValuePToken } from 'token';
 
-import { charCheck } from '../common/charCheck';
-
 import { checkMap } from '../checkMap';
+import { charCheck } from '../common/charCheck';
 
 function literalValueCheck(
    pToken: LiteralValuePToken,

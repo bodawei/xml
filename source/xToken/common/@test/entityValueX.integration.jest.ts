@@ -13,7 +13,6 @@ import { ParameterEntityStartXToken } from '../../marker/parameterEntityStartXTo
 import { CharRefXToken } from '../../token/charRefXToken';
 import { ParameterEntityReferenceXToken } from '../../token/parameterEntityReferenceXToken';
 import { TextXToken } from '../../token/textXToken';
-
 import { makeEntityValueX } from '../entityValueX';
 
 describe('entityValue (integration)', () => {

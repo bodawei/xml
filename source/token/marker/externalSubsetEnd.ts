@@ -11,7 +11,4 @@ class ExternalSubsetEndToken {
    public readonly type: typeof EXTERNAL_SUBSET_END_TOKEN = EXTERNAL_SUBSET_END_TOKEN;
 }
 
-export {
-   EXTERNAL_SUBSET_END_TOKEN,
-   ExternalSubsetEndToken
-};
+export { EXTERNAL_SUBSET_END_TOKEN, ExternalSubsetEndToken };

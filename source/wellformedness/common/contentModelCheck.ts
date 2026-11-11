@@ -1,11 +1,10 @@
 /* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
 import { Collector, ConformanceVersion } from 'basic';
-import { ContentModelP, isContentModelP } from 'pToken';
 import { strOrBlank } from 'basic';
+import { ContentModelP, isContentModelP } from 'pToken';
 
 import { wellFormedErrorCodes } from '../error/wellFormedError';
-
 import { nameCheck } from './nameCheck';
 
 const WFEID = wellFormedErrorCodes.id;

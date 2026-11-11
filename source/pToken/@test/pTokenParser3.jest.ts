@@ -2,8 +2,10 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { CONFORMANCE_VERSION, ENTITY_ID, EntityId, ConformanceVersion } from 'basic';
-import { ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, ParseToken, ParseType } from 'pToken';
 import { SToken, STokenSource } from 'basic';
+import { ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, ParseToken, ParseType } from 'pToken';
+// import { SToken, toSToken } from 'basic';
+import { MockSTokenSource } from 'pToken-test';
 import {
    CONDITIONAL_START_PTOKEN,
    CONDITIONAL_END_PTOKEN,
@@ -32,17 +34,12 @@ import {
    makeSpace,
 } from 'token-test';
 
-// import { SToken, toSToken } from 'basic';
-import { MockSTokenSource } from 'pToken-test';
-
 import { parseXmlDecl, parsePlainInstruction } from '../bridge/instruction';
+import { PTokenParser } from '../pTokenParser3';
 import { parseCharRef } from '../token/charRef';
 import { parseGeneralEntityReference } from '../token/generalEntityReference';
 import { parseParameterEntityReference } from '../token/parameterEntityReference';
-
 import * as peRef from '../token/parameterEntityReference';
-
-import { PTokenParser } from '../pTokenParser3';
 
 jest.mock('../../token/comment');
 jest.mock('../../token/elementStart');

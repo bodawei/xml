@@ -1,13 +1,13 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, Collector } from 'basic';
-import { InstructionField, TextDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'basic';
+import { InstructionField, TextDeclarationPToken } from 'pToken';
 
 import { charCheck } from '../common/charCheck';
 import { checkSpaceProblems, checkSpaces, checkVersionString } from '../common/xmlTextDeclUtils';
-import { wellFormedErrorCodes } from '../error/wellFormedError';
 import { fatalErrorCodes } from '../error/fatalErrorCodes';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
 
 const FEID = fatalErrorCodes.id;
 const WFEID = wellFormedErrorCodes.id;

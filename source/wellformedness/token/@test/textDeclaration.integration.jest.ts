@@ -2,13 +2,12 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, ProblemCollector } from 'basic';
-import { parseTextDeclaration } from 'pToken';
 import { STokenSource, toSToken } from 'basic';
+import { parseTextDeclaration } from 'pToken';
 
+import { InstructionStart } from '../../../pToken/bridge/instruction';
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { WellFormedError } from '../../error/wellFormedError';
-import { InstructionStart } from '../../../pToken/bridge/instruction';
-
 import { textDeclarationCheck } from '../textDeclarationCheck';
 
 const WFEID = wellFormedErrorCodes.id;

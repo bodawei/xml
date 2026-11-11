@@ -1,6 +1,7 @@
 /* Copyright ® 2018-220 by 柏大衛. All rights reserved. */
 
 import { EntityId, Range } from 'basic';
+import { SToken, toSToken } from 'basic';
 import {
    AttListDeclarationPToken,
    CharRefPToken,
@@ -16,8 +17,7 @@ import {
    TextPToken,
    ContentModelP,
    TEXT_PTOKEN,
- } from 'pToken';
-import { SToken, toSToken } from 'basic';
+} from 'pToken';
 import {
    CdataPToken,
    CommentPToken,
@@ -29,7 +29,6 @@ import {
    DocTypeStartPToken,
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
-   
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,
    ParameterEntityEndPToken,
@@ -38,6 +37,7 @@ import {
    CharDataPToken,
    DeclarationPToken,
 } from 'token';
+
 import { AttrValue } from '../../token/common/attribute';
 import { ConditionalEndPToken } from '../conditionalEnd';
 
@@ -46,7 +46,7 @@ const RANGE = new Range(new EntityId(BLANK_ORIGIN), 0, 0, 0, 1, 0, 1);
 
 function makeInsertedRange() {
    return new Range(RANGE);
-};
+}
 
 function makeAttListDeclaration(type = 'CDATA'): AttListDeclarationPToken {
    return new AttListDeclarationPToken({
@@ -140,7 +140,7 @@ function makeNotationDeclaration(): NotationDeclarationPToken {
       declTypeSpace: toSToken(' '),
       name: toSToken('notationName'),
       nameSpace: toSToken(' '),
-      externalId: { },
+      externalId: {},
       externalIdSpace: toSToken(' '),
       close: toSToken('>'),
    });
@@ -170,8 +170,10 @@ function makeElementStart(): ElementStartPToken {
    });
 }
 
-
-function makeElementStartWithAttrValue(value: AttrValue, addedProps: Record<string, unknown> = {}): ElementStartPToken {
+function makeElementStartWithAttrValue(
+   value: AttrValue,
+   addedProps: Record<string, unknown> = {},
+): ElementStartPToken {
    return new ElementStartPToken({
       open: toSToken('<'),
       name: toSToken('elStart'),
@@ -180,13 +182,16 @@ function makeElementStartWithAttrValue(value: AttrValue, addedProps: Record<stri
          {
             name: toSToken('att1'),
             value,
-            ...addedProps
+            ...addedProps,
          },
       ],
    });
 }
 
-function makeElementEmptyWithAttrValue(value: AttrValue, addedProps: Record<string, unknown> = {}): ElementEmptyPToken {
+function makeElementEmptyWithAttrValue(
+   value: AttrValue,
+   addedProps: Record<string, unknown> = {},
+): ElementEmptyPToken {
    return new ElementEmptyPToken({
       open: toSToken('<'),
       name: toSToken('elStart'),
@@ -195,22 +200,31 @@ function makeElementEmptyWithAttrValue(value: AttrValue, addedProps: Record<stri
          {
             name: toSToken('att1'),
             value,
-            ...addedProps
+            ...addedProps,
          },
       ],
    });
 }
-function makeElementEmptyWithAttrValueFromString(value: string, origValue?: string, addedProps?: Record<string, unknown>): ElementEmptyPToken {
-   return makeElementEmptyWithAttrValue([
-      new TextPToken({ text: new SToken(value, origValue || value, []) }),
-   ], addedProps);
+function makeElementEmptyWithAttrValueFromString(
+   value: string,
+   origValue?: string,
+   addedProps?: Record<string, unknown>,
+): ElementEmptyPToken {
+   return makeElementEmptyWithAttrValue(
+      [new TextPToken({ text: new SToken(value, origValue || value, []) })],
+      addedProps,
+   );
 }
 
-
-function makeElementStartWithAttrValueFromString(value: string, origValue?: string, addedProps?: Record<string, unknown> ): ElementStartPToken {
-   return makeElementStartWithAttrValue([
-      new TextPToken({ text: new SToken(value, origValue || value, []) }),
-   ], addedProps);
+function makeElementStartWithAttrValueFromString(
+   value: string,
+   origValue?: string,
+   addedProps?: Record<string, unknown>,
+): ElementStartPToken {
+   return makeElementStartWithAttrValue(
+      [new TextPToken({ text: new SToken(value, origValue || value, []) })],
+      addedProps,
+   );
 }
 
 function makeElementDeclaration(contentSpec?: string): ElementDeclarationPToken {
@@ -238,30 +252,36 @@ function makeElementDeclarationWithContentModel(): ElementDeclarationPToken {
       contentSpec: undefined,
       contentModel: new ContentModelP({
          open: toSToken('('),
-         delimitedParticles: [{
-            particle: {
-               name: toSToken('aName'),
-               repeat: toSToken('+'),
+         delimitedParticles: [
+            {
+               particle: {
+                  name: toSToken('aName'),
+                  repeat: toSToken('+'),
+               },
+               delimiter: toSToken('|'),
             },
-            delimiter: toSToken('|'),
-         }, {
-            particle: {
-               open: toSToken('('),
-               delimitedParticles: [{
-                  particle: {
-                     name: toSToken('first'),
-                  },
-                  delimiter: toSToken(','),
-               }, {
-                  particle: {
-                     name: toSToken('second'),
-                     repeat: toSToken('?'),
-                  },
-               }],
-               close: toSToken(')'),
-               repeat: toSToken('*'),
+            {
+               particle: {
+                  open: toSToken('('),
+                  delimitedParticles: [
+                     {
+                        particle: {
+                           name: toSToken('first'),
+                        },
+                        delimiter: toSToken(','),
+                     },
+                     {
+                        particle: {
+                           name: toSToken('second'),
+                           repeat: toSToken('?'),
+                        },
+                     },
+                  ],
+                  close: toSToken(')'),
+                  repeat: toSToken('*'),
+               },
             },
-         }],
+         ],
          close: toSToken(')'),
          repeat: toSToken('*'),
       }),
@@ -281,15 +301,19 @@ function makeGeneralEntityDeclaration(name = 'geDecl'): GeneralEntityDeclaration
    return new GeneralEntityDeclarationPToken({
       open: toSToken('<!'),
       name: toSToken(name),
-      value: [{
-         type: TEXT_PTOKEN,
-         text: toSToken('blah'),
-      }],
+      value: [
+         {
+            type: TEXT_PTOKEN,
+            text: toSToken('blah'),
+         },
+      ],
       close: toSToken('>'),
    });
 }
 
-function makeGeneralEntityDeclarationWithExternalId(name = 'geDecl'): GeneralEntityDeclarationPToken {
+function makeGeneralEntityDeclarationWithExternalId(
+   name = 'geDecl',
+): GeneralEntityDeclarationPToken {
    return new GeneralEntityDeclarationPToken({
       open: toSToken('<!'),
       name: toSToken(name),
@@ -301,9 +325,9 @@ function makeGeneralEntityDeclarationWithExternalId(name = 'geDecl'): GeneralEnt
             closeQuote: toSToken('"'),
          },
          system: {
-            openQuote: toSToken('\''),
+            openQuote: toSToken("'"),
             value: [new TextPToken(toSToken('http://foo.com'))],
-            closeQuote: toSToken('\''),
+            closeQuote: toSToken("'"),
          },
       },
       close: toSToken('>'),
@@ -455,11 +479,10 @@ function makeXmlDecl10(): XmlDeclarationPToken {
    });
 }
 
-
 const helper = {
    BLANK_ORIGIN,
-   makeInsertedRange
-}
+   makeInsertedRange,
+};
 
 export default helper;
 export {

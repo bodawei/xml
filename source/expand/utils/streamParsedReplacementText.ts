@@ -1,6 +1,7 @@
 /* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
 import { Problem } from 'basic';
+import { STokenSource } from 'basic';
 import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    GeneralEntityReferencePToken,
@@ -9,7 +10,6 @@ import {
    externalIdToEntityId,
    ParseToken,
 } from 'pToken';
-import { STokenSource } from 'basic';
 import {
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,
@@ -19,13 +19,13 @@ import {
    ParameterEntityEndPToken,
 } from 'token';
 
+import { ExpandParams } from '../types';
+import { EntityContextStack } from './EntityContextStack';
+import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 import {
    EXTERNAL_DTD_PSEUDO_TOKEN,
    ExternalDtdSubsetPseudoToken,
 } from './ExternalDtdSubsetPseudoToken';
-import { entityValueToSTokenSource } from './entityValueToSTokenSource';
-import { ExpandParams } from '../types';
-import { EntityContextStack } from './EntityContextStack';
 
 type DeliverToken = (result: ParseToken | undefined, handled: () => void) => void;
 

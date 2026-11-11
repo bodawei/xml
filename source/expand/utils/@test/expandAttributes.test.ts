@@ -1,20 +1,20 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { ENTITY_ID, CONFORMANCE_VERSION, Problem } from 'basic';
-import { GeneralEntityDeclarationPToken, GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { toSToken, STokenSource } from 'basic';
-import { WellFormedError, wellFormedErrorCodes } from 'wellformedness';
+import { GeneralEntityDeclarationPToken, GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import {
    GeneralEntityEndPToken,
    GeneralEntityStartPToken,
    ElidedEntityDeclarationPToken,
 } from 'token';
+import { WellFormedError, wellFormedErrorCodes } from 'wellformedness';
 
-import { expandAttributes } from '../expandAttributes';
 import { ExpandParams, RetrieveResults, AttributeValueResults } from '../../types';
 import * as addProtoReplacementText from '../addProtoReplacementText';
-import { EntityDetails } from '../EntityDetails';
 import { EntityContextStack } from '../EntityContextStack';
+import { EntityDetails } from '../EntityDetails';
+import { expandAttributes } from '../expandAttributes';
 
 const WFEID = wellFormedErrorCodes.id;
 

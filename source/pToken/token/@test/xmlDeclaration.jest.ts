@@ -5,14 +5,13 @@ import { toSToken } from 'basic';
 import { MockSTokenSource } from 'pToken-test';
 
 import { InstructionStart } from '../../bridge/instruction';
+import * as fieldedInstr from '../../common/fieldedInstruction';
 import {
    XmlDeclarationPToken,
    parseXmlDeclaration,
    isXmlDeclStandalone,
    XMLDECL_PTOKEN,
 } from '../xmlDeclaration';
-
-import * as fieldedInstr from '../../common/fieldedInstruction';
 
 jest.mock('../../common/fieldedInstruction');
 

@@ -1,19 +1,17 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { Transform } from 'stream';
 
+import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, XmlEdition, XmlVersion } from 'basic';
+import { SToken, STokenSource } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { ParseType, ParseToken } from 'pToken';
-import { PTokenStream } from '../pTokenStream';
-import { SToken, STokenSource } from 'basic';
-
 
 import { FlattenPTokenStream } from '../flattenPTokenStream';
-
-import { TestDoc } from './data/flatDocsTypes';
+import { PTokenStream } from '../pTokenStream';
 import documents from './data/flatDocs.json';
+import { TestDoc } from './data/flatDocsTypes';
 
 class STokenToOriginalStringStream extends Transform {
    constructor() {
@@ -45,15 +43,18 @@ describe('flat (integration)', () => {
             const sTokenSource = new STokenSource();
             const pTokenStream = new PTokenStream(sTokenSource, {
                parseType: ParseType.DOCUMENT,
-               confVer: verToUse && editionToUse ? new ConformanceVersion(verToUse, editionToUse) : undefined,
+               confVer:
+                  verToUse && editionToUse
+                     ? new ConformanceVersion(verToUse, editionToUse)
+                     : undefined,
             });
             const flat = new FlattenPTokenStream();
             const toString = new STokenToOriginalStringStream();
             pTokenStream.pipe(flat).pipe(toString);
-      
+
             sTokenSource.addText(testData.doc || '');
             sTokenSource.endText();
-         
+
             gatherStreamResults<ParseToken>(toString, (results) => {
                const textChunks = results.join('');
 

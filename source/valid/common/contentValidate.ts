@@ -16,7 +16,6 @@ import {
 } from 'token';
 
 import { validityErrorCodes } from '../error/validityErrorCodes';
-
 import { isXmlData } from './isXmlData';
 import { ElDeclType, ElementContext, ValidityState } from './validityState';
 

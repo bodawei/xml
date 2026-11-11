@@ -1,7 +1,7 @@
 /* Copyright ® 2019-2026 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
+import { strOrBlank, toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import {
    AttListDeclarationPToken,
@@ -13,7 +13,6 @@ import {
    TextDeclarationPToken,
    TextPToken,
 } from 'pToken';
-import { strOrBlank, toSToken } from 'basic';
 import {
    CommentPToken,
    ExternalSubsetStartToken,
@@ -28,12 +27,6 @@ import {
    DocTypeStartPToken,
    DocTypeEndPToken,
 } from 'token';
-
-import { wellFormedErrorCodes } from '../error/wellFormedError';
-import { MarkupDeclChecker } from '../MarkupDeclChecker';
-import * as checkUtils from '../checkUtils';
-import { CheckState, CHECKER_DONE } from '../checkUtils';
-
 import {
    makeTextDecl,
    makeParameterEntityDeclaration,
@@ -53,7 +46,11 @@ import {
    makeDocTypeEnd,
 } from 'token-test';
 
+import * as checkUtils from '../checkUtils';
+import { CheckState, CHECKER_DONE } from '../checkUtils';
 import { warningCodes } from '../error/warningCodes';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
+import { MarkupDeclChecker } from '../MarkupDeclChecker';
 
 const WFEID = wellFormedErrorCodes.id;
 

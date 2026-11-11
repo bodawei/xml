@@ -1,8 +1,8 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { Collector } from 'basic';
-import { DeclarationStart } from 'token';
 import { strOrBlank } from 'basic';
+import { DeclarationStart } from 'token';
 
 import { wellFormedErrorCodes } from '../error/wellFormedError';
 

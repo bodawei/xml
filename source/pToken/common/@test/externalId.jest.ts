@@ -1,14 +1,12 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { TextPToken } from 'pToken';
 import { toSToken } from 'basic';
+import { TextPToken } from 'pToken';
 import { MockSTokenSource } from 'pToken-test';
 
-import { ExternalIdP, parseExternalId, resumeParseExternalId } from '../externalId';
-
 import literal, { LiteralPToken } from '../../../token/common/literal'; // ick
+import { ExternalIdP, parseExternalId, resumeParseExternalId } from '../externalId';
 
 jest.mock('../../../token/common/literal');
 

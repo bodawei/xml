@@ -1,6 +1,7 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, EntityId } from 'basic';
+import { strOrBlank, STokenSource } from 'basic';
 import {
    ParseType,
    ParseToken,
@@ -10,7 +11,6 @@ import {
    TextPToken,
    parseCharRef,
 } from 'pToken';
-import { strOrBlank, STokenSource } from 'basic';
 import {
    DOCTYPE_START_PTOKEN,
    ELEMENT_END_PTOKEN,

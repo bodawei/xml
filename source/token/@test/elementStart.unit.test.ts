@@ -1,11 +1,10 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-
+import { toSToken } from 'basic';
 import { makeSTokenMaker, MockSTokenSource } from 'pToken-test';
 
 import attribute from '../common/attribute';
 import { ElementEmptyPToken, ElementStartPToken, parseElementStart } from '../elementStart';
-import { toSToken } from 'basic';
 
 describe('elementStart (unit)', () => {
    let elementStartPToken: ElementStartPToken;
@@ -48,18 +47,25 @@ describe('elementStart (unit)', () => {
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
          attrArray = [];
-         attrParse = spyOn(attribute, 'parse').and.callFake((_1: any, _2: any, deliverPToken: any) => {
-            deliverPToken(attrArray);
-         });
+         attrParse = spyOn(attribute, 'parse').and.callFake(
+            (_1: any, _2: any, deliverPToken: any) => {
+               deliverPToken(attrArray);
+            },
+         );
       });
 
       it('calls attribute.parse()', () => {
-         const mockSource = new MockSTokenSource([
-            [ undefined, 'space' ],
-            [ 'elemName', 'word', [ '>', '/>' ] ],
-            [ ' ', 'space' ],
-            [ '>', 'match', '>' ],
-         ], 1, 0, 1);
+         const mockSource = new MockSTokenSource(
+            [
+               [undefined, 'space'],
+               ['elemName', 'word', ['>', '/>']],
+               [' ', 'space'],
+               ['>', 'match', '>'],
+            ],
+            1,
+            0,
+            1,
+         );
 
          parseElementStart(mockSource, elementStartPToken.open, callback);
          mockSource.respondInAsyncTime();
@@ -67,20 +73,25 @@ describe('elementStart (unit)', () => {
          const args = attrParse.calls.argsFor(0);
          expect(args[0]).toEqual(mockSource);
          expect(args[1]).toEqual({
-            terminators: [ '/', '>', '/>' ],
+            terminators: ['/', '>', '/>'],
             geRef: true,
          });
          expect(typeof args[2]).toEqual('function');
       });
 
       it('returns an empty element if appropriate', () => {
-         const mockSource = new MockSTokenSource([
-            [ undefined, 'space' ],
-            [ 'elemName', 'word', [ '>', '/>' ] ],
-            [ ' ', 'space' ],
-            [ undefined, 'match', '>' ],
-            [ '/>', 'match', '/>' ],
-         ], 1, 0, 1);
+         const mockSource = new MockSTokenSource(
+            [
+               [undefined, 'space'],
+               ['elemName', 'word', ['>', '/>']],
+               [' ', 'space'],
+               [undefined, 'match', '>'],
+               ['/>', 'match', '/>'],
+            ],
+            1,
+            0,
+            1,
+         );
          const makeSToken = makeSTokenMaker(undefined, 10, 0, 10);
          (elementEmptyPToken as any).close = makeSToken('/>');
 
@@ -91,12 +102,7 @@ describe('elementStart (unit)', () => {
       });
 
       it('returns simple values', () => {
-         const mockSource = new MockSTokenSource([
-            ' ',
-            'elemName',
-            ' ',
-            '>',
-         ], 1, 0, 1);
+         const mockSource = new MockSTokenSource([' ', 'elemName', ' ', '>'], 1, 0, 1);
 
          parseElementStart(mockSource, elementStartPTokenWithLeading.open, callback);
          mockSource.respondInAsyncTime();
@@ -105,13 +111,12 @@ describe('elementStart (unit)', () => {
       });
 
       it('no values if at the end of input', () => {
-         const mockSource = new MockSTokenSource([
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-         ], 1, 0, 1);
+         const mockSource = new MockSTokenSource(
+            [undefined, undefined, undefined, undefined, undefined],
+            1,
+            0,
+            1,
+         );
          (elementStartPToken as any).openSpace = undefined;
          (elementStartPToken as any).name = undefined;
          (elementStartPToken as any).nameSpace = undefined;
@@ -121,7 +126,5 @@ describe('elementStart (unit)', () => {
 
          expect(callback).toContainPTokenProps(elementStartPToken);
       });
-
    });
-
 });

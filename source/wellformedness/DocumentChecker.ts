@@ -18,6 +18,7 @@ import {
    getFirstSToken,
 } from 'token';
 
+import { checkMap } from './checkMap';
 import {
    ContentChecker,
    MarkupChecker,
@@ -26,11 +27,10 @@ import {
    CheckState,
    CHECKER_DONE,
 } from './checkUtils';
-import { checkMap } from './checkMap';
+import { dtdEndCheck } from './common/dtdEndCheck';
 import { WellFormedError, wellFormedErrorCodes } from './error/wellFormedError';
 import { conditionalStartCheck } from './token/conditionalStartCheck';
 import { docTypeEndCheck } from './token/docTypeEndCheck';
-import { dtdEndCheck } from './common/dtdEndCheck';
 
 const NO_CHANGE = '---INTERNAL---MARKER---';
 

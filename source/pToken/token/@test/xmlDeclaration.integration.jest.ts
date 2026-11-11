@@ -3,8 +3,8 @@
 import { describe, expect, it } from '@jest/globals';
 import { STokenSource, toSToken } from 'basic';
 
-import { parseXmlDeclaration } from '../xmlDeclaration';
 import { InstructionStart } from '../../bridge/instruction';
+import { parseXmlDeclaration } from '../xmlDeclaration';
 
 describe('xmlDeclaration (integration)', () => {
    let start: InstructionStart;

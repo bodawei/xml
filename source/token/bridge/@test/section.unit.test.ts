@@ -1,13 +1,12 @@
 /* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { ParameterEntityReferencePToken } from 'pToken';
 import { toSToken } from 'basic';
+import { ParameterEntityReferencePToken } from 'pToken';
 import { MockSTokenSource } from 'pToken-test';
 
+import * as peReference from '../../../pToken/token/parameterEntityReference';
 import * as cdata from '../../cdata';
 import * as conditional from '../../conditionalStart';
-import * as peReference from '../../../pToken/token/parameterEntityReference';
-
 import { SectionStart, parseSection } from '../section';
 
 describe('section (unit)', () => {
@@ -29,27 +28,30 @@ describe('section (unit)', () => {
 
       beforeEach(() => {
          peRef = new ParameterEntityReferencePToken({
-            open: toSToken('%')
+            open: toSToken('%'),
          });
          callback = jasmine.createSpy('callbackSpy');
          spyOn(cdata, 'parseCdata').and.callFake((_1: any, start: any, cb: (x: any) => void) => {
             cb(start);
          });
-         spyOn(conditional, 'parseConditional').and.callFake((_1: any, start: any, cb: (x: any) => void) => {
-            cb(start);
-         });
-         spyOn(peReference, 'parseParameterEntityReference').and.callFake((_1: any, cb: (x: any) => void) => {
-            cb(peRef);
-         });
-
+         spyOn(conditional, 'parseConditional').and.callFake(
+            (_1: any, start: any, cb: (x: any) => void) => {
+               cb(start);
+            },
+         );
+         spyOn(peReference, 'parseParameterEntityReference').and.callFake(
+            (_1: any, cb: (x: any) => void) => {
+               cb(peRef);
+            },
+         );
       });
 
       it('delivers a section start for CDATA', () => {
          mockSource = new MockSTokenSource([
-            [ ' ', 'space' ],
-            [ MockSTokenSource.PEEK('C'), 'peekChar' ],
-            [ 'CDATA', 'word', [ '[', '>' ] ],
-            [ ' ', 'space' ],
+            [' ', 'space'],
+            [MockSTokenSource.PEEK('C'), 'peekChar'],
+            ['CDATA', 'word', ['[', '>']],
+            [' ', 'space'],
          ]);
 
          parseSection(mockSource, sectionStart.open, callback);
@@ -60,10 +62,10 @@ describe('section (unit)', () => {
 
       it('delivers a section start for non-CDATA value', () => {
          mockSource = new MockSTokenSource([
-            [ ' ', 'space' ],
-            [ MockSTokenSource.PEEK('S'), 'peekChar' ],
-            [ 'SUPER', 'word', [ '[', '>' ] ],
-            [ ' ', 'space' ],
+            [' ', 'space'],
+            [MockSTokenSource.PEEK('S'), 'peekChar'],
+            ['SUPER', 'word', ['[', '>']],
+            [' ', 'space'],
          ]);
 
          parseSection(mockSource, sectionStart.open, callback);
@@ -79,10 +81,10 @@ describe('section (unit)', () => {
 
       it('delivers a section start with a parameter entity reference', () => {
          mockSource = new MockSTokenSource([
-            [ ' ', 'space' ],
-            [ MockSTokenSource.PEEK('%'), 'peekChar' ],
-            // parameter entity reference would 
-            [ ' ', 'space' ],
+            [' ', 'space'],
+            [MockSTokenSource.PEEK('%'), 'peekChar'],
+            // parameter entity reference would
+            [' ', 'space'],
          ]);
 
          parseSection(mockSource, sectionStart.open, callback);
@@ -94,17 +96,12 @@ describe('section (unit)', () => {
             unexpanded: {
                peRef,
                propName: 'sectionType',
-            }
+            },
          });
       });
 
       it('copes with EOF', () => {
-         mockSource = new MockSTokenSource([
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-         ]);
+         mockSource = new MockSTokenSource([undefined, undefined, undefined, undefined]);
 
          parseSection(mockSource, sectionStart.open, callback);
          mockSource.respondInAsyncTime();
@@ -113,7 +110,5 @@ describe('section (unit)', () => {
             open: toSToken('<!['),
          });
       });
-
    });
-
 });

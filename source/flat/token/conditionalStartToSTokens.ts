@@ -2,8 +2,9 @@
 
 import { SToken } from 'basic';
 import { ConditionalStartPToken } from 'token';
-import { parameterEntityReferenceToSTokens } from './parameterEntityReferenceToSTokens';
+
 import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
+import { parameterEntityReferenceToSTokens } from './parameterEntityReferenceToSTokens';
 
 function conditionalStartToSTokens(pToken: ConditionalStartPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();

@@ -2,8 +2,8 @@
 
 import { SToken } from 'basic';
 import { AttributesPToken } from 'token';
-import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 import { literalToSTokens } from './literalToSTokens';
 
 function attributeToSTokens(attributes: AttributesPToken = []): Array<SToken> {

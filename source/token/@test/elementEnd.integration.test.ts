@@ -21,7 +21,6 @@ describe('elementEnd (integration)', () => {
    });
 
    describe('parse()', () => {
-
       it('parses the end of the element when called', (done) => {
          const source = new STokenSource();
          source.addText('elemName >');
@@ -32,7 +31,5 @@ describe('elementEnd (integration)', () => {
             done();
          });
       });
-
    });
-
 });

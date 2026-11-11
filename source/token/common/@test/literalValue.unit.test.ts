@@ -1,18 +1,16 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { Range, EntityId } from 'basic';
-import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { SToken } from 'basic';
+import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { makeSTokenMaker, MockSTokenSource } from 'pToken-test';
 
-import * as parameterEntityReference from '../../../pToken/token/parameterEntityReference';
 import * as charRef from '../../../pToken/token/charRef';
 import * as generalEntityReference from '../../../pToken/token/generalEntityReference';
-
+import * as parameterEntityReference from '../../../pToken/token/parameterEntityReference';
 import literalValue, { LiteralValuePToken } from '../literalValue';
 
 describe('literalValue (unit)', () => {
-
    describe('parse()', () => {
       let mockSource: MockSTokenSource;
       let value: LiteralValuePToken;
@@ -21,55 +19,43 @@ describe('literalValue (unit)', () => {
 
       beforeEach(() => {
          expectedSToken = makeSTokenMaker();
-         callback = (result: LiteralValuePToken) => value = result;
+         callback = (result: LiteralValuePToken) => (value = result);
       });
 
       it('does a basic parse', () => {
-         mockSource = new MockSTokenSource([
-            'blah',
-            MockSTokenSource.PEEK('"'),
-         ]);
+         mockSource = new MockSTokenSource(['blah', MockSTokenSource.PEEK('"')]);
 
-         literalValue.parse(mockSource, [ '"' ], callback);
+         literalValue.parse(mockSource, ['"'], callback);
          mockSource.respondInAsyncTime();
 
-         expect(value).toEqual([ new TextPToken({ text: expectedSToken('blah') }) ]);
+         expect(value).toEqual([new TextPToken({ text: expectedSToken('blah') })]);
       });
 
       it('returns an empty array result if there is an EOF', () => {
-         mockSource = new MockSTokenSource([
-            undefined,
-            undefined,
-         ]);
+         mockSource = new MockSTokenSource([undefined, undefined]);
 
-         literalValue.parse(mockSource, [ '"' ], callback);
+         literalValue.parse(mockSource, ['"'], callback);
          mockSource.respondInAsyncTime();
 
-         expect(value).toEqual([ ]);
+         expect(value).toEqual([]);
       });
 
       it('returns a partial result if there is an EOF after first chunk of text', () => {
-         mockSource = new MockSTokenSource([
-            'some text',
-            undefined,
-         ]);
+         mockSource = new MockSTokenSource(['some text', undefined]);
 
-         literalValue.parse(mockSource, [ '"' ], callback);
+         literalValue.parse(mockSource, ['"'], callback);
          mockSource.respondInAsyncTime();
 
-         expect(value).toEqual([ new TextPToken({ text: expectedSToken('some text') }) ]);
+         expect(value).toEqual([new TextPToken({ text: expectedSToken('some text') })]);
       });
 
       it('returns an empty array result if there is no text before the close quote', () => {
-         mockSource = new MockSTokenSource([
-            undefined,
-            MockSTokenSource.PEEK('"'),
-         ]);
+         mockSource = new MockSTokenSource([undefined, MockSTokenSource.PEEK('"')]);
 
-         literalValue.parse(mockSource, [ '"' ], callback);
+         literalValue.parse(mockSource, ['"'], callback);
          mockSource.respondInAsyncTime();
 
-         expect(value).toEqual([ ]);
+         expect(value).toEqual([]);
       });
 
       describe('entity references', () => {
@@ -84,12 +70,9 @@ describe('literalValue (unit)', () => {
          });
 
          it('calls out to parseParameterEntityReference() when encountering a % and asked to parse peRefs', () => {
-            mockSource = new MockSTokenSource([
-               undefined,
-               MockSTokenSource.PEEK('%'),
-            ]);
+            mockSource = new MockSTokenSource([undefined, MockSTokenSource.PEEK('%')]);
 
-            literalValue.parse(mockSource, [ '"', '%' ], callback);
+            literalValue.parse(mockSource, ['"', '%'], callback);
             mockSource.respondInAsyncTime();
 
             expect(paramParseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
@@ -97,17 +80,15 @@ describe('literalValue (unit)', () => {
          });
 
          it('calls out to parseGeneralEntityReference() when encountering a & and asked to parse geRefs', () => {
-            mockSource = new MockSTokenSource([
-               undefined,
-               MockSTokenSource.PEEK('&'),
-               '&',
-            ]);
+            mockSource = new MockSTokenSource([undefined, MockSTokenSource.PEEK('&'), '&']);
 
-            literalValue.parse(mockSource, [ '"', '&' ], callback);
+            literalValue.parse(mockSource, ['"', '&'], callback);
             mockSource.respondInAsyncTime();
 
             expect(generalParseSpy.calls.argsFor(0)[0]).toEqual(mockSource);
-            expect(generalParseSpy.calls.argsFor(0)[1]).toEqual(new SToken('&', '&', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)));
+            expect(generalParseSpy.calls.argsFor(0)[1]).toEqual(
+               new SToken('&', '&', new Range(new EntityId(), 0, 0, 0, 1, 0, 1)),
+            );
             expect(typeof generalParseSpy.calls.argsFor(0)[2]).toEqual('function');
          });
 
@@ -115,14 +96,16 @@ describe('literalValue (unit)', () => {
             mockSource = new MockSTokenSource([
                undefined,
                MockSTokenSource.PEEK('&'),
-               ['&#', 'multi', [ '&', '&#' ]],
+               ['&#', 'multi', ['&', '&#']],
             ]);
 
-            literalValue.parse(mockSource, [ '"', '&', '&#' ], callback);
+            literalValue.parse(mockSource, ['"', '&', '&#'], callback);
             mockSource.respondInAsyncTime();
 
             expect(charRefSpy.calls.argsFor(0)[0]).toEqual(mockSource);
-            expect(charRefSpy.calls.argsFor(0)[1]).toEqual(new SToken('&#', '&#', new Range(new EntityId(), 0, 0, 0, 2, 0, 2)));
+            expect(charRefSpy.calls.argsFor(0)[1]).toEqual(
+               new SToken('&#', '&#', new Range(new EntityId(), 0, 0, 0, 2, 0, 2)),
+            );
             expect(typeof charRefSpy.calls.argsFor(0)[2]).toEqual('function');
          });
 
@@ -145,7 +128,7 @@ describe('literalValue (unit)', () => {
                MockSTokenSource.PEEK('"'),
             ]);
 
-            literalValue.parse(mockSource, [ '"', '&', '%' ], callback);
+            literalValue.parse(mockSource, ['"', '&', '%'], callback);
             mockSource.respondInAsyncTime();
 
             const makeSToken = makeSTokenMaker();
@@ -160,9 +143,6 @@ describe('literalValue (unit)', () => {
                new TextPToken({ text: makeSToken2('four') }),
             ]);
          });
-
       });
-
    });
-
 });

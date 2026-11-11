@@ -7,9 +7,8 @@ import attribute, { AttributePToken } from './common/attribute';
 const ELEMENT_START_PTOKEN = 'ELEMENT_START_PTOKEN';
 const ELEMENT_EMPTY_PTOKEN = 'ELEMENT_EMPTY_PTOKEN';
 
-type DeliverElementStartPToken = (pToken?: ElementStartPToken|ElementEmptyPToken) => void;
-type ProtoToken = { open: SToken; [ any: string]: any };
-
+type DeliverElementStartPToken = (pToken?: ElementStartPToken | ElementEmptyPToken) => void;
+type ProtoToken = { open: SToken; [any: string]: any };
 
 class ElementStartPToken {
    public readonly type: typeof ELEMENT_START_PTOKEN = ELEMENT_START_PTOKEN;
@@ -65,48 +64,53 @@ class ElementEmptyPToken {
    [44] EmptyElemTag ::= '<' Name (S Attribute)* S? '/>'
 \**********************************************************************/
 
-function parseElementStart(source: STokenSource, open: SToken, deliverPToken: DeliverElementStartPToken) {
+function parseElementStart(
+   source: STokenSource,
+   open: SToken,
+   deliverPToken: DeliverElementStartPToken,
+) {
    const protoToken: ProtoToken = {
       open,
    };
 
    source.extractToObject('space', protoToken, 'openSpace');
-   source.extractToObject('word', [ '>', '/>' ], protoToken, 'name');
+   source.extractToObject('word', ['>', '/>'], protoToken, 'name');
    source.extractToObject('space', protoToken, 'nameSpace');
 
-   attribute.parse(source, {
-      geRef: true,
-      terminators: [ '/', '>', '/>' ],
-   }, (attributes) => {
-      protoToken.attributes = attributes;
+   attribute.parse(
+      source,
+      {
+         geRef: true,
+         terminators: ['/', '>', '/>'],
+      },
+      (attributes) => {
+         protoToken.attributes = attributes;
 
-      source.extract('match', '>', (sToken) => {
-         if (sToken) {
-            protoToken.close = sToken;
-            deliverPToken(new ElementStartPToken(protoToken));
-            return;
-         }
-
-         source.extract('match', '/>', (sToken) => {
-            protoToken.close = sToken;
-
+         source.extract('match', '>', (sToken) => {
             if (sToken) {
-               deliverPToken(new ElementEmptyPToken(protoToken));
-            } else {
+               protoToken.close = sToken;
                deliverPToken(new ElementStartPToken(protoToken));
+               return;
             }
-         });
-      });
-   });
-}
 
+            source.extract('match', '/>', (sToken) => {
+               protoToken.close = sToken;
+
+               if (sToken) {
+                  deliverPToken(new ElementEmptyPToken(protoToken));
+               } else {
+                  deliverPToken(new ElementStartPToken(protoToken));
+               }
+            });
+         });
+      },
+   );
+}
 
 export {
    ELEMENT_EMPTY_PTOKEN,
    ELEMENT_START_PTOKEN,
-
    ElementEmptyPToken,
    ElementStartPToken,
-
    parseElementStart,
 };

@@ -1,16 +1,15 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
+import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { ProcessingInstructionPToken } from 'pToken';
-import { toSToken } from 'basic';
 
 import { charCheck } from '../../common/charCheck';
-import { nameXmlCheck } from '../../common/nameXmlCheck';
 import { nameCheck } from '../../common/nameCheck';
-import { wellFormedErrorCodes } from '../../error/wellFormedError';
+import { nameXmlCheck } from '../../common/nameXmlCheck';
 import { warningCodes } from '../../error/warningCodes';
-
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { processingInstructionCheck } from '../processingInstructionCheck';
 
 jest.mock('../../common/charCheck');

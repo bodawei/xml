@@ -1,6 +1,7 @@
 /* Copyright ® 2019-2026 by 柏大衛. All rights reserved. */
 
 import { Collector } from 'basic';
+import { strOrBlank } from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
@@ -19,7 +20,6 @@ import {
    ParameterEntityReferencePToken,
    ParseToken,
 } from 'pToken';
-import { strOrBlank } from 'basic';
 import {
    COMMENT_PTOKEN,
    CONDITIONAL_START_PTOKEN,
@@ -36,10 +36,6 @@ import {
    DOCTYPE_END_PTOKEN,
 } from 'token';
 
-import { wellFormedErrorCodes } from './error/wellFormedError';
-import { Warning } from './error/warning';
-import { warningCodes } from './error/warningCodes';
-
 import {
    CHECKER_DONE,
    CheckState,
@@ -49,6 +45,9 @@ import {
    checkParameterEntity,
    isParamEntityExternal,
 } from './checkUtils';
+import { Warning } from './error/warning';
+import { warningCodes } from './error/warningCodes';
+import { wellFormedErrorCodes } from './error/wellFormedError';
 
 enum States {
    PRE = 'PRE',

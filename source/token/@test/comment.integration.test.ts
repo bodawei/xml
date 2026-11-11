@@ -15,14 +15,13 @@ describe('comment (integration)', () => {
       const expectedSToken = makeSTokenMaker();
       commentPToken = new CommentPToken({
          open: toSToken(''),
-         text: [ expectedSToken('my comment') ],
+         text: [expectedSToken('my comment')],
          close: expectedSToken('-->'),
       });
       (commentPToken as any).open = expectedSToken('<!--');
    });
 
    describe('parse()', () => {
-
       it('produces a full PToken result', (done) => {
          const source = new STokenSource();
          source.addText('my comment-->');
@@ -55,7 +54,5 @@ describe('comment (integration)', () => {
             done();
          });
       });
-
    });
-
 });

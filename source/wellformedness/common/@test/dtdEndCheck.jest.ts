@@ -1,8 +1,8 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { ConformanceVersion } from 'basic';
+import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import {
    CharRefPToken,
@@ -10,14 +10,12 @@ import {
    ParameterEntityDeclarationPToken,
    TextPToken,
 } from 'pToken';
-import { toSToken } from 'basic';
 
 import { CheckState } from '../../checkUtils';
-import { dtdEndCheck } from '../dtdEndCheck';
-
 import { errorCodes } from '../../error/errorCodes';
 import { fatalErrorCodes } from '../../error/fatalErrorCodes';
 import { warningCodes } from '../../error/warningCodes';
+import { dtdEndCheck } from '../dtdEndCheck';
 
 const EID = errorCodes.id;
 const FEID = fatalErrorCodes.id;

@@ -1,20 +1,17 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'basic';
-
-import { ParameterEntityReferencePToken } from '../parameterEntityReference';
+import { TextPToken } from 'pToken';
 
 import { DeclarationStart } from '../../../token/bridge/declaration';
-
 import {
    NotationDeclarationPToken,
    parseNotationDeclaration,
    resumeParseNotationDeclaration,
    NOTATION_DECLARATION_PTOKEN,
 } from '../notationDeclaration';
+import { ParameterEntityReferencePToken } from '../parameterEntityReference';
 
 describe('notationDeclaration (integration)', () => {
    let declarationStart: DeclarationStart;

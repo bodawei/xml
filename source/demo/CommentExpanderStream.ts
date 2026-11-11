@@ -1,9 +1,10 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { Transform } from 'stream';
+
+import { SToken } from 'basic';
 import { ParseToken } from 'pToken';
 import { COMMENT_PTOKEN, CommentPToken } from 'token';
-import { SToken } from 'basic';
 
 const CHARREF_REGEX = /(&#(x?)([a-fA-F0-9]+);)/g;
 

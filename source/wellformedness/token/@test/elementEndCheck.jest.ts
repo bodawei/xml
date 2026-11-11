@@ -2,15 +2,14 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
-import { ParamCollector } from 'basic-test';
 import { toSToken } from 'basic';
+import { ParamCollector } from 'basic-test';
 import { ElementEndPToken } from 'token';
 
 import { nameCheck } from '../../common/nameCheck';
 import { nameXmlCheck } from '../../common/nameXmlCheck';
-import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { warningCodes } from '../../error/warningCodes';
-
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { elementEndCheck } from '../elementEndCheck';
 
 jest.mock('../../common/nameCheck');

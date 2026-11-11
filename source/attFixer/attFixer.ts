@@ -1,5 +1,6 @@
 /* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
+import { strOrBlank, toSToken, SToken } from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
    CHARREF_PTOKEN,
@@ -11,8 +12,6 @@ import {
    ParseToken,
    TextPToken,
 } from 'pToken';
-import { strOrBlank, toSToken, SToken } from 'basic';
-
 // ick
 import {
    ELEMENT_START_PTOKEN,
@@ -20,8 +19,9 @@ import {
    ElementStartPToken,
    ElementEmptyPToken,
 } from 'token';
-import { LiteralValuePToken } from '../token/common/literal';
+
 import { AttributePToken } from '../token/common/attribute';
+import { LiteralValuePToken } from '../token/common/literal';
 import { externalIdNormalize } from './common/externalIdNormalize';
 
 interface AugmentedAttributePToken extends AttributePToken {

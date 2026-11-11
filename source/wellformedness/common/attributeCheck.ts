@@ -1,18 +1,18 @@
 /* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, Collector, rangeStartOffset } from 'basic';
-import { isTextPToken, pTokenArrayToString } from 'pToken';
 import { strOrBlank, SToken } from 'basic';
+import { isTextPToken, pTokenArrayToString } from 'pToken';
 import { AttributePToken, LiteralValuePToken } from 'token';
 
+import { nameXmlCheck } from '../common/nameXmlCheck';
+import { Error } from '../error/error';
+import { errorCodes } from '../error/errorCodes';
+import { warningCodes } from '../error/warningCodes';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
 import { attributeLangCheck } from './attributeLangCheck';
 import { literalCheck } from './literalCheck';
 import { nameCheck } from './nameCheck';
-import { nameXmlCheck } from '../common/nameXmlCheck';
-import { wellFormedErrorCodes } from '../error/wellFormedError';
-import { warningCodes } from '../error/warningCodes';
-import { errorCodes } from '../error/errorCodes';
-import { Error } from '../error/error';
 
 type CheckAttValue = (
    name: SToken,

@@ -1,9 +1,10 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
+import { STokenSource } from 'basic';
 import { PTokenStream } from 'node';
+
 import { PToXTokenStream } from '../node';
 import SimpleObjStream from './so';
-import { STokenSource } from 'basic';
 
 describe('SimpleObjStream (integration)', () => {
    let sTokenSource: STokenSource;
@@ -30,12 +31,11 @@ describe('SimpleObjStream (integration)', () => {
             type: 'one',
             attr: {},
             content: [
-               '1', {
+               '1',
+               {
                   type: 'two',
                   attr: {},
-                  content: [
-                     '2',
-                  ],
+                  content: ['2'],
                },
                '1',
             ],
@@ -45,7 +45,9 @@ describe('SimpleObjStream (integration)', () => {
    });
 
    it('includes CDATA', (done) => {
-      sTokenSource.addText('<?xml version="1.0"?><!DOCTYPE one><one>1<![CDATA[<two>2</two>]]>1</one>');
+      sTokenSource.addText(
+         '<?xml version="1.0"?><!DOCTYPE one><one>1<![CDATA[<two>2</two>]]>1</one>',
+      );
       sTokenSource.endText();
 
       objStream.on('data', (final: Record<string, any>) => {
@@ -53,11 +55,7 @@ describe('SimpleObjStream (integration)', () => {
          expect(result).toEqual({
             type: 'one',
             attr: {},
-            content: [
-               '1',
-               '<two>2</two>',
-               '1',
-            ],
+            content: ['1', '<two>2</two>', '1'],
          });
          done();
       });
@@ -98,5 +96,4 @@ describe('SimpleObjStream (integration)', () => {
    //       console.log('ERROR', x);
    //    });
    // });
-
 });

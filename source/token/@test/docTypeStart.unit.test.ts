@@ -1,11 +1,10 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-
-import {  STokenSource, toSToken } from 'basic';
+import { STokenSource, toSToken } from 'basic';
 import { MockSTokenSource } from 'pToken-test';
 
-import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
 import * as externalId from '../../pToken/common/externalId';
+import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
 
 describe('docTypeStart (unit)', () => {
    let docTypeStartPToken: DocTypeStartPToken;
@@ -15,7 +14,7 @@ describe('docTypeStart (unit)', () => {
          open: toSToken('<!'),
          name: toSToken('rootElement'),
          nameSpace: toSToken(' '),
-         externalId: { },
+         externalId: {},
          externalIdSpace: toSToken(' '),
          openSubset: toSToken('['),
       });
@@ -26,17 +25,19 @@ describe('docTypeStart (unit)', () => {
 
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
-         spyOn(externalId, 'parseExternalId').and.callFake((sTokenSource: STokenSource, tokens: any, cb: any) => {
-            cb({ externalId: { } });
-         });
+         spyOn(externalId, 'parseExternalId').and.callFake(
+            (sTokenSource: STokenSource, tokens: any, cb: any) => {
+               cb({ externalId: {} });
+            },
+         );
       });
 
       it('parses a full element start', () => {
          const mockSource = new MockSTokenSource([
-            [ 'rootElement', 'word', [ '[', '>' ] ],
-            [ ' ', 'space' ],
-            [ ' ', 'space' ],
-            [ '[', 'match', '[' ],
+            ['rootElement', 'word', ['[', '>']],
+            [' ', 'space'],
+            [' ', 'space'],
+            ['[', 'match', '['],
          ]);
 
          parseDocTypeStart(mockSource, { open: toSToken('<!') } as any, callback);
@@ -46,12 +47,7 @@ describe('docTypeStart (unit)', () => {
       });
 
       it('handles EOF', () => {
-         const mockSource = new MockSTokenSource([
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-         ]);
+         const mockSource = new MockSTokenSource([undefined, undefined, undefined, undefined]);
 
          parseDocTypeStart(mockSource, {} as any, callback);
          mockSource.respondInAsyncTime();
@@ -60,11 +56,9 @@ describe('docTypeStart (unit)', () => {
             name: undefined,
             nameSpace: undefined,
             externalIdSpace: undefined,
-            externalId: { },
+            externalId: {},
             openSubset: undefined,
          });
       });
-
    });
-
 });

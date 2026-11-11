@@ -6,7 +6,6 @@ import { STokenSource, toSToken } from 'basic';
 import { parseComment } from 'token';
 
 import { WellFormedError, wellFormedErrorCodes } from '../../error/wellFormedError';
-
 import { commentCheck } from '../commentCheck';
 
 const WFEID = wellFormedErrorCodes.id;

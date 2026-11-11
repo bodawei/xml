@@ -1,6 +1,7 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { ProblemPosition, Problem, WARNING_SEVERITY } from 'basic';
+
 import { warningCodes } from './warningCodes';
 
 class Warning extends Problem {

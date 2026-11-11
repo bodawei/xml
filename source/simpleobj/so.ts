@@ -2,10 +2,15 @@
 
 import { Transform } from 'stream';
 
-import {      CharDataXToken,
+import {
+   CharDataXToken,
    ElementEndXToken,
    CdataXToken,
-   TEXT_XTOKEN,CHARREF_XTOKEN,    ElementStartXToken   , XToken } from 'xToken';
+   TEXT_XTOKEN,
+   CHARREF_XTOKEN,
+   ElementStartXToken,
+   XToken,
+} from 'xToken';
 
 type Token = { type: string };
 
@@ -42,7 +47,6 @@ class Node {
    addContent(item: Token) {
       this.content.push(item);
    }
-
 }
 
 class SimpleObj extends Transform {
@@ -107,7 +111,6 @@ class SimpleObj extends Transform {
    _flush() {
       this.push(this._root);
    }
-
 }
 
 export default SimpleObj;

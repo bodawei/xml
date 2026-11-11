@@ -1,6 +1,7 @@
 /* Copyright ® 2019-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
+import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import {
    TextPToken,
@@ -8,16 +9,14 @@ import {
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
 } from 'pToken';
-import { toSToken } from 'basic';
 
 import { charCheck } from '../../common/charCheck';
 import { externalIdCheck } from '../../common/externalIdCheck';
 import { literalCheck } from '../../common/literalCheck';
 import { nameCheck } from '../../common/nameCheck';
 import { nameXmlCheck } from '../../common/nameXmlCheck';
-import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { warningCodes } from '../../error/warningCodes';
-
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { entityDeclarationCheck } from '../entityDeclarationCheck';
 
 jest.mock('../../common/charCheck');

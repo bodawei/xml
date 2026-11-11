@@ -18,7 +18,7 @@ class CheckValidityStream extends Transform {
    }
 
    _transform(pToken: PToken, encoding: string, done: () => void) {
-      const errors = this.checker.check(pToken, );
+      const errors = this.checker.check(pToken);
 
       for (const error of errors) {
          this.push(error);
@@ -34,4 +34,3 @@ class CheckValidityStream extends Transform {
 }
 
 export default CheckValidityStream;
-

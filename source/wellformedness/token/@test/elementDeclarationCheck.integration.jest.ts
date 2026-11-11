@@ -1,13 +1,12 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, ProblemCollector } from 'basic';
-import { parseElementDeclaration } from 'pToken';
 import { STokenSource, toSToken } from 'basic';
+import { parseElementDeclaration } from 'pToken';
 import { DeclarationStart } from 'token';
 
-import { wellFormedErrorCodes, WellFormedError } from '../../error/wellFormedError';
 import { warningCodes } from '../../error/warningCodes';
-
+import { wellFormedErrorCodes, WellFormedError } from '../../error/wellFormedError';
 import { elementDeclarationCheck } from '../elementDeclarationCheck';
 
 const WFEID = wellFormedErrorCodes.id;

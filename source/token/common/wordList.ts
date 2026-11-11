@@ -9,9 +9,9 @@ type WORDLIST_PTOKEN = typeof ENUMERATION_PTOKEN | typeof NOTATION_PTOKEN;
 type DeliverPToken = (pToken?: WordListPToken) => void;
 type DeliverNamePToken = (pToken: Array<WordListEntryPToken>) => void;
 enum WordListType {
-    ENUMERATION = 'ENUMERATION',
-    NOTATION = 'NOTATION',
-};
+   ENUMERATION = 'ENUMERATION',
+   NOTATION = 'NOTATION',
+}
 type WordListProps = {
    open: SToken;
    [name: string]: any;
@@ -23,7 +23,7 @@ type WordListEntryPToken = {
    readonly wordSpace?: SToken;
    readonly connector?: SToken;
    readonly connectorSpace?: SToken;
-}
+};
 
 class WordListPToken {
    public readonly type: WORDLIST_PTOKEN;
@@ -83,7 +83,12 @@ function parse(source: STokenSource, type: WordListType, deliverPToken: DeliverP
 
 function parseNames(source: STokenSource, deliverPToken: DeliverNamePToken): void {
    source.extract('peekChar', (charSToken) => {
-      if (!charSToken || charSToken.str === ')' || charSToken.str === '%' || charSToken.str === '>') {
+      if (
+         !charSToken ||
+         charSToken.str === ')' ||
+         charSToken.str === '%' ||
+         charSToken.str === '>'
+      ) {
          deliverPToken([]);
          return;
       }
@@ -91,7 +96,7 @@ function parseNames(source: STokenSource, deliverPToken: DeliverNamePToken): voi
       let aWord: WordListEntryPToken = {};
 
       // Codi will always match at least one of these.
-      source.extractToObject('word', [ ')', '%', '>', '|' ], aWord, 'word');
+      source.extractToObject('word', [')', '%', '>', '|'], aWord, 'word');
       source.extractToObject('space', aWord, 'wordSpace');
       source.extractToObject('match', '|', aWord, 'connector');
       source.extractToObject('space', aWord, 'connectorSpace');
@@ -108,11 +113,9 @@ function parseNames(source: STokenSource, deliverPToken: DeliverNamePToken): voi
 
 export {
    parse as parseWordList,
-
    ENUMERATION_PTOKEN,
    NOTATION_PTOKEN,
    WordListType,
    WordListPToken,
-
    WordListEntryPToken,
 };

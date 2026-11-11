@@ -2,10 +2,7 @@
 
 import { makeSTokenMaker, MockSTokenSource, STokenMaker } from 'pToken-test';
 
-import {
-   CommentPToken,
-   parseComment,
-} from '../comment';
+import { CommentPToken, parseComment } from '../comment';
 
 describe('comment (unit)', () => {
    let commentPToken: CommentPToken;
@@ -15,7 +12,7 @@ describe('comment (unit)', () => {
       expectedSToken = makeSTokenMaker();
       commentPToken = new CommentPToken({
          open: expectedSToken('<!--'),
-         text: [ expectedSToken('commentText') ],
+         text: [expectedSToken('commentText')],
          close: expectedSToken('-->'),
       });
    });
@@ -28,10 +25,15 @@ describe('comment (unit)', () => {
       });
 
       it('does a simple parse', () => {
-         const mockSource = new MockSTokenSource([
-            [ 'commentText', 'all', [ '--' ] ],
-            [ '-->', 'match', '-->' ],
-         ], 4, 0, 4);
+         const mockSource = new MockSTokenSource(
+            [
+               ['commentText', 'all', ['--']],
+               ['-->', 'match', '-->'],
+            ],
+            4,
+            0,
+            4,
+         );
 
          parseComment(mockSource, commentPToken.open, callback);
          mockSource.respondInAsyncTime();
@@ -43,20 +45,21 @@ describe('comment (unit)', () => {
          const expectedSToken = makeSTokenMaker();
          commentPToken = new CommentPToken({
             open: expectedSToken('<!--'),
-            text: [
-               expectedSToken('part1'),
-               expectedSToken('--'),
-               expectedSToken('part2'),
-            ],
+            text: [expectedSToken('part1'), expectedSToken('--'), expectedSToken('part2')],
             close: expectedSToken('-->'),
          });
-         const mockSource = new MockSTokenSource([
-            [ 'part1', 'all', [ '--' ] ],
-            [ undefined, 'match', '-->' ],
-            [ '--', 'match', '--' ],
-            [ 'part2', 'all', [ '--' ] ],
-            [ '-->', 'match', '-->' ],
-         ], 4, 0, 4);
+         const mockSource = new MockSTokenSource(
+            [
+               ['part1', 'all', ['--']],
+               [undefined, 'match', '-->'],
+               ['--', 'match', '--'],
+               ['part2', 'all', ['--']],
+               ['-->', 'match', '-->'],
+            ],
+            4,
+            0,
+            4,
+         );
 
          parseComment(mockSource, commentPToken.open, callback);
          mockSource.respondInAsyncTime();
@@ -68,9 +71,9 @@ describe('comment (unit)', () => {
          (commentPToken.text as any).pop();
          (commentPToken as any).close = undefined;
          const mockSource = new MockSTokenSource([
-            [ undefined, 'all', [ '--' ] ],
-            [ undefined, 'match', '-->' ],
-            [ undefined, 'match', '--' ],
+            [undefined, 'all', ['--']],
+            [undefined, 'match', '-->'],
+            [undefined, 'match', '--'],
          ]);
 
          parseComment(mockSource, commentPToken.open, callback);
@@ -83,16 +86,15 @@ describe('comment (unit)', () => {
          const expectedSToken = makeSTokenMaker();
          commentPToken = new CommentPToken({
             open: expectedSToken('<!--'),
-            text: [
-               expectedSToken('part1'),
-            ],
+            text: [expectedSToken('part1')],
             close: undefined,
          });
-         const mockSource = new MockSTokenSource([
-            'part1',
-            [ undefined, 'match', '-->' ],
-            [ undefined, 'match', '--' ],
-         ], 4, 0, 4);
+         const mockSource = new MockSTokenSource(
+            ['part1', [undefined, 'match', '-->'], [undefined, 'match', '--']],
+            4,
+            0,
+            4,
+         );
 
          parseComment(mockSource, commentPToken.open, callback);
          mockSource.respondInAsyncTime();
@@ -104,26 +106,27 @@ describe('comment (unit)', () => {
          const expectedSToken = makeSTokenMaker();
          commentPToken = new CommentPToken({
             open: expectedSToken('<!--'),
-            text: [
-               expectedSToken('part1'),
-               expectedSToken('--'),
-            ],
+            text: [expectedSToken('part1'), expectedSToken('--')],
             close: undefined,
          });
-         const mockSource = new MockSTokenSource([
-            [ 'part1', 'all', [ '--' ] ],
-            [ undefined, 'match', '-->' ],
-            [ '--', 'match', '--' ],
-            [ undefined, 'all', [ '--' ] ],
-            [ undefined, 'match', '-->' ],
-            [ undefined, 'match', '--' ],
-         ], 4, 0, 4);
+         const mockSource = new MockSTokenSource(
+            [
+               ['part1', 'all', ['--']],
+               [undefined, 'match', '-->'],
+               ['--', 'match', '--'],
+               [undefined, 'all', ['--']],
+               [undefined, 'match', '-->'],
+               [undefined, 'match', '--'],
+            ],
+            4,
+            0,
+            4,
+         );
 
          parseComment(mockSource, commentPToken.open, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(commentPToken);
       });
-
    });
 });

@@ -2,8 +2,8 @@
 
 import { SToken } from 'basic';
 import { ExternalIdP } from 'pToken';
-import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 import { literalToSTokens } from './literalToSTokens';
 
 function externalIdToSTokens(externalId: ExternalIdP | undefined): Array<SToken> {

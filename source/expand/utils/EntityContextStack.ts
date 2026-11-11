@@ -1,11 +1,12 @@
+import { strOrBlank } from 'basic';
+import { EntityId } from 'basic';
 import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    GeneralEntityReferencePToken,
    ParameterEntityReferencePToken,
 } from 'pToken';
-import { strOrBlank } from 'basic';
+
 import { OpaqueEntityLoc } from '../types';
-import { EntityId } from 'basic';
 import {
    ExternalDtdSubsetPseudoToken,
    EXTERNAL_DTD_PSEUDO_TOKEN,

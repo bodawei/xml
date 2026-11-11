@@ -1,13 +1,12 @@
 /* Copyright ® 2018-2019 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, extractSurrogatePair, isChar } from 'basic';
+import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { CharRefPToken } from 'pToken';
-import { toSToken } from 'basic';
 import { makeCharRef } from 'token-test';
 
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
-
 import { charRefCheck } from '../charRefCheck';
 
 jest.mock('basic', () => {

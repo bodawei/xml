@@ -3,8 +3,8 @@
 import { strOrBlank } from 'basic';
 import { ParameterEntityDeclarationPToken } from 'pToken';
 
-import { ExternalIdX } from '../common/externalIdX';
 import { ExntityValueX, makeEntityValueX, cloneEntityValueX } from '../common/entityValueX';
+import { ExternalIdX } from '../common/externalIdX';
 
 const PARAMETER_ENTITY_DECLARATION_XTOKEN = 'PARAMETER_ENTITY_DECLARATION_XTOKEN';
 

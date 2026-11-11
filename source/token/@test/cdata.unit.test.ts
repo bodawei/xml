@@ -1,6 +1,5 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-
 import { toSToken } from 'basic';
 import { makeSTokenMaker, MockSTokenSource } from 'pToken-test';
 
@@ -35,9 +34,9 @@ describe('cdata (unit)', () => {
 
       it('returns simple values', () => {
          const mockSource = new MockSTokenSource([
-            [ '[', 'match', '[' ],
-            [ 'test text', 'all', [ ']]>' ] ],
-            [ ']]>', 'match', ']]>' ],
+            ['[', 'match', '['],
+            ['test text', 'all', [']]>']],
+            [']]>', 'match', ']]>'],
          ]);
          delete (cDataPToken as any).sectionType;
 
@@ -48,11 +47,7 @@ describe('cdata (unit)', () => {
       });
 
       it('handles EOF', () => {
-         const mockSource = new MockSTokenSource([
-            undefined,
-            undefined,
-            undefined,
-         ]);
+         const mockSource = new MockSTokenSource([undefined, undefined, undefined]);
 
          parseCdata(mockSource, sectionStart, callback);
          mockSource.respondInAsyncTime();
@@ -62,7 +57,5 @@ describe('cdata (unit)', () => {
             close: undefined,
          });
       });
-
    });
-
 });

@@ -1,9 +1,9 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { toSToken } from 'basic';
 import { WordListPToken, WordListType } from 'token';
+
 import { wordListToSTokens } from '../wordListToSTokens';
 
 describe('wordListToSTokens (unit)', () => {

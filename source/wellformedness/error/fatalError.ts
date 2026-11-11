@@ -1,7 +1,8 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
-import { fatalErrorCodes } from './fatalErrorCodes';
 import { FATAL_ERROR_SEVERITY, ProblemPosition, Problem } from 'basic';
+
+import { fatalErrorCodes } from './fatalErrorCodes';
 
 class FatalError extends Problem {
    constructor(

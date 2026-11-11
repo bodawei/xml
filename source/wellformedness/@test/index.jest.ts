@@ -1,6 +1,7 @@
 /* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
+
 import { fatalErrorCodes } from '../error/fatalErrorCodes';
 
 // import * as wellformedness from '../index';

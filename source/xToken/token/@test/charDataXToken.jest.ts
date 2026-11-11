@@ -3,6 +3,7 @@
 import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { CharDataPToken } from 'token';
+
 import { CHARDATA_XTOKEN, CharDataXToken } from '../charDataXToken';
 
 describe('charDataXToken (unit)', () => {

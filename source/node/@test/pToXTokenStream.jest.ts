@@ -1,7 +1,6 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { makeTextPToken } from 'token-test';
 import { convertPTokenToXToken, TextXToken } from 'xToken';
 
@@ -11,10 +10,12 @@ jest.mock('xToken');
 
 describe('PToXTokenStream (unit)', () => {
    let pToXTokenStream: PToXTokenStream;
-    let convertPTokenToXTokenMock: jest.MockedFunction<typeof convertPTokenToXToken>;
+   let convertPTokenToXTokenMock: jest.MockedFunction<typeof convertPTokenToXToken>;
 
    beforeEach(() => {
-      convertPTokenToXTokenMock = convertPTokenToXToken as jest.MockedFunction<typeof convertPTokenToXToken>;
+      convertPTokenToXTokenMock = convertPTokenToXToken as jest.MockedFunction<
+         typeof convertPTokenToXToken
+      >;
 
       pToXTokenStream = new PToXTokenStream({});
    });

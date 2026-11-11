@@ -1,6 +1,6 @@
 import { Problem } from 'basic';
-import { PARAMETER_ENTITY_REFERENCE_PTOKEN, ParameterEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'basic';
+import { PARAMETER_ENTITY_REFERENCE_PTOKEN, ParameterEntityReferencePToken } from 'pToken';
 import {
    ElidedEntityDeclarationPToken,
    EntityValuePToken,
@@ -9,10 +9,9 @@ import {
 } from 'token';
 
 import { ExpandParams } from '../types';
-import { EntityDetails } from './EntityDetails';
-
 import { addProtoReplacementText } from './addProtoReplacementText';
 import { EntityContextStack } from './EntityContextStack';
+import { EntityDetails } from './EntityDetails';
 
 interface ExpandedResult {
    newValue: EntityValuePToken;

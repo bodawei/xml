@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ElementEndPToken } from 'token';
 import { strOrBlank } from 'basic';
+import { ElementEndPToken } from 'token';
 
 const ELEMENT_END_XTOKEN = 'ELEMENT_END_XTOKEN';
 

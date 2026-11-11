@@ -1,9 +1,9 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
+import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { ParameterEntityReferencePToken } from 'pToken';
-import { toSToken } from 'basic';
 import { ParameterEntityStartPToken } from 'token';
 
 import { parameterEntityReferenceCheck } from '../../token/parameterEntityReferenceCheck';

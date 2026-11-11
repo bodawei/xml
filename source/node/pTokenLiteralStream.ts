@@ -2,9 +2,8 @@
 
 import { Readable } from 'stream';
 
-import { PTokenLiteralParser} from 'pToken';
-
 import { STokenSource } from 'basic';
+import { PTokenLiteralParser } from 'pToken';
 
 type Options = {
    peRef?: boolean;
@@ -27,10 +26,10 @@ class PTokenLiteralStream extends Readable {
    }
 
    _read() {
-      this.parser.parse(result => {
+      this.parser.parse((result) => {
          this.push(result || null);
       });
    }
 }
 
-export  {PTokenLiteralStream };
+export { PTokenLiteralStream };

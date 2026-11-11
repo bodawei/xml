@@ -1,23 +1,38 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { CharRefPToken, parseCharRef, GeneralEntityReferencePToken, parseGeneralEntityReference, GENERAL_ENTITY_REFERENCE_PTOKEN } from 'pToken';
 import { SToken, STokenSource } from 'basic';
-
+import {
+   CharRefPToken,
+   parseCharRef,
+   GeneralEntityReferencePToken,
+   parseGeneralEntityReference,
+   GENERAL_ENTITY_REFERENCE_PTOKEN,
+} from 'pToken';
 import { ParameterEntityReferencePToken, TextPToken, parseParameterEntityReference } from 'pToken';
-import {  GeneralEntityEndPToken } from '../marker/generalEntityEnd';
+
+import { GeneralEntityEndPToken } from '../marker/generalEntityEnd';
 import { GeneralEntityStartPToken } from '../marker/generalEntityStart';
 import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
-import { ParameterEntityStartPToken, } from '../marker/parameterEntityStart';
+import { ParameterEntityStartPToken } from '../marker/parameterEntityStart';
 
 // <typeHack>
-   // type EntityReferencePToken = { type: string };
-   // function isTextPToken(item: any): item is TextPToken {
-   //    return item.type === TEXT_PTOKEN;
-   // }
+// type EntityReferencePToken = { type: string };
+// function isTextPToken(item: any): item is TextPToken {
+//    return item.type === TEXT_PTOKEN;
+// }
 // </typeHack>
 
-type Terminators = Array<'&'|'&#'|'%'|'"'|'\''>;
-type LiteralValuePToken = Array<TextPToken|CharRefPToken|GeneralEntityReferencePToken|ParameterEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken|ParameterEntityStartPToken|ParameterEntityEndPToken>;
+type Terminators = Array<'&' | '&#' | '%' | '"' | "'">;
+type LiteralValuePToken = Array<
+   | TextPToken
+   | CharRefPToken
+   | GeneralEntityReferencePToken
+   | ParameterEntityReferencePToken
+   | GeneralEntityStartPToken
+   | GeneralEntityEndPToken
+   | ParameterEntityStartPToken
+   | ParameterEntityEndPToken
+>;
 type DeliverValue = (valuePToken: LiteralValuePToken) => void;
 
 /**********************************************************************\
@@ -60,7 +75,7 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
       let currentValue: LiteralValuePToken = [];
 
       if (container.sToken) {
-         currentValue = [ new TextPToken({ text: container.sToken }) ];
+         currentValue = [new TextPToken({ text: container.sToken })];
       }
 
       // End of file.
@@ -69,23 +84,34 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
          return;
       }
 
-      function handleRef(refPToken: GeneralEntityReferencePToken | ParameterEntityReferencePToken | CharRefPToken |void) {
+      function handleRef(
+         refPToken:
+            | GeneralEntityReferencePToken
+            | ParameterEntityReferencePToken
+            | CharRefPToken
+            | void,
+      ) {
          parse(source, terminators, (rest) => {
-            rest.unshift(refPToken as GeneralEntityReferencePToken | ParameterEntityReferencePToken | CharRefPToken); // typeHack
+            rest.unshift(
+               refPToken as
+                  | GeneralEntityReferencePToken
+                  | ParameterEntityReferencePToken
+                  | CharRefPToken,
+            ); // typeHack
             deliverPToken(currentValue.concat(rest));
          });
       }
 
       switch (charSToken.str[0]) {
          case '"': // Note Cody will only notice one of these (the one passed in through terminators)
-         case '\'':
+         case "'":
             deliverPToken(currentValue);
             break;
          case '%':
             parseParameterEntityReference(source, handleRef);
             break;
          case '&':
-            source.extract('multi', [ '&', '&#' ], (opening) => {
+            source.extract('multi', ['&', '&#'], (opening) => {
                if (opening && opening.str === '&') {
                   parseGeneralEntityReference(source, opening!, handleRef); // typeHack
                } else {
@@ -97,16 +123,8 @@ function parse(source: STokenSource, terminators: Terminators, deliverPToken: De
    });
 }
 
-
-
 const parseLiteralValue = parse;
-export {
-   LiteralValuePToken,
-   Terminators,
-
-   parse,
-   parseLiteralValue,
-}
+export { LiteralValuePToken, Terminators, parse, parseLiteralValue };
 
 export default {
    parse,

@@ -2,6 +2,7 @@
 
 import { SToken } from 'basic';
 import { CommentPToken } from 'token';
+
 import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function commentToSTokens(pToken: CommentPToken): Array<SToken> {

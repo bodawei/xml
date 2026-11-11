@@ -30,11 +30,16 @@ describe('baseDeclaration (unit)', () => {
       });
 
       it('does an ordinary full parsing', () => {
-         mockSource = new MockSTokenSource([
-            [ ' ', 'space' ],
-            [ 'DOCTYPE', 'word', [ '>' ] ],
-            [ ' ', 'space' ],
-         ], 2, 0, 2);
+         mockSource = new MockSTokenSource(
+            [
+               [' ', 'space'],
+               ['DOCTYPE', 'word', ['>']],
+               [' ', 'space'],
+            ],
+            2,
+            0,
+            2,
+         );
 
          declaration.parse(mockSource, declarationPToken.open, callback);
          mockSource.respondInAsyncTime();
@@ -43,11 +48,7 @@ describe('baseDeclaration (unit)', () => {
       });
 
       it('copes with EOF', () => {
-         mockSource = new MockSTokenSource([
-            undefined,
-            undefined,
-            undefined,
-         ]);
+         mockSource = new MockSTokenSource([undefined, undefined, undefined]);
          declarationPToken.postOpenSpace = undefined;
          declarationPToken.declType = undefined;
          declarationPToken.postDeclTypeSpace = undefined;
@@ -57,7 +58,5 @@ describe('baseDeclaration (unit)', () => {
 
          expect(callback).toContainPTokenProps(declarationPToken);
       });
-
    });
-
 });

@@ -4,8 +4,8 @@ import { ConformanceVersion, Range, EntityId } from 'basic';
 import { SToken, STokenSource } from 'basic';
 import { makeSTokenMaker } from 'pToken-test';
 
-import { parseCdata, CdataPToken } from '../cdata';
 import { SectionStart } from '../bridge/section';
+import { parseCdata, CdataPToken } from '../cdata';
 
 describe('cdata (integration)', () => {
    let source: STokenSource;
@@ -17,7 +17,7 @@ describe('cdata (integration)', () => {
 
       source = new STokenSource();
 
-      sectionStart =  {
+      sectionStart = {
          open: expectedSToken('<!['),
          sectionType: expectedSToken('CDATA'),
       };
@@ -31,7 +31,6 @@ describe('cdata (integration)', () => {
    });
 
    describe('parse()', () => {
-
       it('parses up to the ]]>', (done) => {
          source.addText('[some text<foo>]]>other', new Range(new EntityId(), 8, 0, 8));
 
@@ -40,7 +39,5 @@ describe('cdata (integration)', () => {
             done();
          });
       });
-
    });
-
 });

@@ -1,15 +1,14 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it, jest } from '@jest/globals';
-
 import { ProblemCollector, ConformanceVersion, EntityId } from 'basic';
+import { toSToken } from 'basic';
 import {
    ParseToken,
    ProcessingInstructionPToken,
    TextDeclarationPToken,
    XmlDeclarationPToken,
 } from 'pToken';
-import { toSToken } from 'basic';
 import {
    COMMENT_PTOKEN,
    ELEMENT_EMPTY_PTOKEN,
@@ -46,9 +45,7 @@ import {
    makeElementEmpty,
 } from 'token-test';
 
-import { dtdEndCheck } from '../common/dtdEndCheck';
-import { wellFormedErrorCodes, WellFormedError } from '../error/wellFormedError';
-import { DocumentChecker } from '../DocumentChecker';
+import { checkMap } from '../checkMap';
 import {
    CHECKER_DONE,
    CheckState,
@@ -57,7 +54,9 @@ import {
    ContentCheckerConstructor,
    MarkupCheckerConstructor,
 } from '../checkUtils';
-import { checkMap } from '../checkMap';
+import { dtdEndCheck } from '../common/dtdEndCheck';
+import { DocumentChecker } from '../DocumentChecker';
+import { wellFormedErrorCodes, WellFormedError } from '../error/wellFormedError';
 import { conditionalStartCheck } from '../token/conditionalStartCheck';
 
 jest.mock('../common/dtdEndCheck');

@@ -5,7 +5,6 @@ import { toSToken, STokenSource } from 'basic';
 import { parseCdata, SectionStart } from 'token';
 
 import { WellFormedError, wellFormedErrorCodes } from '../../error/wellFormedError';
-
 import { cdataCheck } from '../cdataCheck';
 
 const WFEID = wellFormedErrorCodes.id;

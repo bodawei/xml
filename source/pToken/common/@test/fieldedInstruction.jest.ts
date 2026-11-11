@@ -4,10 +4,9 @@ import { describe, expect, it } from '@jest/globals';
 import { toSToken } from 'basic';
 import { MockSTokenSource } from 'pToken-test';
 
-import { parseFieldedInstruction, FieldedInstruction } from '../fieldedInstruction';
-import { InstructionStart } from '../../bridge/instruction';
-
 import literal from '../../../token/common/literal';
+import { InstructionStart } from '../../bridge/instruction';
+import { parseFieldedInstruction, FieldedInstruction } from '../fieldedInstruction';
 
 describe('FieldedInstruction (unit)', () => {
    let expected: FieldedInstruction;

@@ -2,6 +2,7 @@
 
 import { SToken } from 'basic';
 import { CdataPToken } from 'token';
+
 import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function cdataToSTokens(pToken: CdataPToken): Array<SToken> {

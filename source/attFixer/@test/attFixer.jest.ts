@@ -1,6 +1,7 @@
 /* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
+import { toSToken, SToken } from 'basic';
 import {
    AttListDeclarationPToken,
    CharRefPToken,
@@ -11,7 +12,8 @@ import {
    ParameterEntityDeclarationPToken,
    TextPToken,
 } from 'pToken';
-import { toSToken, SToken } from 'basic';
+// ick
+import { ElementStartPToken, GeneralEntityStartPToken, GeneralEntityEndPToken } from 'token';
 import {
    makeAttListDeclaration,
    makeElementStart,
@@ -25,10 +27,7 @@ import {
    makeGeneralEntityDeclaration,
 } from 'token-test';
 
-// ick
-import { ElementStartPToken, GeneralEntityStartPToken, GeneralEntityEndPToken } from 'token';
 import { AttributePToken, AttrValue } from '../../token/common/attribute';
-
 import { isAugmentedAttribute, AttFixer, AugmentedAttributePToken } from '../attFixer';
 
 describe('AttFixer', () => {

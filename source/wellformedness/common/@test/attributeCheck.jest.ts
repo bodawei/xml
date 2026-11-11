@@ -1,19 +1,19 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
+import { SToken, toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
-import { SToken, toSToken } from 'basic';
 import { AttributePToken } from 'token';
 
+import { nameXmlCheck } from '../../common/nameXmlCheck';
+import { errorCodes } from '../../error/errorCodes';
+import { warningCodes } from '../../error/warningCodes';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
+import { attributeCheck } from '../attributeCheck';
 import { attributeLangCheck } from '../attributeLangCheck';
 import { literalCheck } from '../literalCheck';
 import { nameCheck } from '../nameCheck';
-import { nameXmlCheck } from '../../common/nameXmlCheck';
-import { attributeCheck } from '../attributeCheck';
-import { wellFormedErrorCodes } from '../../error/wellFormedError';
-import { warningCodes } from '../../error/warningCodes';
-import { errorCodes } from '../../error/errorCodes';
 
 jest.mock('../attributeLangCheck');
 jest.mock('../literalCheck');

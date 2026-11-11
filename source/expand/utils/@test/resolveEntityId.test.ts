@@ -1,6 +1,7 @@
 /* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
 import { EntityId } from 'basic';
+
 import { resolveEntityId } from '../resolveEntityId';
 
 describe('resolveEntityId()', () => {

@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ParameterEntityDeclarationPToken, PARAMETER_ENTITY_DECLARATION_PTOKEN } from 'pToken';
 import { SToken } from 'basic';
+import { ParameterEntityDeclarationPToken, PARAMETER_ENTITY_DECLARATION_PTOKEN } from 'pToken';
 
 import { EntityValuePToken } from './EntityValuePToken';
 
@@ -23,8 +23,4 @@ class ElidedEntityDeclarationPToken {
    }
 }
 
-export {
-   ELIDED_ENTITY_DECLARATION_PTOKEN,
-
-   ElidedEntityDeclarationPToken,
-};
+export { ELIDED_ENTITY_DECLARATION_PTOKEN, ElidedEntityDeclarationPToken };

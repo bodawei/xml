@@ -1,9 +1,9 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { EntityId } from '../../../basic/token/entityId';
-import { Range } from '../../../basic/util/range';
 import { SToken } from '../../../basic/sToken/sToken';
 import { STokenSource } from '../../../basic/sToken/STokenSource';
+import { EntityId } from '../../../basic/token/entityId';
+import { Range } from '../../../basic/util/range';
 
 const PLACEHOLDER_RANGE = new Range(new EntityId(), 0, 0, 0, 1, 0, 1);
 const PEEK = '___PEEK___';

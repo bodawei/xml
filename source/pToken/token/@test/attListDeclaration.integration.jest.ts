@@ -1,19 +1,17 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'basic';
+import { TextPToken } from 'pToken';
 
+// ick
+import { WordListPToken, WordListType } from '../../../token/common/wordList';
 import {
    AttListDeclarationPToken,
    parseAttListDeclaration,
    resumeParseAttListDeclaration,
 } from '../attListDeclaration';
 import { ParameterEntityReferencePToken } from '../parameterEntityReference';
-
-// ick
-import { WordListPToken, WordListType } from '../../../token/common/wordList';
 
 describe('attListDeclaration (integration)', () => {
    describe('parseAttListDeclaration()', () => {

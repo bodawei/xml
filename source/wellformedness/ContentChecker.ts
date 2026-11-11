@@ -1,6 +1,7 @@
 /* Copyright ® 2019-2026 by 柏大衛. All rights reserved. */
 
 import { Collector } from 'basic';
+import { strOrBlank } from 'basic';
 import {
    CHARREF_PTOKEN,
    PROCESSING_INSTRUCTION_PTOKEN,
@@ -9,7 +10,6 @@ import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    ParseToken,
 } from 'pToken';
-import { strOrBlank } from 'basic';
 import {
    CDATA_PTOKEN,
    CHARDATA_PTOKEN,

@@ -1,21 +1,19 @@
 /* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { UnexpandedMarkupDetails, TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'basic';
+import { UnexpandedMarkupDetails, TextPToken } from 'pToken';
 import { MockSTokenSource } from 'pToken-test';
 
+import literal from '../../../token/common/literal';
+import { parseWordList } from '../../../token/common/wordList';
+import { WordListPToken, WordListType } from '../../../token/common/wordList';
+import { parseUnexpanded } from '../../common/parseUnexpanded';
 import {
    AttListDeclarationPToken,
    parseAttListDeclaration,
    resumeParseAttListDeclaration,
 } from '../attListDeclaration';
-import { parseUnexpanded } from '../../common/parseUnexpanded';
-
-import literal from '../../../token/common/literal';
-import { parseWordList } from '../../../token/common/wordList';
-import { WordListPToken, WordListType } from '../../../token/common/wordList';
 
 jest.mock('../../../token/common/literal');
 jest.mock('../../../token/common/wordList');

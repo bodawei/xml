@@ -1,12 +1,12 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
+import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
-import { toSToken } from 'basic';
 import { GeneralEntityEndPToken, GeneralEntityStartPToken } from 'token';
-import { wellFormedErrorCodes } from '../../error/wellFormedError';
 
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { attributeLangCheck } from '../attributeLangCheck';
 
 const WFEID = wellFormedErrorCodes.id;

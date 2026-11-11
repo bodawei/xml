@@ -1,13 +1,13 @@
 /* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, Collector, isName } from 'basic';
+import { strOrBlank } from 'basic';
 import {
    GENERAL_ENTITY_DECLARATION_PTOKEN,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
    TEXT_PTOKEN,
 } from 'pToken';
-import { strOrBlank } from 'basic';
 import { LiteralValuePToken } from 'token';
 
 import { charCheck } from '../common/charCheck';

@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { ContentModelP, isContentModelP } from 'pToken';
 import { strOrBlank } from 'basic';
+import { ContentModelP, isContentModelP } from 'pToken';
 
 enum CpType {
    CHOICE = 'CHOICE',

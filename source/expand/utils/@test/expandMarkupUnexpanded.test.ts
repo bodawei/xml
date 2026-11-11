@@ -1,21 +1,21 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { ENTITY_ID, ConformanceVersion, Problem } from 'basic';
+import { toSToken, STokenSource } from 'basic';
 import {
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
    UnexpandedMarkupToken,
    TextPToken,
 } from 'pToken';
-import { toSToken, STokenSource } from 'basic';
-import { WellFormedError, wellFormedErrorCodes } from 'wellformedness';
 import { ParameterEntityStartPToken, ParameterEntityEndPToken } from 'token';
+import { WellFormedError, wellFormedErrorCodes } from 'wellformedness';
 
 import { ExpandParams, RetrieveResults } from '../../types';
 import * as addProtoReplacementText from '../addProtoReplacementText';
 import { AddProtoReplacementTextResult } from '../addProtoReplacementText';
-import { EntityDetails } from '../EntityDetails';
 import { EntityContextStack } from '../EntityContextStack';
+import { EntityDetails } from '../EntityDetails';
 import { expandMarkupUnexpanded } from '../expandMarkupUnexpanded';
 
 const WFEID = wellFormedErrorCodes.id;

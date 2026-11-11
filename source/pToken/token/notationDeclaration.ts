@@ -2,10 +2,9 @@
 
 import { combineSTokens, SToken, STokenSource } from 'basic';
 
-import { parseUnexpanded } from '../common/parseUnexpanded';
-
 import { DeclarationStart } from '../../token/bridge/declaration';
 import { ExternalIdP, parseExternalId, resumeParseExternalId } from '../common/externalId';
+import { parseUnexpanded } from '../common/parseUnexpanded';
 import { UnexpandedMarkupDetails } from '../types';
 
 const NOTATION_DECLARATION_PTOKEN = 'NOTATION_DECLARATION_PTOKEN';

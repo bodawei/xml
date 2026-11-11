@@ -1,11 +1,10 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { combineSTokens, SToken, STokenSource, strOrBlank } from 'basic';
-import literal from '../../token/common/literal';
-import { DeclarationStart } from '../../token/bridge/declaration';
-import { parseExternalId } from '../common/externalId';
-import { ParameterEntityReferencePToken } from '../token/parameterEntityReference';
 
+import { DeclarationStart } from '../../token/bridge/declaration';
+import literal from '../../token/common/literal';
+import { parseExternalId } from '../common/externalId';
 import { parseUnexpanded, parseUnexpandedAfterPeRef } from '../common/parseUnexpanded';
 import {
    GeneralEntityDeclarationProps,
@@ -15,6 +14,7 @@ import {
    ParameterEntityDeclarationProps,
    ParameterEntityDeclarationPToken,
 } from '../token/parameterEntityDeclaration';
+import { ParameterEntityReferencePToken } from '../token/parameterEntityReference';
 
 type AnyEntityDeclaration = GeneralEntityDeclarationProps & ParameterEntityDeclarationProps;
 

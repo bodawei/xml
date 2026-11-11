@@ -1,14 +1,13 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'basic';
-
-import { parseEntityDeclaration, resumeParseEntityDeclaration } from '../entityDeclaration';
-
+import { TextPToken } from 'pToken';
 import { DeclarationStart } from 'token';
+
 import { GeneralEntityDeclarationPToken } from '../../token/generalEntityDeclaration';
 import { ParameterEntityDeclarationPToken } from '../../token/parameterEntityDeclaration';
 import { ParameterEntityReferencePToken } from '../../token/parameterEntityReference';
+import { parseEntityDeclaration, resumeParseEntityDeclaration } from '../entityDeclaration';
 
 describe('parseEntityDeclaration (unit)', () => {
    let declarationStart: DeclarationStart;

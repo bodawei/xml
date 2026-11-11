@@ -2,12 +2,11 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
-import { ParamCollector } from 'basic-test';
 import { toSToken } from 'basic';
+import { ParamCollector } from 'basic-test';
 import { CharDataPToken } from 'token';
 
 import { charCheck } from '../../common/charCheck';
-
 import { charDataCheck } from '../charDataCheck';
 
 jest.mock('../../common/charCheck');

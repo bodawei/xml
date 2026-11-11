@@ -3,7 +3,6 @@
 import { ParseToken } from 'pToken';
 
 import { GeneralEntityEndXToken } from './marker/generalEntityEndXToken';
-import { UnknownDeclarationXToken } from './token/unknownDeclarationXToken';
 import { GeneralEntityStartXToken } from './marker/generalEntityStartXToken';
 import { ParameterEntityEndXToken } from './marker/parameterEntityEndXToken';
 import { ParameterEntityStartXToken } from './marker/parameterEntityStartXToken';
@@ -29,6 +28,7 @@ import { ProcessingInstructionXToken } from './token/processingInstructionXToken
 import { SpaceXToken } from './token/spaceXtoken';
 import { TextDeclarationXToken } from './token/textDeclarationXToken';
 import { TextXToken } from './token/textXToken';
+import { UnknownDeclarationXToken } from './token/unknownDeclarationXToken';
 import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
 
 type XToken =

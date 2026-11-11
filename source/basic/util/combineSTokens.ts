@@ -1,7 +1,6 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { SToken } from '../sToken/sToken';
-
 import { offsetsAreEqual } from './offsetsAreEqual';
 import { Range } from './range';
 import { rangeEndOffset } from './rangeEndOffset';

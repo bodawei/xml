@@ -1,15 +1,13 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
+import { STokenSource, toSToken } from 'basic';
 import { ParameterEntityReferencePToken } from 'pToken';
-import {  STokenSource, toSToken } from 'basic';
-import { CdataPToken, ConditionalStartPToken,  } from 'token';
+import { CdataPToken, ConditionalStartPToken } from 'token';
 
 import { parseSection } from '../section';
 
 describe('section (integration)', () => {
-
    describe('parse()', () => {
-
       it('produces a full CDATA PToken', (done) => {
          const source = new STokenSource();
          source.addText(' CDATA [ FOO ]]>');
@@ -23,7 +21,7 @@ describe('section (integration)', () => {
                sectionTypeSpace: toSToken(' '),
                bracket: toSToken('['),
                text: toSToken(' FOO '),
-               close: toSToken(']]>')
+               close: toSToken(']]>'),
             });
 
             expect(parsing).toEqualRangeless(expected);
@@ -69,14 +67,12 @@ describe('section (integration)', () => {
                unexpanded: {
                   peRef,
                   propName: 'sectionType',
-               }
+               },
             });
 
             expect(parsing).toEqualRangeless(expected);
             done();
          });
       });
-
    });
-
 });

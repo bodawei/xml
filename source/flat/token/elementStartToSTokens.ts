@@ -2,9 +2,9 @@
 
 import { SToken } from 'basic';
 import { ElementEmptyPToken, ElementStartPToken } from 'token';
-import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 import { attributeToSTokens } from '../common/attributeToSTokens';
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function elementStartToSTokens(pToken: ElementStartPToken | ElementEmptyPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();

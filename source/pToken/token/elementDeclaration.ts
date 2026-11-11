@@ -1,10 +1,9 @@
 import { combineSTokens, SToken, STokenSource } from 'basic';
-
-import { parseUnexpanded } from '../common/parseUnexpanded';
-import { ContentModelP, parseContentModel, resumeParseContentModel } from '../common/contentModel';
-import { UnexpandedMarkupDetails } from '../types';
-
 import { DeclarationStart } from 'token';
+
+import { ContentModelP, parseContentModel, resumeParseContentModel } from '../common/contentModel';
+import { parseUnexpanded } from '../common/parseUnexpanded';
+import { UnexpandedMarkupDetails } from '../types';
 
 type DeliverCB = (ptoken: ElementDeclarationPToken) => void;
 

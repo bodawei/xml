@@ -1,8 +1,9 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
 import { Transform } from 'stream';
-import { PToken } from 'token';
+
 import { ParseToken } from 'pToken';
+import { PToken } from 'token';
 
 type PTokenArray = Array<ParseToken>;
 
@@ -20,6 +21,4 @@ function gatherStream(stream: Transform, expect: (results: PTokenArray) => void,
    });
 }
 
-export {
-   gatherStream,
-};
+export { gatherStream };

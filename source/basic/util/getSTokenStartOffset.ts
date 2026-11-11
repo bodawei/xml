@@ -1,7 +1,6 @@
 /* Copyright ® 2021-2022 by 柏大衛. All rights reserved. */
 
 import { SToken } from '../sToken/sToken';
-
 import { Offset } from './offset';
 
 function getSTokenStartOffset(sToken: SToken): Offset | undefined {

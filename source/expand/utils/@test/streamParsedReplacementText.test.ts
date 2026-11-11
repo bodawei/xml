@@ -1,6 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { ENTITY_ID, ConformanceVersion, EntityId, Problem } from 'basic';
+import { toSToken, STokenSource } from 'basic';
 import {
    GeneralEntityDeclarationPToken,
    GeneralEntityReferencePToken,
@@ -9,8 +10,7 @@ import {
    TextPToken,
    ParseToken,
 } from 'pToken';
-import { toSToken, STokenSource } from 'basic';
-import { WellFormedError, wellFormedErrorCodes } from 'wellformedness';
+import { ParseType } from 'pToken';
 import {
    ExternalSubsetStartToken,
    ExternalSubsetEndToken,
@@ -19,13 +19,13 @@ import {
    ParameterEntityEndPToken,
    ParameterEntityStartPToken,
 } from 'token';
+import { WellFormedError, wellFormedErrorCodes } from 'wellformedness';
 
 import { ExpandParams, RetrieveResults } from '../../types';
+import { EntityContextStack } from '../EntityContextStack';
 import { EntityDetails } from '../EntityDetails';
 import { ExternalDtdSubsetPseudoToken } from '../ExternalDtdSubsetPseudoToken';
 import { streamParsedReplacementText } from '../streamParsedReplacementText';
-import { ParseType } from 'pToken';
-import { EntityContextStack } from '../EntityContextStack';
 
 function noopFunction(): void {
    // do nothing

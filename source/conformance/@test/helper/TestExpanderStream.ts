@@ -4,10 +4,10 @@ import { basename, dirname, relative, resolve, join } from 'path';
 import { Transform } from 'stream';
 
 import { EntityId, ENTITY_ID } from 'basic';
+import { STokenSource } from 'basic';
 import { EntityExpander, OpaqueEntityLoc, RetrieveResults, AttributeValueResults } from 'expand';
 import { PTokenStream, PTokenLiteralStream } from 'node';
 import { ParseType } from 'pToken';
-import { STokenSource } from 'basic';
 import {
    AttributeValueElement,
    AttributeValuePToken,
@@ -16,8 +16,8 @@ import {
    EntityValueElement,
 } from 'token';
 
-import { TestCases } from './types';
 import { TestDetails } from './prepareTestDetails';
+import { TestCases } from './types';
 
 interface ResolvedInfo {
    testDetails: TestDetails;

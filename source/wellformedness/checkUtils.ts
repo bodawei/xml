@@ -1,4 +1,5 @@
 import { Collector, ConformanceVersion } from 'basic';
+import { SToken, strOrBlank } from 'basic';
 import {
    CHARREF_PTOKEN,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
@@ -10,7 +11,6 @@ import {
    ParameterEntityDeclarationPToken,
    ParameterEntityReferencePToken,
 } from 'pToken';
-import { SToken, strOrBlank } from 'basic';
 import {
    GENERAL_ENTITY_END_PTOKEN,
    GENERAL_ENTITY_START_PTOKEN,
@@ -24,6 +24,7 @@ import {
    ConditionalStartPToken,
    DocTypeStartPToken,
 } from 'token';
+
 import { AttributePToken } from '../token/common/attribute';
 import { LiteralValuePToken } from '../token/common/literal';
 import { wellFormedErrorCodes } from './error/wellFormedError';

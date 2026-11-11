@@ -2,8 +2,8 @@
 
 import { Problem } from 'basic';
 import { doAsyncLoop } from 'basic';
-import { GENERAL_ENTITY_REFERENCE_PTOKEN, GeneralEntityReferencePToken } from 'pToken';
 import { strOrBlank, STokenSource } from 'basic';
+import { GENERAL_ENTITY_REFERENCE_PTOKEN, GeneralEntityReferencePToken } from 'pToken';
 import {
    AttributeValuePToken,
    ElidedEntityDeclarationPToken,
@@ -11,11 +11,11 @@ import {
    GeneralEntityEndPToken,
 } from 'token';
 
-import { entityValueToSTokenSource } from './entityValueToSTokenSource';
-import { addProtoReplacementText } from './addProtoReplacementText';
-import { GEDetails } from './EntityDetails';
 import { ExpandParams } from '../types';
+import { addProtoReplacementText } from './addProtoReplacementText';
 import { EntityContextStack } from './EntityContextStack';
+import { GEDetails } from './EntityDetails';
+import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 
 interface AttrValueObj {
    value: AttributeValuePToken;

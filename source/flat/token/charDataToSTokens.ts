@@ -2,6 +2,7 @@
 
 import { SToken } from 'basic';
 import { CharDataPToken } from 'token';
+
 import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function charDataToSTokens(pToken: CharDataPToken): Array<SToken> {

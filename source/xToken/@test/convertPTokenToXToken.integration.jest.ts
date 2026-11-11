@@ -33,10 +33,11 @@ import {
    makeXmlDecl,
 } from 'token-test';
 
+import { convertPTokenToXToken } from '../convertPTokenToXToken';
 import { GeneralEntityEndXToken } from '../marker/generalEntityEndXToken';
 import { GeneralEntityStartXToken } from '../marker/generalEntityStartXToken';
-import { ParameterEntityStartXToken } from '../marker/parameterEntityStartXToken';
 import { ParameterEntityEndXToken } from '../marker/parameterEntityEndXToken';
+import { ParameterEntityStartXToken } from '../marker/parameterEntityStartXToken';
 import { AttListDeclarationXToken } from '../token/attListDeclarationXToken';
 import { CdataXToken } from '../token/cdataXToken';
 import { CharDataXToken } from '../token/charDataXToken';
@@ -57,12 +58,10 @@ import { ParameterEntityDeclarationXToken } from '../token/parameterEntityDeclar
 import { ParameterEntityReferenceXToken } from '../token/parameterEntityReferenceXToken';
 import { ProcessingInstructionXToken } from '../token/processingInstructionXToken';
 import { SpaceXToken } from '../token/spaceXtoken';
+import { TextDeclarationXToken } from '../token/textDeclarationXToken';
 import { TextXToken } from '../token/textXToken';
 import { UnknownDeclarationXToken } from '../token/unknownDeclarationXToken';
-import { TextDeclarationXToken } from '../token/textDeclarationXToken';
 import { XmlDeclarationXToken } from '../token/xmlDeclarationXToken';
-
-import { convertPTokenToXToken } from '../convertPTokenToXToken';
 
 describe('convertPTokenToXToken() (integration)', () => {
    it('converts an ATTLIST Declaration', () => {

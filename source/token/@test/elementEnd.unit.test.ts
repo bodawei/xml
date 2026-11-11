@@ -1,6 +1,5 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-
 import { makeSTokenMaker, MockSTokenSource } from 'pToken-test';
 
 import { ElementEndPToken, parseElementEnd } from '../elementEnd';
@@ -27,12 +26,17 @@ describe('elementEnd', () => {
       });
 
       it('returns a common parsing', () => {
-         const mockSource = new MockSTokenSource([
-            [ undefined, 'space' ],
-            [ 'elemName', 'word', [ '>' ] ],
-            [ ' ', 'space' ],
-            [ '>', 'match', '>' ],
-         ], 2, 0, 2);
+         const mockSource = new MockSTokenSource(
+            [
+               [undefined, 'space'],
+               ['elemName', 'word', ['>']],
+               [' ', 'space'],
+               ['>', 'match', '>'],
+            ],
+            2,
+            0,
+            2,
+         );
 
          parseElementEnd(mockSource, elementEndPToken.open, callback);
          mockSource.respondInAsyncTime();
@@ -41,12 +45,12 @@ describe('elementEnd', () => {
       });
 
       it('no values if at the end of input', () => {
-         const mockSource = new MockSTokenSource([
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-         ], 1, 0, 1);
+         const mockSource = new MockSTokenSource(
+            [undefined, undefined, undefined, undefined],
+            1,
+            0,
+            1,
+         );
          (elementEndPToken as any).name = undefined;
          (elementEndPToken as any).nameSpace = undefined;
          (elementEndPToken as any).close = undefined;
@@ -56,7 +60,5 @@ describe('elementEnd', () => {
 
          expect(callback).toContainPTokenProps(elementEndPToken);
       });
-
    });
-
 });

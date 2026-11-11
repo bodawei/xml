@@ -1,6 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { readFileSync, writeFileSync } from 'fs';
+
 import { TestCases, TestSuite } from '../../../conformance/@test/helper/types';
 import { TestDoc } from '../data/flatDocsTypes';
 
@@ -17,18 +18,15 @@ function walkCase(
       docs,
    );
 
-   return testCase.tests.reduce(
-      (subDocs, test) => {
-         subDocs.push({
-            id: test.ID,
-            version: test.VERSION,
-            edition: test.EDITION,
-            doc: test.testData || '',
-         });
-         return subDocs;
-      },
-      caseDocs,
-   );
+   return testCase.tests.reduce((subDocs, test) => {
+      subDocs.push({
+         id: test.ID,
+         version: test.VERSION,
+         edition: test.EDITION,
+         doc: test.testData || '',
+      });
+      return subDocs;
+   }, caseDocs);
 }
 
 function walkSuite(testSuite: TestSuite, docs: Array<TestDoc>): Array<TestDoc> {
@@ -38,13 +36,12 @@ function walkSuite(testSuite: TestSuite, docs: Array<TestDoc>): Array<TestDoc> {
    );
 }
 
-
 function convertTestData(pathName: string, ouputDir: string) {
-  const data = readFileSync(pathName, { encoding: 'utf-8' });
+   const data = readFileSync(pathName, { encoding: 'utf-8' });
 
-  const tests = walkSuite(JSON.parse(data), []);
+   const tests = walkSuite(JSON.parse(data), []);
 
-  writeFileSync(ouputDir, JSON.stringify(tests, undefined, 3));
+   writeFileSync(ouputDir, JSON.stringify(tests, undefined, 3));
 }
 
 /*

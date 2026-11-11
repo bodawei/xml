@@ -6,7 +6,6 @@ import { STokenSource, toSToken } from 'basic';
 import { DeclarationPToken, parseDocTypeStart } from 'token';
 
 import { WellFormedError, wellFormedErrorCodes } from '../../error/wellFormedError';
-
 import { docTypeStartCheck } from '../docTypeStartCheck';
 
 const WFEID = wellFormedErrorCodes.id;

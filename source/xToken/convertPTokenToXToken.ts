@@ -15,7 +15,6 @@ import {
    XMLDECL_PTOKEN,
    ParseToken,
 } from 'pToken';
-
 import {
    CDATA_PTOKEN,
    CHARDATA_PTOKEN,
@@ -40,19 +39,21 @@ import { GeneralEntityStartXToken } from './marker/generalEntityStartXToken';
 import { ParameterEntityEndXToken } from './marker/parameterEntityEndXToken';
 import { ParameterEntityStartXToken } from './marker/parameterEntityStartXToken';
 import { AttListDeclarationXToken } from './token/attListDeclarationXToken';
+import { CdataXToken } from './token/cdataXToken';
+import { CharDataXToken } from './token/charDataXToken';
 import { CharRefXToken } from './token/charRefXToken';
-import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
-import { NotationDeclarationXToken } from './token/notationDeclarationXToken';
+import { CommentXToken } from './token/commentXToken';
 import { ConditionalEndXToken } from './token/conditionalEndXToken';
 import { ConditionalStartXToken } from './token/conditionalStartXToken';
-import { CommentXToken } from './token/commentXToken';
 import { DocTypeEndXToken } from './token/docTypeEndXToken';
 import { DocTypeStartXToken } from './token/docTypeStartXToken';
+import { ElementDeclarationXToken } from './token/elementDeclarationXToken';
 import { ElementEmptyXToken } from './token/elementEmptyXToken';
 import { ElementEndXToken } from './token/elementEndXToken';
 import { ElementStartXToken } from './token/elementStartXToken';
-import { ElementDeclarationXToken } from './token/elementDeclarationXToken';
 import { GeneralEntityDeclarationXToken } from './token/generalEntityDeclarationXToken';
+import { GeneralEntityReferenceXToken } from './token/generalEntityReferenceXToken';
+import { NotationDeclarationXToken } from './token/notationDeclarationXToken';
 import { ParameterEntityDeclarationXToken } from './token/parameterEntityDeclarationXToken';
 import { ParameterEntityReferenceXToken } from './token/parameterEntityReferenceXToken';
 import { ProcessingInstructionXToken } from './token/processingInstructionXToken';
@@ -62,8 +63,6 @@ import { TextXToken } from './token/textXToken';
 import { UnknownDeclarationXToken } from './token/unknownDeclarationXToken';
 import { XmlDeclarationXToken } from './token/xmlDeclarationXToken';
 import { XToken } from './types';
-import { CdataXToken } from './token/cdataXToken';
-import { CharDataXToken } from './token/charDataXToken';
 
 function convertPTokenToXToken(pToken: ParseToken): XToken {
    switch (pToken.type) {

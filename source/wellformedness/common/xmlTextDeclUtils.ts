@@ -1,15 +1,15 @@
 /* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, Collector } from 'basic';
-import { InstructionField } from 'pToken';
 import { SToken } from 'basic';
+import { InstructionField } from 'pToken';
 
 import { Error } from '../error/error';
+import { errorCodes } from '../error/errorCodes';
 import { FatalError } from '../error/fatalError';
 import { Warning } from '../error/warning';
-import { wellFormedErrorCodes } from '../error/wellFormedError';
 import { warningCodes } from '../error/warningCodes';
-import { errorCodes } from '../error/errorCodes';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
 
 const EID = errorCodes.id;
 const WFEID = wellFormedErrorCodes.id;

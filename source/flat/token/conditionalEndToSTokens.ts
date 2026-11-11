@@ -2,6 +2,7 @@
 
 import { SToken } from 'basic';
 import { ConditionalEndPToken } from 'token';
+
 import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function conditionalEndToSTokens(pToken: ConditionalEndPToken): Array<SToken> {

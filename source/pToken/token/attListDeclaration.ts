@@ -2,14 +2,13 @@
 
 import { combineSTokens, SToken, STokenSource, strOrBlank } from 'basic';
 
-import { parseUnexpanded } from '../common/parseUnexpanded';
-import { UnexpandedMarkupDetails } from '../types';
-
 // ick
 import { DeclarationStart } from '../../token/bridge/declaration';
 import { AttributeValuePToken } from '../../token/common/attribute';
 import literal from '../../token/common/literal';
 import { parseWordList, WordListType, WordListPToken } from '../../token/common/wordList';
+import { parseUnexpanded } from '../common/parseUnexpanded';
+import { UnexpandedMarkupDetails } from '../types';
 
 interface AttListDeclarationProps {
    open?: SToken;

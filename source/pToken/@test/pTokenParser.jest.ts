@@ -2,8 +2,8 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { CONFORMANCE_VERSION, ENTITY_ID, EntityId, Range } from 'basic';
-import { ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, ParseToken, ParseType } from 'pToken';
 import { SToken, STokenSource } from 'basic';
+import { ELEMENT_DECLARATION_PTOKEN, TEXT_PTOKEN, ParseToken, ParseType } from 'pToken';
 import {
    CONDITIONAL_START_PTOKEN,
    CONDITIONAL_END_PTOKEN,
@@ -13,22 +13,20 @@ import {
    DOCTYPE_END_PTOKEN,
    CHARDATA_PTOKEN,
 } from 'token';
-
 import * as tokenStuff from 'token';
-import * as instruction from '../bridge/instruction';
-import * as charRef from '../token/charRef';
-import * as geRef from '../token/generalEntityReference';
-import * as peRef from '../token/parameterEntityReference';
 
 import * as declaration from '../../token/bridge/declaration';
 import * as section from '../../token/bridge/section';
-import * as space from '../../token/space';
+import * as charData from '../../token/charData';
+import * as comment from '../../token/comment';
 import * as elementEnd from '../../token/elementEnd';
 import * as elementStart from '../../token/elementStart';
-import * as comment from '../../token/comment';
-import * as charData from '../../token/charData';
-
+import * as space from '../../token/space';
+import * as instruction from '../bridge/instruction';
 import { PTokenParser } from '../pTokenParser';
+import * as charRef from '../token/charRef';
+import * as geRef from '../token/generalEntityReference';
+import * as peRef from '../token/parameterEntityReference';
 
 describe('pTokenParser (unit)', () => {
    let sTokenSource: STokenSource;

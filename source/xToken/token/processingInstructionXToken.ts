@@ -1,7 +1,7 @@
 /* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
-import { ProcessingInstructionPToken } from 'pToken';
 import { strOrBlank } from 'basic';
+import { ProcessingInstructionPToken } from 'pToken';
 
 const PROCESSING_INSTRUCTION_XTOKEN = 'PROCESSING_INSTRUCTION_XTOKEN';
 

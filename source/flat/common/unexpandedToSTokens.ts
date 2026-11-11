@@ -2,10 +2,10 @@
 
 import { SToken } from 'basic';
 import { PARAMETER_ENTITY_REFERENCE_PTOKEN, TEXT_PTOKEN, UnexpandedMarkupDetails } from 'pToken';
-import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 import { parameterEntityReferenceToSTokens } from '../token/parameterEntityReferenceToSTokens';
 import { textToSTokens } from '../token/textToSTokens';
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 const DEFAULT: UnexpandedMarkupDetails = { propName: '', tokens: [] };
 

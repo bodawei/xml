@@ -1,6 +1,7 @@
 /* Copyright ® 2019-2026 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
+import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import {
    NOTATION_DECLARATION_PTOKEN,
@@ -10,7 +11,6 @@ import {
    NotationDeclarationPToken,
    TextDeclarationPToken,
 } from 'pToken';
-import { toSToken } from 'basic';
 import {
    GENERAL_ENTITY_END_PTOKEN,
    CdataPToken,
@@ -23,10 +23,10 @@ import {
    CharDataPToken,
 } from 'token';
 
-import { wellFormedErrorCodes } from '../error/wellFormedError';
-import { ContentChecker } from '../ContentChecker';
 import { CheckState, CHECKER_DONE } from '../checkUtils';
+import { ContentChecker } from '../ContentChecker';
 import { warningCodes } from '../error/warningCodes';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
 
 const WFEID = wellFormedErrorCodes.id;
 const WID = warningCodes.id;

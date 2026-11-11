@@ -5,9 +5,8 @@ import { toSToken } from 'basic';
 import { MockSTokenSource } from 'pToken-test';
 
 import { InstructionStart } from '../../bridge/instruction';
-import { TEXTDECL_PTOKEN, parseTextDeclaration, TextDeclarationPToken } from '../textDeclaration';
-
 import * as fieldedInstr from '../../common/fieldedInstruction';
+import { TEXTDECL_PTOKEN, parseTextDeclaration, TextDeclarationPToken } from '../textDeclaration';
 
 jest.mock('../../common/fieldedInstruction');
 

@@ -1,7 +1,6 @@
 /* Copyright ® 2017-220 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { STokenSource, toSToken } from 'basic';
 
 import { parseFieldedInstruction } from '../fieldedInstruction';

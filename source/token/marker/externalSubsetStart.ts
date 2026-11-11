@@ -11,7 +11,4 @@ class ExternalSubsetStartToken {
    public readonly type: typeof EXTERNAL_SUBSET_START_TOKEN = EXTERNAL_SUBSET_START_TOKEN;
 }
 
-export {
-   EXTERNAL_SUBSET_START_TOKEN,
-   ExternalSubsetStartToken
-};
+export { EXTERNAL_SUBSET_START_TOKEN, ExternalSubsetStartToken };

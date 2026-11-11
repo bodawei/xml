@@ -1,8 +1,8 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, Collector, isChar } from 'basic';
-import { CharRefPToken } from 'pToken';
 import { strOrBlank } from 'basic';
+import { CharRefPToken } from 'pToken';
 
 import { wellFormedErrorCodes } from '../error/wellFormedError';
 

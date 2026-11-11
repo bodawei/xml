@@ -4,11 +4,10 @@ import { describe, expect, it } from '@jest/globals';
 import { SToken, toSToken } from 'basic';
 import { MockSTokenSource } from 'pToken-test';
 
-import { parseInstruction } from '../instruction';
-
 import * as pi from '../../token/processingInstruction';
 import * as textDecl from '../../token/textDeclaration';
 import * as xmlDecl from '../../token/xmlDeclaration';
+import { parseInstruction } from '../instruction';
 
 describe('parseInstruction (unit)', () => {
    let callback: jest.MockedFunction<

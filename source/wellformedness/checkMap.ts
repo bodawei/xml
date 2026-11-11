@@ -30,10 +30,12 @@ import {
    PARAMETER_ENTITY_END_PTOKEN,
 } from 'token';
 
+import { generalEntityStartCheck } from './marker/generalEntityStartCheck';
+import { parameterEntityStartCheck } from './marker/parameterEntityStartCheck';
 import { attListDeclarationCheck } from './token/attListDeclarationCheck';
 import { cdataCheck } from './token/cdataCheck';
-import { charRefCheck } from './token/charRefCheck';
 import { charDataCheck } from './token/charDataCheck';
+import { charRefCheck } from './token/charRefCheck';
 import { commentCheck } from './token/commentCheck';
 import { conditionalStartCheck } from './token/conditionalStartCheck';
 import { docTypeEndCheck } from './token/docTypeEndCheck';
@@ -41,16 +43,13 @@ import { docTypeStartCheck } from './token/docTypeStartCheck';
 import { elementDeclarationCheck } from './token/elementDeclarationCheck';
 import { elementEndCheck } from './token/elementEndCheck';
 import { elementStartCheck } from './token/elementStartCheck';
+import { entityDeclarationCheck } from './token/entityDeclarationCheck';
+import { generalEntityReferenceCheck } from './token/generalEntityReferenceCheck';
 import { notationDeclarationCheck } from './token/notationDeclarationCheck';
 import { parameterEntityReferenceCheck } from './token/parameterEntityReferenceCheck';
-import { generalEntityReferenceCheck } from './token/generalEntityReferenceCheck';
-import { entityDeclarationCheck } from './token/entityDeclarationCheck';
 import { processingInstructionCheck } from './token/processingInstructionCheck';
 import { textDeclarationCheck } from './token/textDeclarationCheck';
 import { xmlDeclarationCheck } from './token/xmlDeclarationCheck';
-
-import { generalEntityStartCheck } from './marker/generalEntityStartCheck';
-import { parameterEntityStartCheck } from './marker/parameterEntityStartCheck';
 
 type CheckMap = Record<
    string,

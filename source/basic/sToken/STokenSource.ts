@@ -13,7 +13,6 @@ import { Offset } from '../util/offset';
 import { Range } from '../util/range';
 import { rangeEndOffset } from '../util/rangeEndOffset';
 import { rangeStartOffset } from '../util/rangeStartOffset';
-
 import { SToken } from './sToken';
 
 type DeliverSToken = (stoken?: SToken) => void;

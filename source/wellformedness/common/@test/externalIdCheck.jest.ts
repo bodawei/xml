@@ -1,17 +1,15 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { ConformanceVersion } from 'basic';
+import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { CharRefPToken, ExternalIdP, TextPToken } from 'pToken';
-import { toSToken } from 'basic';
 
-import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { errorCodes } from '../../error/errorCodes';
-
-import { literalCheck } from '../literalCheck';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { externalIdCheck } from '../externalIdCheck';
+import { literalCheck } from '../literalCheck';
 
 jest.mock('../literalCheck');
 

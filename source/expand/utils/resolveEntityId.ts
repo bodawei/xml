@@ -1,6 +1,7 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
 import { EntityId, ENTITY_ID } from 'basic';
+
 import { OpaqueEntityLoc } from '../types';
 
 // http://stackoverflow.com/questions/10687099/how-to-test-if-a-url-string-is-absolute-or-relative

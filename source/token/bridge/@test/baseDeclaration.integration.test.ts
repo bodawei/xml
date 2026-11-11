@@ -19,7 +19,6 @@ describe('baseDeclaration (integration)', () => {
    });
 
    describe('parse()', () => {
-
       it('produces a full pToken', (done) => {
          const source = new STokenSource();
          source.addText(' DOCTYPE ');
@@ -30,7 +29,5 @@ describe('baseDeclaration (integration)', () => {
             done();
          });
       });
-
    });
-
 });

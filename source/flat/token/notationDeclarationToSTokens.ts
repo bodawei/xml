@@ -1,11 +1,11 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
-import { NotationDeclarationPToken } from 'pToken';
 import { SToken } from 'basic';
-import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
+import { NotationDeclarationPToken } from 'pToken';
 
 import { externalIdToSTokens } from '../common/externalIdToSTokens';
 import { unexpandedToSTokens } from '../common/unexpandedToSTokens';
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function notationDeclarationToSTokens(pToken: NotationDeclarationPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();

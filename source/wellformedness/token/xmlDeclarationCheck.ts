@@ -1,12 +1,12 @@
 /* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, Collector } from 'basic';
-import { InstructionField, XmlDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'basic';
-import { fatalErrorCodes } from '../error/fatalErrorCodes';
+import { InstructionField, XmlDeclarationPToken } from 'pToken';
 
 import { charCheck } from '../common/charCheck';
 import { checkSpaceProblems, checkSpaces, checkVersionString } from '../common/xmlTextDeclUtils';
+import { fatalErrorCodes } from '../error/fatalErrorCodes';
 import { wellFormedErrorCodes } from '../error/wellFormedError';
 
 const FEID = fatalErrorCodes.id;

@@ -1,12 +1,10 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { TextDeclarationPToken } from 'pToken';
 import { toSToken } from 'basic';
+import { TextDeclarationPToken } from 'pToken';
 
 import { fieldedInstructionToSTokens } from '../../common/fieldedInstructionToSTokens';
-
 import { textDeclarationToSTokens } from '../textDeclarationToSTokens';
 
 jest.mock('../../common/fieldedInstructionToSTokens');

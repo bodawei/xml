@@ -6,7 +6,7 @@ const CONDITIONAL_END_PTOKEN = 'CONDITIONAL_END_PTOKEN';
 
 type ConditionalProps = {
    open: SToken;
-}
+};
 
 /**********************************************************************\
  Represents the end of a conditional section
@@ -25,8 +25,4 @@ class ConditionalEndPToken {
    }
 }
 
-export {
-   CONDITIONAL_END_PTOKEN,
-
-   ConditionalEndPToken,
-};
+export { CONDITIONAL_END_PTOKEN, ConditionalEndPToken };

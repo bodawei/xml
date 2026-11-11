@@ -1,10 +1,10 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { TextPToken } from 'pToken';
 import { toSToken } from 'basic';
+import { TextPToken } from 'pToken';
 import { AttributePToken } from 'token';
-import { TextXToken } from '../../token/textXToken';
 
+import { TextXToken } from '../../token/textXToken';
 import { AttributeX } from '../attributeX';
 
 describe('attributeX (integration)', () => {

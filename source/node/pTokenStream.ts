@@ -1,8 +1,9 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { Readable } from 'stream';
-import { PTokenOptions, ParseType, PTokenParser } from 'pToken';
+
 import { STokenSource } from 'basic';
+import { PTokenOptions, ParseType, PTokenParser } from 'pToken';
 
 class PTokenStream extends Readable {
    private parser: PTokenParser;
@@ -17,9 +18,9 @@ class PTokenStream extends Readable {
    }
 
    _read(): void {
-      this.parser.parse(result => {
+      this.parser.parse((result) => {
          if (Array.isArray(result)) {
-            result.forEach(item => this.push(item));
+            result.forEach((item) => this.push(item));
          } else if (result) {
             this.push(result);
          } else {

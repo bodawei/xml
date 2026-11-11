@@ -1,16 +1,17 @@
 /* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, Collector } from 'basic';
-import { TEXT_PTOKEN } from 'pToken';
 import { strOrBlank } from 'basic';
+import { TEXT_PTOKEN } from 'pToken';
 import { LiteralValuePToken } from 'token';
+
 import { CheckState, GeneralEntitiesInfo } from '../checkUtils';
+import { Error } from '../error/error';
+import { errorCodes } from '../error/errorCodes';
 import { FatalError } from '../error/fatalError';
 import { fatalErrorCodes } from '../error/fatalErrorCodes';
 import { Warning } from '../error/warning';
 import { warningCodes } from '../error/warningCodes';
-import { errorCodes } from '../error/errorCodes';
-import { Error } from '../error/error';
 
 const GE_REF_REGEXP = /&([^;]*);/g;
 const WID = warningCodes.id;

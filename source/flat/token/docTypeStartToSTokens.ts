@@ -2,9 +2,9 @@
 
 import { SToken } from 'basic';
 import { DocTypeStartPToken } from 'token';
-import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 import { externalIdToSTokens } from '../common/externalIdToSTokens';
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function docTypeStartToSTokens(pToken: DocTypeStartPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();

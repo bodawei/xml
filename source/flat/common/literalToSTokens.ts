@@ -2,8 +2,8 @@
 
 import { SToken } from 'basic';
 import { LiteralPToken } from 'token';
-import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 import { literalValueToSTokens } from './literalValueToSTokens';
 
 function literalToSTokens(pToken: LiteralPToken | undefined): Array<SToken> {

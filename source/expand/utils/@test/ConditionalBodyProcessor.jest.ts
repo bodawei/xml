@@ -2,12 +2,11 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { EntityId, Range } from 'basic';
-import { ParseToken } from 'pToken';
-import { Warning } from 'wellformedness'; // ick
-
 import { STokenSource, strOrBlank, toSToken } from 'basic';
+import { ParseToken } from 'pToken';
 import { CommentPToken, ConditionalEndPToken, ConditionalStartPToken } from 'token';
 import { makeTextPToken } from 'token-test';
+import { Warning } from 'wellformedness'; // ick
 
 import { ConditionalBodyProcessor } from '../ConditionalBodyProcessor';
 

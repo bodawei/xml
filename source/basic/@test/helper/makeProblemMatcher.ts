@@ -3,7 +3,6 @@
 import type { expect } from '@jest/globals';
 
 import { ProblemCodes } from '../../util/problemCodes';
-
 import { ParamCollector, ProblemParams } from './paramCollector';
 
 type MatcherContext = ThisParameterType<Parameters<typeof expect.extend>[0][string]>;
