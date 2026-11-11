@@ -45,12 +45,16 @@ class DeclarationPToken extends base.PToken {
    declaration ::= '<!' name S
 \**********************************************************************/
 
-function parse(source: STokenSource, openSToken: SToken, deliverPToken: (value: DeclarationPToken) => void) {
+function parse(
+   source: STokenSource,
+   openSToken: SToken,
+   deliverPToken: (value: DeclarationPToken) => void,
+) {
    const results = new DeclarationPToken();
    results.open = openSToken;
 
    source.extractToObject('space', results, 'postOpenSpace');
-   source.extractToObject('word', [ '>' ], results, 'declType');
+   source.extractToObject('word', ['>'], results, 'declType');
 
    source.extract('space', (sToken) => {
       results.postDeclTypeSpace = sToken;

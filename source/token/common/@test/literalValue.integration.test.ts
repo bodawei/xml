@@ -1,6 +1,11 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { CharRefPToken, GeneralEntityReferencePToken, ParameterEntityReferencePToken, TextPToken } from 'pToken';
+import {
+   CharRefPToken,
+   GeneralEntityReferencePToken,
+   ParameterEntityReferencePToken,
+   TextPToken,
+} from 'pToken';
 import { SToken } from '../../../basic/sToken/sToken';
 import { STokenSource, toSToken } from 'basic';
 import { makeSTokenMaker } from 'pToken-test';
@@ -15,15 +20,14 @@ describe('literalValue (integration)', () => {
    });
 
    describe('parse()', () => {
-
       it('ignores PE and GE References if not told to attend to them', (done) => {
          source.addText('one%peref;two&geref;&geref2;three"');
          source.endText();
 
          literalValue.parse(source, ['"'], (pToken) => {
             expect(pToken).toEqualRangeless([
-                  new TextPToken({ text: toSToken('one%peref;two&geref;&geref2;three') }),
-               ]);
+               new TextPToken({ text: toSToken('one%peref;two&geref;&geref2;three') }),
+            ]);
             done();
          });
       });
@@ -74,7 +78,5 @@ describe('literalValue (integration)', () => {
             done();
          });
       });
-
    });
-
 });

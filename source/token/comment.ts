@@ -16,7 +16,7 @@ class CommentPToken {
    public readonly text: ReadonlyArray<SToken> = [];
    public readonly close?: SToken;
 
-   constructor(param: CommentPToken | {open: SToken}) {
+   constructor(param: CommentPToken | { open: SToken }) {
       Object.keys(param).forEach((key) => {
          if (key === 'type') {
             return;
@@ -54,8 +54,12 @@ function parseComment(source: STokenSource, commentOpen: SToken, deliverPToken: 
    extractCommentContent(source, pToken, deliverPToken);
 }
 
-function extractCommentContent(source: STokenSource, pToken: { open: SToken; [key: string]: any }, deliverPToken: DeliverPToken) {
-   source.extract('all', [ '--' ], (textSToken) => {
+function extractCommentContent(
+   source: STokenSource,
+   pToken: { open: SToken; [key: string]: any },
+   deliverPToken: DeliverPToken,
+) {
+   source.extract('all', ['--'], (textSToken) => {
       if (textSToken) {
          pToken.text.push(textSToken);
       }
@@ -80,9 +84,4 @@ function extractCommentContent(source: STokenSource, pToken: { open: SToken; [ke
    });
 }
 
-export {
-   COMMENT_PTOKEN,
-   CommentPToken,
-
-   parseComment,
-};
+export { COMMENT_PTOKEN, CommentPToken, parseComment };

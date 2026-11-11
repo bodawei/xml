@@ -9,7 +9,6 @@ import { ParseType, ParseToken } from 'pToken';
 import { PTokenStream } from '../pTokenStream';
 import { SToken, STokenSource } from 'basic';
 
-
 import { FlattenPTokenStream } from '../flattenPTokenStream';
 
 import { TestDoc } from './data/flatDocsTypes';
@@ -45,15 +44,18 @@ describe('flat (integration)', () => {
             const sTokenSource = new STokenSource();
             const pTokenStream = new PTokenStream(sTokenSource, {
                parseType: ParseType.DOCUMENT,
-               confVer: verToUse && editionToUse ? new ConformanceVersion(verToUse, editionToUse) : undefined,
+               confVer:
+                  verToUse && editionToUse
+                     ? new ConformanceVersion(verToUse, editionToUse)
+                     : undefined,
             });
             const flat = new FlattenPTokenStream();
             const toString = new STokenToOriginalStringStream();
             pTokenStream.pipe(flat).pipe(toString);
-      
+
             sTokenSource.addText(testData.doc || '');
             sTokenSource.endText();
-         
+
             gatherStreamResults<ParseToken>(toString, (results) => {
                const textChunks = results.join('');
 

@@ -2,7 +2,11 @@
 
 import { STokenSource, SToken, toSToken } from 'basic';
 
-import { ConditionalStartPToken, parseConditional, resumeParseConditional } from '../conditionalStart';
+import {
+   ConditionalStartPToken,
+   parseConditional,
+   resumeParseConditional,
+} from '../conditionalStart';
 import { SectionStart } from '../bridge/section';
 import { ParameterEntityReferencePToken } from 'pToken';
 
@@ -40,9 +44,9 @@ describe('conditional (integration)', () => {
             open: toSToken('<!['),
             openSpace: toSToken(' '),
             unexpanded: {
-               peRef: new ParameterEntityReferencePToken({ open: toSToken('%')}),
+               peRef: new ParameterEntityReferencePToken({ open: toSToken('%') }),
                propName: 'sectionType',
-            }
+            },
          });
          const expected = new ConditionalStartPToken({
             open: toSToken('<!['),
@@ -51,9 +55,9 @@ describe('conditional (integration)', () => {
             sectionTypeSpace: toSToken(' '),
             bracket: toSToken('['),
             unexpanded: {
-               peRef: new ParameterEntityReferencePToken({ open: toSToken('%')}),
+               peRef: new ParameterEntityReferencePToken({ open: toSToken('%') }),
                propName: 'sectionType',
-            }
+            },
          });
          source.addText(' blah [<![two<![three]]>four]]>]]>');
 
@@ -70,29 +74,30 @@ describe('conditional (integration)', () => {
             sectionType: toSToken('blah'),
             sectionTypeSpace: toSToken(' '),
             unexpanded: {
-               peRef: new ParameterEntityReferencePToken({ open: toSToken('%')}),
+               peRef: new ParameterEntityReferencePToken({ open: toSToken('%') }),
                propName: 'sectionType',
                secondPropName: 'bracket',
-            }
+            },
          });
          source.addText('\t[<![two<![three]]>four]]>]]>');
 
          resumeParseConditional(source, start, (result) => {
-            expect(result).toEqualRangeless(new ConditionalStartPToken({
-               open: toSToken('<!['),
-               openSpace: toSToken(' '),
-               sectionType: toSToken('blah'),
-               sectionTypeSpace: toSToken(' \t'),
-               bracket: toSToken('['),
-               unexpanded: {
-                  peRef: new ParameterEntityReferencePToken({ open: toSToken('%')}),
-                  propName: 'sectionType',
-                  secondPropName: 'bracket',
-               }
-            }));
+            expect(result).toEqualRangeless(
+               new ConditionalStartPToken({
+                  open: toSToken('<!['),
+                  openSpace: toSToken(' '),
+                  sectionType: toSToken('blah'),
+                  sectionTypeSpace: toSToken(' \t'),
+                  bracket: toSToken('['),
+                  unexpanded: {
+                     peRef: new ParameterEntityReferencePToken({ open: toSToken('%') }),
+                     propName: 'sectionType',
+                     secondPropName: 'bracket',
+                  },
+               }),
+            );
             done();
          });
       });
    });
-
 });

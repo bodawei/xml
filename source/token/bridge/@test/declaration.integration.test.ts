@@ -7,7 +7,6 @@ import { STokenSource, SToken, toSToken } from 'basic';
 import { parseDeclaration } from '../declaration';
 
 describe('declaration (integration)', () => {
-
    describe('parseDeclaration()', () => {
       let confVer: ConformanceVersion;
       let source: STokenSource;
@@ -25,22 +24,22 @@ describe('declaration (integration)', () => {
          source.endText();
 
          parseDeclaration(source, start, (parsing) => {
-            expect(parsing).toEqualRangeless(new GeneralEntityDeclarationPToken({
-               open: start,
-               declType: toSToken('ENTITY'),
-               declTypeSpace: toSToken(' '),
-               name: toSToken('foo'),
-               nameSpace: toSToken(' '),
-               openQuote: toSToken('"'),
-               value: [ new TextPToken({ text: toSToken('theValue') }) ],
-               closeQuote: toSToken('"'),
-               close: toSToken('>'),
-            }));
+            expect(parsing).toEqualRangeless(
+               new GeneralEntityDeclarationPToken({
+                  open: start,
+                  declType: toSToken('ENTITY'),
+                  declTypeSpace: toSToken(' '),
+                  name: toSToken('foo'),
+                  nameSpace: toSToken(' '),
+                  openQuote: toSToken('"'),
+                  value: [new TextPToken({ text: toSToken('theValue') })],
+                  closeQuote: toSToken('"'),
+                  close: toSToken('>'),
+               }),
+            );
 
             done();
          });
       });
-
    });
-
 });

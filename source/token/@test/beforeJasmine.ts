@@ -2,7 +2,7 @@
 
 import { SToken } from 'basic';
 
-type Props =  { [name: string]: any, calls?: any };
+type Props = { [name: string]: any; calls?: any };
 
 function toContainPTokenProps(util?: any, customEqualityTesters?: any) {
    return {
@@ -20,8 +20,10 @@ function toContainPTokenProps(util?: any, customEqualityTesters?: any) {
             const args = callbackSpy.calls.allArgs();
 
             if (args.length !== 1 || args[0].length !== 1) {
-               throw new Error('toContainPTokenProps() wanted one call with one argument. ' +
-                  `Got ${args.length} calls with ${args[0] ? args[0].length : 0} arguments.`);
+               throw new Error(
+                  'toContainPTokenProps() wanted one call with one argument. ' +
+                     `Got ${args.length} calls with ${args[0] ? args[0].length : 0} arguments.`,
+               );
             }
 
             actualProps = args[0][0];
@@ -35,11 +37,14 @@ function toContainPTokenProps(util?: any, customEqualityTesters?: any) {
                message += `Did not find the property "${propName}" in callback value.\n`;
             }
 
-            if (actualProps.hasOwnProperty(propName) &&
-               !util.equals(actualProps[propName], expectedProps[propName], customEqualityTesters)) {
+            if (
+               actualProps.hasOwnProperty(propName) &&
+               !util.equals(actualProps[propName], expectedProps[propName], customEqualityTesters)
+            ) {
                pass = false;
                // note JSON.stringify() loses properties that have undefined values
-               message += `${propName}'s value did not match.\n` +
+               message +=
+                  `${propName}'s value did not match.\n` +
                   `   Actual:   ${JSON.stringify(actualProps[propName])}\n` +
                   `   Expected: ${JSON.stringify(expectedProps[propName])}\n`;
             }
@@ -100,8 +105,10 @@ function getTheOneArg(callback: jasmine.Spy) {
       const args = callback.calls.allArgs();
 
       if (args.length !== 1 || args[0].length !== 1) {
-         throw new Error('toEqualRangeless() wanted one call with one argument. ' +
-            `Got ${args.length} calls with ${args[0] ? args[0].length : 0} arguments.`);
+         throw new Error(
+            'toEqualRangeless() wanted one call with one argument. ' +
+               `Got ${args.length} calls with ${args[0] ? args[0].length : 0} arguments.`,
+         );
       }
 
       return args[0][0];
@@ -122,7 +129,8 @@ function fixUndef(value: Array<any> | Props | void): string | Props {
       });
 
       return newObj;
-   } if (value === undefined) {
+   }
+   if (value === undefined) {
       return '•undefined•';
    }
 
@@ -152,14 +160,15 @@ function toEqualRangeless(util: any, customEqualityTesters: any) {
             let exp = expected[propName];
             const act = actual[propName];
 
-            if ((typeof act === 'object' && 'originalStr' in act) && typeof exp === 'string') {
+            if (typeof act === 'object' && 'originalStr' in act && typeof exp === 'string') {
                exp = new SToken(exp, exp, []);
             }
 
             if (!util.equals(act, exp, customEqualityTesters)) {
                pass = false;
                // note JSON.stringify() loses properties that have undefined values
-               message += `"${propName}"'s value did not match.\n` +
+               message +=
+                  `"${propName}"'s value did not match.\n` +
                   `   Actual:   ${JSON.stringify(fixUndef(act))}\n` +
                   `   Expected: ${JSON.stringify(fixUndef(exp))}\n`;
             }
@@ -172,7 +181,6 @@ function toEqualRangeless(util: any, customEqualityTesters: any) {
       },
    };
 }
-
 
 beforeEach(() => {
    jasmine.addMatchers({
@@ -195,7 +203,4 @@ declare global {
    }
 }
 
-export {
-   toContainPTokenProps,
-   toEqualRangeless,
-}
+export { toContainPTokenProps, toEqualRangeless };

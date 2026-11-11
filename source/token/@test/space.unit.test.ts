@@ -23,9 +23,7 @@ describe('space (unit)', () => {
       });
 
       it('does a simple parseSpace', () => {
-         const mockSource = new MockSTokenSource([
-            [ ' ', 'space', undefined ],
-         ]);
+         const mockSource = new MockSTokenSource([[' ', 'space', undefined]]);
 
          parseSpace(mockSource, callback);
          mockSource.respondInAsyncTime();
@@ -34,16 +32,12 @@ describe('space (unit)', () => {
       });
 
       it('copes with EOF', () => {
-         const mockSource = new MockSTokenSource([
-            [ undefined, 'space', undefined ],
-         ]);
+         const mockSource = new MockSTokenSource([[undefined, 'space', undefined]]);
 
          parseSpace(mockSource, callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback.calls.argsFor(0)).toEqual([ undefined ]);
+         expect(callback.calls.argsFor(0)).toEqual([undefined]);
       });
-
    });
-
 });

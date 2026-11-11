@@ -13,12 +13,12 @@ class GeneralEntityEndPToken {
    public readonly type: typeof GENERAL_ENTITY_END_PTOKEN = GENERAL_ENTITY_END_PTOKEN;
    public readonly referencePToken: GeneralEntityReferencePToken;
 
-   constructor(geReferencePToken: GeneralEntityReferencePToken, preparsedValue?: EntityValuePToken | void) {
+   constructor(
+      geReferencePToken: GeneralEntityReferencePToken,
+      preparsedValue?: EntityValuePToken | void,
+   ) {
       this.referencePToken = geReferencePToken;
    }
 }
 
-export {
-   GENERAL_ENTITY_END_PTOKEN,
-   GeneralEntityEndPToken,
-};
+export { GENERAL_ENTITY_END_PTOKEN, GeneralEntityEndPToken };

@@ -1,6 +1,6 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { ConformanceVersion,  } from 'basic';
+import { ConformanceVersion } from 'basic';
 import { STokenSource } from 'basic';
 import { makeSTokenMaker } from 'pToken-test';
 
@@ -37,11 +37,10 @@ describe('charData (integration)', () => {
          });
          source.addText('some textfoo#>');
 
-         parseCharData(source, [ '#' ], (result) => {
+         parseCharData(source, ['#'], (result) => {
             expect(result).toEqual(expected);
             done();
          });
       });
    });
-
 });

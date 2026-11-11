@@ -17,8 +17,4 @@ class ParameterEntityEndPToken {
    }
 }
 
-
-export {
-   PARAMETER_ENTITY_END_PTOKEN,
-   ParameterEntityEndPToken,
-};
+export { PARAMETER_ENTITY_END_PTOKEN, ParameterEntityEndPToken };

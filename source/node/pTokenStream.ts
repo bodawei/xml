@@ -17,9 +17,9 @@ class PTokenStream extends Readable {
    }
 
    _read(): void {
-      this.parser.parse(result => {
+      this.parser.parse((result) => {
          if (Array.isArray(result)) {
-            result.forEach(item => this.push(item));
+            result.forEach((item) => this.push(item));
          } else if (result) {
             this.push(result);
          } else {

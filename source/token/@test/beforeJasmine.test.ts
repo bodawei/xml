@@ -6,11 +6,8 @@ import { SToken, toSToken } from 'basic';
 import { toContainPTokenProps, toEqualRangeless } from './beforeJasmine';
 
 describe('token custom matchers', () => {
-
    describe('toContainPTokenProps()', () => {
-
       describe('raw matcher', () => {
-
          it('returns a compare function', () => {
             expect(typeof toContainPTokenProps().compare === 'function').toEqual(true);
          });
@@ -31,7 +28,9 @@ describe('token custom matchers', () => {
             try {
                toContainPTokenProps().compare(spy, {});
             } catch (e: any) {
-               expect(e.message).toEqual('toContainPTokenProps() wanted one call with one argument. Got 2 calls with 1 arguments.');
+               expect(e.message).toEqual(
+                  'toContainPTokenProps() wanted one call with one argument. Got 2 calls with 1 arguments.',
+               );
             }
          });
 
@@ -42,7 +41,9 @@ describe('token custom matchers', () => {
             try {
                toContainPTokenProps().compare(spy, {});
             } catch (e: any) {
-               expect(e.message).toEqual('toContainPTokenProps() wanted one call with one argument. Got 1 calls with 2 arguments.');
+               expect(e.message).toEqual(
+                  'toContainPTokenProps() wanted one call with one argument. Got 1 calls with 2 arguments.',
+               );
             }
          });
 
@@ -52,7 +53,9 @@ describe('token custom matchers', () => {
             try {
                toContainPTokenProps().compare(spy, {});
             } catch (e: any) {
-               expect(e.message).toEqual('toContainPTokenProps() wanted one call with one argument. Got 0 calls with 0 arguments.');
+               expect(e.message).toEqual(
+                  'toContainPTokenProps() wanted one call with one argument. Got 0 calls with 0 arguments.',
+               );
             }
          });
 
@@ -62,7 +65,11 @@ describe('token custom matchers', () => {
                one: 'one',
             });
 
-            const result = toContainPTokenProps({ equals() { return true; } }).compare(spy, {
+            const result = toContainPTokenProps({
+               equals() {
+                  return true;
+               },
+            }).compare(spy, {
                one: 'one',
             });
 
@@ -73,12 +80,18 @@ describe('token custom matchers', () => {
          });
 
          it('returns a message indicating failure, when the actual is a literal value', () => {
-
-            const result = toContainPTokenProps({ equals() { return true; } }).compare({
-               one: 'one',
-            }, {
-               one: 'one',
-            });
+            const result = toContainPTokenProps({
+               equals() {
+                  return true;
+               },
+            }).compare(
+               {
+                  one: 'one',
+               },
+               {
+                  one: 'one',
+               },
+            );
 
             expect(result).toEqual({
                pass: true,
@@ -92,7 +105,11 @@ describe('token custom matchers', () => {
                one: 'one',
             });
 
-            const result = toContainPTokenProps({ equals() { return true; } }).compare(spy, {
+            const result = toContainPTokenProps({
+               equals() {
+                  return true;
+               },
+            }).compare(spy, {
                two: 'two',
             });
 
@@ -108,7 +125,11 @@ describe('token custom matchers', () => {
                one: 'one',
             });
 
-            const result = toContainPTokenProps({ equals() { return false; } }).compare(spy, {
+            const result = toContainPTokenProps({
+               equals() {
+                  return false;
+               },
+            }).compare(spy, {
                one: 'five',
             });
 
@@ -124,26 +145,27 @@ describe('token custom matchers', () => {
                one: 'one',
             });
 
-            const result = toContainPTokenProps({ equals() { return false; } }).compare(spy, {
+            const result = toContainPTokenProps({
+               equals() {
+                  return false;
+               },
+            }).compare(spy, {
                one: 'five',
                two: 'two',
             });
 
             expect(result).toEqual({
                pass: false,
-               message: 'one\'s value did not match.\n   Actual:   "one"\n   Expected: "five"\n' +
+               message:
+                  'one\'s value did not match.\n   Actual:   "one"\n   Expected: "five"\n' +
                   'Did not find the property "two" in callback value.\n',
             });
          });
-
       });
-
    });
 
    describe('toEqualRangeless()', () => {
-
       describe('raw matcher', () => {
-
          it('returns a compare function', () => {
             expect(typeof toEqualRangeless({}, {}).compare === 'function').toEqual(true);
          });
@@ -168,8 +190,10 @@ describe('token custom matchers', () => {
             try {
                toEqualRangeless({}, {}).compare(spy, {});
             } catch (e: any) {
-               expect(e.message).toEqual('toEqualRangeless() wanted one call with one argument. ' +
-                  'Got 2 calls with 1 arguments.');
+               expect(e.message).toEqual(
+                  'toEqualRangeless() wanted one call with one argument. ' +
+                     'Got 2 calls with 1 arguments.',
+               );
             }
          });
 
@@ -179,8 +203,10 @@ describe('token custom matchers', () => {
             try {
                toEqualRangeless({}, {}).compare(spy, {});
             } catch (e: any) {
-               expect(e.message).toEqual('toEqualRangeless() wanted one call with one argument. ' +
-                  'Got 0 calls with 0 arguments.');
+               expect(e.message).toEqual(
+                  'toEqualRangeless() wanted one call with one argument. ' +
+                     'Got 0 calls with 0 arguments.',
+               );
             }
          });
 
@@ -190,7 +216,14 @@ describe('token custom matchers', () => {
                one: new SToken('one', 'one', new Range(new EntityId(), 1, 0, 1, 3, 0, 3)),
             });
 
-            const result = toEqualRangeless({ equals() { return true; } }, {}).compare(spy, {
+            const result = toEqualRangeless(
+               {
+                  equals() {
+                     return true;
+                  },
+               },
+               {},
+            ).compare(spy, {
                one: toSToken('one'),
             });
 
@@ -206,7 +239,14 @@ describe('token custom matchers', () => {
                one: new SToken('actual', 'actual', new Range(new EntityId(), 1, 0, 1, 3, 0, 3)),
             });
 
-            const result = toEqualRangeless({ equals() { return true; } }, {}).compare(spy, {
+            const result = toEqualRangeless(
+               {
+                  equals() {
+                     return true;
+                  },
+               },
+               {},
+            ).compare(spy, {
                one: 'actual',
             });
 
@@ -225,7 +265,14 @@ describe('token custom matchers', () => {
                },
             });
 
-            const result = toEqualRangeless({ equals() { return true; } }, {}).compare(spy, {
+            const result = toEqualRangeless(
+               {
+                  equals() {
+                     return true;
+                  },
+               },
+               {},
+            ).compare(spy, {
                one: {
                   child: toSToken('one'),
                   childTwo: true,
@@ -242,7 +289,14 @@ describe('token custom matchers', () => {
             const spy = jasmine.createSpy();
             spy(undefined);
 
-            const result = toEqualRangeless({ equals() { return true; } }, {}).compare(spy, undefined);
+            const result = toEqualRangeless(
+               {
+                  equals() {
+                     return true;
+                  },
+               },
+               {},
+            ).compare(spy, undefined);
 
             expect(result).toEqual({
                pass: true,
@@ -256,7 +310,14 @@ describe('token custom matchers', () => {
                one: new SToken('actual', 'actual', new Range(new EntityId(), 1, 0, 1, 3, 0, 3)),
             });
 
-            const result = toEqualRangeless({ equals() { return true; } }, {}).compare(spy, {
+            const result = toEqualRangeless(
+               {
+                  equals() {
+                     return true;
+                  },
+               },
+               {},
+            ).compare(spy, {
                one: toSToken('actual'),
                two: toSToken('two'),
             });
@@ -273,13 +334,21 @@ describe('token custom matchers', () => {
                one: new SToken('actual', 'actual', new Range(new EntityId(), 1, 0, 1, 3, 0, 3)),
             });
 
-            const result = toEqualRangeless({ equals() { return false; } }, {}).compare(spy, {
+            const result = toEqualRangeless(
+               {
+                  equals() {
+                     return false;
+                  },
+               },
+               {},
+            ).compare(spy, {
                one: new SToken('expected', 'expected', new Range(new EntityId(), 5, 0, 5, 3, 0, 3)),
             });
 
             expect(result).toEqual({
                pass: false,
-               message: '"one"\'s value did not match.\n   Actual:   {"str":"actual","originalStr":"actual","ranges":[]}' +
+               message:
+                  '"one"\'s value did not match.\n   Actual:   {"str":"actual","originalStr":"actual","ranges":[]}' +
                   '\n   Expected: {"str":"expected","originalStr":"expected","ranges":[]}\n',
             });
          });
@@ -290,13 +359,21 @@ describe('token custom matchers', () => {
                one: new SToken('actual', 'actual', new Range(new EntityId(), 1, 0, 1, 3, 0, 3)),
             });
 
-            const result = toEqualRangeless({ equals() { return false; } }, {}).compare(spy, {
+            const result = toEqualRangeless(
+               {
+                  equals() {
+                     return false;
+                  },
+               },
+               {},
+            ).compare(spy, {
                one: undefined,
             });
 
             expect(result).toEqual({
                pass: false,
-               message: '"one"\'s value did not match.\n   Actual:   {"str":"actual","originalStr":"actual","ranges":[]}' +
+               message:
+                  '"one"\'s value did not match.\n   Actual:   {"str":"actual","originalStr":"actual","ranges":[]}' +
                   '\n   Expected: "•undefined•"\n',
             });
          });
@@ -304,16 +381,32 @@ describe('token custom matchers', () => {
          it('processes arrays as properties', () => {
             const spy = jasmine.createSpy();
             spy({
-               one: [ new SToken('actual', 'actual', new Range(new EntityId(), 1, 0, 1, 3, 0, 3)), 5, undefined],
+               one: [
+                  new SToken('actual', 'actual', new Range(new EntityId(), 1, 0, 1, 3, 0, 3)),
+                  5,
+                  undefined,
+               ],
             });
 
-            const result = toEqualRangeless({ equals() { return false; } }, {}).compare(spy, {
-               one: [ new SToken('expected', 'expected', new Range(new EntityId(), 5, 0, 9, 3, 0, 3)), 5, undefined],
+            const result = toEqualRangeless(
+               {
+                  equals() {
+                     return false;
+                  },
+               },
+               {},
+            ).compare(spy, {
+               one: [
+                  new SToken('expected', 'expected', new Range(new EntityId(), 5, 0, 9, 3, 0, 3)),
+                  5,
+                  undefined,
+               ],
             });
 
             expect(result).toEqual({
                pass: false,
-               message: '"one"\'s value did not match.\n' +
+               message:
+                  '"one"\'s value did not match.\n' +
                   '   Actual:   [{"str":"actual","originalStr":"actual","ranges":[]},5,"•undefined•"]\n' +
                   '   Expected: [{"str":"expected","originalStr":"expected","ranges":[]},5,"•undefined•"]\n',
             });
@@ -321,22 +414,32 @@ describe('token custom matchers', () => {
 
          it('processes arrays as the top level argument', () => {
             const spy = jasmine.createSpy();
-            spy([ new SToken('actual', 'actual', new Range(new EntityId(), 1, 0, 1, 3, 0, 3)), 5, undefined]);
+            spy([
+               new SToken('actual', 'actual', new Range(new EntityId(), 1, 0, 1, 3, 0, 3)),
+               5,
+               undefined,
+            ]);
 
-            const result = toEqualRangeless({ equals(a: any, b: any) {
-               return a === b;
-            } }, {}).compare(spy,
-               [ new SToken('expected', 'expected', new Range(new EntityId(), 5, 0, 9, 3, 0, 3)), 5, undefined]);
+            const result = toEqualRangeless(
+               {
+                  equals(a: any, b: any) {
+                     return a === b;
+                  },
+               },
+               {},
+            ).compare(spy, [
+               new SToken('expected', 'expected', new Range(new EntityId(), 5, 0, 9, 3, 0, 3)),
+               5,
+               undefined,
+            ]);
 
             expect(result).toEqual({
                pass: false,
-               message: '"0"\'s value did not match.\n   Actual:   {"str":"actual","originalStr":"actual","ranges":[]}' +
+               message:
+                  '"0"\'s value did not match.\n   Actual:   {"str":"actual","originalStr":"actual","ranges":[]}' +
                   '\n   Expected: {"str":"expected","originalStr":"expected","ranges":[]}\n',
             });
          });
-
       });
-
    });
-
 });

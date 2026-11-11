@@ -3,7 +3,7 @@
 import { Transform } from 'stream';
 
 import { PToken } from 'token';
-import { ContentChecker, DocumentChecker, MarkupDeclChecker, } from 'wellformedness';
+import { ContentChecker, DocumentChecker, MarkupDeclChecker } from 'wellformedness';
 
 /*
  * This consumes a stream of PTokens and checks most of the Well-formedness
@@ -78,4 +78,3 @@ class CheckWellFormed extends Transform {
 }
 
 export default CheckWellFormed;
-

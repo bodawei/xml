@@ -9,25 +9,31 @@ import {
    ElementDeclarationPToken,
    GeneralEntityDeclarationPToken,
    ParameterEntityDeclarationPToken,
-AttListDeclarationPToken, NotationDeclarationPToken } from 'pToken';
+   AttListDeclarationPToken,
+   NotationDeclarationPToken,
+} from 'pToken';
 import { strOrBlank, SToken, STokenSource } from 'basic';
-import {
-   parseDocTypeEnd,
-   parseDocTypeStart,
-
-   DocTypeEndPToken,
-   DocTypeStartPToken,
-} from 'token';
+import { parseDocTypeEnd, parseDocTypeStart, DocTypeEndPToken, DocTypeStartPToken } from 'token';
 import { DeclarationPToken, UNKNOWNDECL_PTOKEN } from './baseDeclaration';
 
 type DeclarationStart = {
-   open: SToken,
-   openSpace?: SToken,
-   declType?: SToken,
-   declTypeSpace?: SToken,
+   open: SToken;
+   openSpace?: SToken;
+   declType?: SToken;
+   declTypeSpace?: SToken;
 };
 
-type DeliverDeclaration = (declaration: DocTypeStartPToken|DeclarationPToken|Array<ParseToken>|GeneralEntityDeclarationPToken|ParameterEntityDeclarationPToken|NotationDeclarationPToken| AttListDeclarationPToken | ElementDeclarationPToken) => void;
+type DeliverDeclaration = (
+   declaration:
+      | DocTypeStartPToken
+      | DeclarationPToken
+      | Array<ParseToken>
+      | GeneralEntityDeclarationPToken
+      | ParameterEntityDeclarationPToken
+      | NotationDeclarationPToken
+      | AttListDeclarationPToken
+      | ElementDeclarationPToken,
+) => void;
 
 /**********************************************************************\
  parseDeclaration() extracts an ATTLIST, ELEMENT, ENTITY, NOTATION or
@@ -45,12 +51,16 @@ type DeliverDeclaration = (declaration: DocTypeStartPToken|DeclarationPToken|Arr
       ???
 \**********************************************************************/
 
-function parseDeclaration(source: STokenSource, openSToken: SToken, deliverPToken: DeliverDeclaration) {
+function parseDeclaration(
+   source: STokenSource,
+   openSToken: SToken,
+   deliverPToken: DeliverDeclaration,
+) {
    const start: DeclarationStart = { open: openSToken };
    start.open = openSToken;
 
    source.extractToObject('space', start, 'openSpace');
-   source.extractToObject('word', [ '>', '%' ], start, 'declType');
+   source.extractToObject('word', ['>', '%'], start, 'declType');
 
    source.extract('space', (sToken) => {
       start.declTypeSpace = sToken;
@@ -69,7 +79,6 @@ function parseDeclaration(source: STokenSource, openSToken: SToken, deliverPToke
             parseElementDeclaration(source, start, deliverPToken);
             return;
       }
-
 
       // Legacy support
       const newResult = new DeclarationPToken(undefined, {
@@ -91,7 +100,7 @@ function parseDeclaration(source: STokenSource, openSToken: SToken, deliverPToke
                   deliverPToken(docTypeStart);
                } else {
                   parseDocTypeEnd(source, docTypeStart, (endToken: DocTypeEndPToken) => {
-                     deliverPToken([ docTypeStart, endToken ]);
+                     deliverPToken([docTypeStart, endToken]);
                   });
                }
             });
@@ -101,11 +110,6 @@ function parseDeclaration(source: STokenSource, openSToken: SToken, deliverPToke
             break;
       }
    });
-
 }
 
-export {
-   UNKNOWNDECL_PTOKEN,
-   DeclarationStart,
-   parseDeclaration,
-};
+export { UNKNOWNDECL_PTOKEN, DeclarationStart, parseDeclaration };

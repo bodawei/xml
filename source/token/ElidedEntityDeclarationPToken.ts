@@ -23,8 +23,4 @@ class ElidedEntityDeclarationPToken {
    }
 }
 
-export {
-   ELIDED_ENTITY_DECLARATION_PTOKEN,
-
-   ElidedEntityDeclarationPToken,
-};
+export { ELIDED_ENTITY_DECLARATION_PTOKEN, ElidedEntityDeclarationPToken };

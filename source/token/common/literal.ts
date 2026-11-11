@@ -9,17 +9,17 @@ import literalValue, {
 
 type DeliverPToken = (foundLiteral?: LiteralPToken) => void;
 type ParseOptions = {
-   pToken: any,
-   peRef?: boolean,
-   geRef?: boolean,
-   charRef?: boolean,
+   pToken: any;
+   peRef?: boolean;
+   geRef?: boolean;
+   charRef?: boolean;
 };
 interface LiteralPToken {
-   openQuote?: SToken,
-   value: LiteralValuePToken,
-   closeQuote?: SToken,
-   [other: string]: any,
-};
+   openQuote?: SToken;
+   value: LiteralValuePToken;
+   closeQuote?: SToken;
+   [other: string]: any;
+}
 
 /**********************************************************************\
  The literal namespace has utility routines for dealing with
@@ -43,14 +43,14 @@ function parse(source: STokenSource, options: ParseOptions | undefined, done: De
    const pToken = options?.pToken || {};
 
    source.extract('peekChar', (quoteSToken) => {
-      if (!quoteSToken || (quoteSToken.str !== '"' && quoteSToken.str !== '\'')) {
+      if (!quoteSToken || (quoteSToken.str !== '"' && quoteSToken.str !== "'")) {
          done();
          return;
       }
 
       source.extractToObject('char', pToken, 'openQuote');
 
-      const terminators: LiteralValueTerminators = [ quoteSToken.str ];
+      const terminators: LiteralValueTerminators = [quoteSToken.str];
 
       if (options?.peRef) {
          terminators.push('%');
@@ -83,8 +83,4 @@ const literal = {
 };
 
 export default literal;
-export {
-   parseLiteral,
-   LiteralPToken,
-   LiteralValuePToken,
-};
+export { parseLiteral, LiteralPToken, LiteralValuePToken };

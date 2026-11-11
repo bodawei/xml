@@ -3,10 +3,23 @@
 import { Problem } from 'basic';
 import declaration, { DeclarationPToken } from './bridge/baseDeclaration';
 
-import { AttributePToken, AttributesPToken, AttributeValuePToken, AttributeValueElement, parseAttribute } from './common/attribute';
+import {
+   AttributePToken,
+   AttributesPToken,
+   AttributeValuePToken,
+   AttributeValueElement,
+   parseAttribute,
+} from './common/attribute';
 import { LiteralPToken, parseLiteral } from './common/literal';
 import literalValue, { LiteralValuePToken, parseLiteralValue } from './common/literalValue';
-import { WordListPToken, WordListType, WordListEntryPToken, parseWordList, NOTATION_PTOKEN, ENUMERATION_PTOKEN } from './common/wordList';
+import {
+   WordListPToken,
+   WordListType,
+   WordListEntryPToken,
+   parseWordList,
+   NOTATION_PTOKEN,
+   ENUMERATION_PTOKEN,
+} from './common/wordList';
 import { ExternalSubsetStartToken } from './marker/externalSubsetStart';
 import { ExternalSubsetEndToken } from './marker/externalSubsetEnd';
 import { DocTypeEndPToken } from './docTypeEnd';
@@ -75,15 +88,13 @@ type PToken =
    | GeneralEntityStartPToken
    | ParameterEntityEndPToken
    | ParameterEntityStartPToken
-   | SpacePToken
-   ;
+   | SpacePToken;
 
-   export * from './getFirstSToken';
+export * from './getFirstSToken';
 
 export {
    NOTATION_PTOKEN,
    ENUMERATION_PTOKEN,
-
    DeclarationPToken,
    AttributePToken,
    AttributesPToken,
@@ -97,9 +108,7 @@ export {
    parseLiteral,
    parseLiteralValue,
    parseWordList,
-
    declaration,
-
    literalValue,
    AttributeValuePToken,
    PToken,

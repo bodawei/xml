@@ -39,12 +39,16 @@ class CdataPToken {
    [21] CDEnd   ::= ']]>'
 \**********************************************************************/
 
-function parseCdata(source: STokenSource, sectionStart: SectionStart, deliverPToken: DeliverPToken) {
+function parseCdata(
+   source: STokenSource,
+   sectionStart: SectionStart,
+   deliverPToken: DeliverPToken,
+) {
    const props: any = Object.assign({}, sectionStart);
 
    source.extractToObject('match', '[', props, 'bracket');
 
-   source.extractToObject('all', [ ']]>' ], props, 'text');
+   source.extractToObject('all', [']]>'], props, 'text');
 
    source.extract('match', ']]>', (sToken) => {
       props.close = sToken;
@@ -52,9 +56,4 @@ function parseCdata(source: STokenSource, sectionStart: SectionStart, deliverPTo
    });
 }
 
-export {
-   CDATA_PTOKEN,
-   CdataPToken,
-
-   parseCdata,
-};
+export { CDATA_PTOKEN, CdataPToken, parseCdata };

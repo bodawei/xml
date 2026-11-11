@@ -2,11 +2,7 @@
 
 import { toSToken, STokenSource } from 'basic';
 
-import {
-   parseWordList,
-   WordListType,
-   WordListPToken,
-} from '../wordList';
+import { parseWordList, WordListType, WordListPToken } from '../wordList';
 
 describe('wordList (integration)', () => {
    let wlPToken: WordListPToken;
@@ -15,24 +11,26 @@ describe('wordList (integration)', () => {
       wlPToken = new WordListPToken(WordListType.NOTATION, {
          open: toSToken('('),
          openSpace: toSToken(' '),
-         words: [ {
-            word: toSToken('one'),
-            wordSpace: undefined,
-            connector: toSToken('|'),
-            connectorSpace: toSToken(' '),
-         }, {
-            word: toSToken('two'),
-            wordSpace: undefined,
-            connector: undefined,
-            connectorSpace: undefined,
-         }],
+         words: [
+            {
+               word: toSToken('one'),
+               wordSpace: undefined,
+               connector: toSToken('|'),
+               connectorSpace: toSToken(' '),
+            },
+            {
+               word: toSToken('two'),
+               wordSpace: undefined,
+               connector: undefined,
+               connectorSpace: undefined,
+            },
+         ],
          close: toSToken(')'),
          closeSpace: toSToken(' '),
       });
    });
 
    describe('parseWordList()', () => {
-
       it('parses a simple wordList', (done) => {
          const source = new STokenSource();
          source.addText('( one| two) ');
@@ -53,29 +51,31 @@ describe('wordList (integration)', () => {
             expect(result).toEqualRangeless({
                open: toSToken('('),
                openSpace: toSToken(' '),
-               words: [ {
-                  word: undefined,
-                  wordSpace: undefined,
-                  connector: toSToken('|'),
-                  connectorSpace: toSToken(' '),
-               }, {
-                  word: toSToken('two'),
-                  wordSpace: toSToken(' '),
-                  connector: undefined,
-                  connectorSpace: undefined,
-               }, {
-                  word: toSToken('three'),
-                  wordSpace: toSToken(' '),
-                  connector: toSToken('|'),
-                  connectorSpace: undefined,
-               }],
+               words: [
+                  {
+                     word: undefined,
+                     wordSpace: undefined,
+                     connector: toSToken('|'),
+                     connectorSpace: toSToken(' '),
+                  },
+                  {
+                     word: toSToken('two'),
+                     wordSpace: toSToken(' '),
+                     connector: undefined,
+                     connectorSpace: undefined,
+                  },
+                  {
+                     word: toSToken('three'),
+                     wordSpace: toSToken(' '),
+                     connector: toSToken('|'),
+                     connectorSpace: undefined,
+                  },
+               ],
                close: undefined,
                closeSpace: undefined,
             });
             done();
          });
       });
-
    });
-
 });

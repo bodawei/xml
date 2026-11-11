@@ -2,9 +2,7 @@
 
 import { STokenSource, SToken } from 'basic';
 
-
 const CHARDATA_PTOKEN = 'CHARDATA_PTOKEN';
-
 
 class CharDataPToken {
    public readonly type: typeof CHARDATA_PTOKEN = CHARDATA_PTOKEN;
@@ -29,8 +27,12 @@ class CharDataPToken {
       [14] CharData ::= [^<&]* - ([^<&]* ']]>' [^<&]*)
 \**********************************************************************/
 
-function parseCharData(source: STokenSource, otherTerminators: Array<string>, deliverPToken: (result: CharDataPToken|undefined) => void) {
-   const terminators = [ '<', '&', ']]>' ].concat(otherTerminators);
+function parseCharData(
+   source: STokenSource,
+   otherTerminators: Array<string>,
+   deliverPToken: (result: CharDataPToken | undefined) => void,
+) {
+   const terminators = ['<', '&', ']]>'].concat(otherTerminators);
 
    source.extract('all', terminators, (sToken) => {
       if (!sToken) {
@@ -42,10 +44,4 @@ function parseCharData(source: STokenSource, otherTerminators: Array<string>, de
    });
 }
 
-export {
-   CHARDATA_PTOKEN,
-
-   CharDataPToken,
-
-   parseCharData,
-};
+export { CHARDATA_PTOKEN, CharDataPToken, parseCharData };

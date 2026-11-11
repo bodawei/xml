@@ -10,7 +10,12 @@ import { EntityExpander, resolveEntityId as defaultResolveEntityId } from 'expan
 import { STokenSource } from 'basic';
 import { AttributeValuePToken, EntityValuePToken, PToken } from 'token';
 
-import { AttributeValueResults, ExpandToken, OpaqueEntityLoc, RetrieveResults } from '../expand/types';
+import {
+   AttributeValueResults,
+   ExpandToken,
+   OpaqueEntityLoc,
+   RetrieveResults,
+} from '../expand/types';
 import { ParseType } from 'pToken';
 
 function parseBody(sTokenSource: STokenSource, context: ParseType, expandToken: ExpandToken): void {
@@ -52,9 +57,7 @@ function resolveEntityId(
    return pathname;
 }
 
-function retrieveExternalEntity(
-   entityLoc: OpaqueEntityLoc,
-): RetrieveResults {
+function retrieveExternalEntity(entityLoc: OpaqueEntityLoc): RetrieveResults {
    const sTokenSource = new STokenSource();
 
    const data = fs.readFileSync(entityLoc as string, { encoding: 'utf8' });

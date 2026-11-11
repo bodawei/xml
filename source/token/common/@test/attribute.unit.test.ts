@@ -10,21 +10,24 @@ describe('attribute (unit)', () => {
 
    beforeEach(() => {
       const expectedSToken = makeSTokenMaker();
-      attributesPChunk = [ {
-         name: expectedSToken('version'),
-         postNameSpace: expectedSToken(' '),
-         equal: expectedSToken('='),
-         postEqualSpace: expectedSToken(' '),
-         value: [],
-         trailingSpace: expectedSToken(' '),
-      }, {
-         name: expectedSToken('another'),
-         postNameSpace: undefined,
-         equal: expectedSToken('='),
-         postEqualSpace: undefined,
-         value: [],
-         trailingSpace: undefined,
-      } ];
+      attributesPChunk = [
+         {
+            name: expectedSToken('version'),
+            postNameSpace: expectedSToken(' '),
+            equal: expectedSToken('='),
+            postEqualSpace: expectedSToken(' '),
+            value: [],
+            trailingSpace: expectedSToken(' '),
+         },
+         {
+            name: expectedSToken('another'),
+            postNameSpace: undefined,
+            equal: expectedSToken('='),
+            postEqualSpace: undefined,
+            value: [],
+            trailingSpace: undefined,
+         },
+      ];
    });
 
    describe('parse()', () => {
@@ -35,21 +38,23 @@ describe('attribute (unit)', () => {
       beforeEach(() => {
          callback = jasmine.createSpy('callbackSpy');
          litParse = spyOn(literal, 'parse');
-         litParse.and.callFake((_1: any, options: any, callback: Function) => { callback(options.pToken); });
+         litParse.and.callFake((_1: any, options: any, callback: Function) => {
+            callback(options.pToken);
+         });
       });
 
       it('parses an attribute', () => {
          mockSource = new MockSTokenSource([
-            [ 'version', 'word', [ '=', '>' ] ],
-            [ ' ', 'space' ],
-            [ '=', 'match', '=' ],
-            [ ' ', 'space' ],
-            [ ' ', 'space' ],
-            [ undefined, 'word', [ '=', '>' ] ],
+            ['version', 'word', ['=', '>']],
+            [' ', 'space'],
+            ['=', 'match', '='],
+            [' ', 'space'],
+            [' ', 'space'],
+            [undefined, 'word', ['=', '>']],
          ]);
          attributesPChunk.pop();
 
-         attribute.parse(mockSource, { terminators: [ '>' ] }, callback);
+         attribute.parse(mockSource, { terminators: ['>'] }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.argsFor(0)[0]).toEqual(attributesPChunk);
@@ -57,16 +62,16 @@ describe('attribute (unit)', () => {
 
       it('calls literal.parse() with appropriate parameters', () => {
          mockSource = new MockSTokenSource([
-            [ 'version', 'word', [ '=', '>' ] ],
-            [ ' ', 'space' ],
-            [ '=', 'match', '=' ],
-            [ ' ', 'space' ],
-            [ ' ', 'space' ],
-            [ undefined, 'word', [ '=', '>' ] ],
+            ['version', 'word', ['=', '>']],
+            [' ', 'space'],
+            ['=', 'match', '='],
+            [' ', 'space'],
+            [' ', 'space'],
+            [undefined, 'word', ['=', '>']],
          ]);
          attributesPChunk.pop();
 
-         attribute.parse(mockSource, { geRef: true, terminators: [ '>' ] }, callback);
+         attribute.parse(mockSource, { geRef: true, terminators: ['>'] }, callback);
          mockSource.respondInAsyncTime();
 
          expect(litParse.calls.argsFor(0)[0]).toEqual(mockSource);
@@ -76,34 +81,27 @@ describe('attribute (unit)', () => {
 
       it('parses multiple attributes', () => {
          mockSource = new MockSTokenSource([
-            [ 'version', 'word', [ '=', '>' ] ],
-            [ ' ', 'space' ],
-            [ '=', 'match', '=' ],
-            [ ' ', 'space' ],
-            [ ' ', 'space' ],
-            [ 'another', 'word', [ '=', '>' ] ],
-            [ undefined, 'space' ],
-            [ '=', 'match', '=' ],
-            [ undefined, 'space' ],
-            [ undefined, 'space' ],
-            [ undefined, 'word', [ '=', '>' ] ],
+            ['version', 'word', ['=', '>']],
+            [' ', 'space'],
+            ['=', 'match', '='],
+            [' ', 'space'],
+            [' ', 'space'],
+            ['another', 'word', ['=', '>']],
+            [undefined, 'space'],
+            ['=', 'match', '='],
+            [undefined, 'space'],
+            [undefined, 'space'],
+            [undefined, 'word', ['=', '>']],
          ]);
 
-         attribute.parse(mockSource, { terminators: [ '>' ] }, callback);
+         attribute.parse(mockSource, { terminators: ['>'] }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.argsFor(0)[0]).toEqual(attributesPChunk);
       });
 
       it('accepts no options', () => {
-         mockSource = new MockSTokenSource([
-            'version',
-            ' ',
-            '=',
-            ' ',
-            ' ',
-            undefined,
-         ]);
+         mockSource = new MockSTokenSource(['version', ' ', '=', ' ', ' ', undefined]);
          attributesPChunk.pop();
 
          attribute.parse(mockSource, undefined, callback);
@@ -113,14 +111,7 @@ describe('attribute (unit)', () => {
       });
 
       it('accepts options with no terminators', () => {
-         mockSource = new MockSTokenSource([
-            'version',
-            ' ',
-            '=',
-            ' ',
-            ' ',
-            undefined,
-         ]);
+         mockSource = new MockSTokenSource(['version', ' ', '=', ' ', ' ', undefined]);
          attributesPChunk.pop();
 
          attribute.parse(mockSource, {}, callback);
@@ -130,13 +121,15 @@ describe('attribute (unit)', () => {
       });
 
       it('stops at the specified name terminator', () => {
-         litParse.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
+         litParse.and.callFake((_1: any, _2: any, callback: Function) => {
+            callback();
+         });
          mockSource = new MockSTokenSource([
-            [ 'versi', 'word', [ '=', 'x' ] ],
-            [ undefined, 'space' ],
-            [ undefined, 'match', '=' ],
-            [ undefined, 'space' ],
-            [ undefined, 'word', [ '=', 'x' ] ],
+            ['versi', 'word', ['=', 'x']],
+            [undefined, 'space'],
+            [undefined, 'match', '='],
+            [undefined, 'space'],
+            [undefined, 'word', ['=', 'x']],
          ]);
          attributesPChunk.pop();
          const expectedSToken = makeSTokenMaker();
@@ -146,32 +139,34 @@ describe('attribute (unit)', () => {
          attributesPChunk[0].postEqualSpace = undefined;
          delete attributesPChunk[0].trailingSpace;
 
-         attribute.parse(mockSource, { terminators: [ 'x' ] }, callback);
+         attribute.parse(mockSource, { terminators: ['x'] }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.argsFor(0)[0]).toEqual(attributesPChunk);
       });
 
       it('deals with EOF where the attribute name should be', () => {
-         litParse.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
-         mockSource = new MockSTokenSource([
-            [ undefined, 'word', [ '=', '>' ] ],
-         ]);
+         litParse.and.callFake((_1: any, _2: any, callback: Function) => {
+            callback();
+         });
+         mockSource = new MockSTokenSource([[undefined, 'word', ['=', '>']]]);
 
-         attribute.parse(mockSource, { terminators: [ '>' ] }, callback);
+         attribute.parse(mockSource, { terminators: ['>'] }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.argsFor(0)[0]).toEqual([]);
       });
 
       it('deals with EOF after the name', () => {
-         litParse.and.callFake((_1: any, _2: any, callback: Function) => { callback(); });
+         litParse.and.callFake((_1: any, _2: any, callback: Function) => {
+            callback();
+         });
          mockSource = new MockSTokenSource([
-            [ 'version', 'word', [ '=', '>' ] ],
-            [ undefined, 'space' ],
-            [ undefined, 'match', '=' ],
-            [ undefined, 'space' ],
-            [ undefined, 'word', [ '=', '>' ] ],
+            ['version', 'word', ['=', '>']],
+            [undefined, 'space'],
+            [undefined, 'match', '='],
+            [undefined, 'space'],
+            [undefined, 'word', ['=', '>']],
          ]);
          attributesPChunk.pop();
          attributesPChunk[0].postNameSpace = undefined;
@@ -179,12 +174,10 @@ describe('attribute (unit)', () => {
          attributesPChunk[0].postEqualSpace = undefined;
          delete attributesPChunk[0].trailingSpace;
 
-         attribute.parse(mockSource, { terminators: [ '>' ] }, callback);
+         attribute.parse(mockSource, { terminators: ['>'] }, callback);
          mockSource.respondInAsyncTime();
 
          expect(callback.calls.argsFor(0)[0]).toEqual(attributesPChunk);
       });
-
    });
-
 });

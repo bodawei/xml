@@ -20,6 +20,4 @@ function gatherStream(stream: Transform, expect: (results: PTokenArray) => void,
    });
 }
 
-export {
-   gatherStream,
-};
+export { gatherStream };

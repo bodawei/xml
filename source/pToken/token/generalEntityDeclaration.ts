@@ -59,7 +59,8 @@ function isNotDeclarationStart(
 }
 
 class GeneralEntityDeclarationPToken {
-   public readonly type: typeof GENERAL_ENTITY_DECLARATION_PTOKEN = GENERAL_ENTITY_DECLARATION_PTOKEN;
+   public readonly type: typeof GENERAL_ENTITY_DECLARATION_PTOKEN =
+      GENERAL_ENTITY_DECLARATION_PTOKEN;
 
    public readonly open: SToken;
 

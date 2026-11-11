@@ -6,9 +6,7 @@ import { SToken, STokenSource } from 'basic';
 import { parseSpace } from '../space';
 
 describe('space (integration)', () => {
-
    describe('parse()', () => {
-
       it('does a simple parse', (done) => {
          const pToken = {
             type: 'SPACE_PTOKEN',
@@ -23,7 +21,5 @@ describe('space (integration)', () => {
             done();
          });
       });
-
    });
-
 });

@@ -13,7 +13,7 @@ import { DocTypeStartPToken } from './docTypeStart';
 
 const DOCTYPE_END_PTOKEN = 'DOCTYPE_END_PTOKEN';
 
-type PreToken = { docTypeStartPToken: DocTypeStartPToken; [ other: string ]: any };
+type PreToken = { docTypeStartPToken: DocTypeStartPToken; [other: string]: any };
 
 class DocTypeEndPToken {
    public readonly type: typeof DOCTYPE_END_PTOKEN = DOCTYPE_END_PTOKEN;
@@ -30,7 +30,6 @@ class DocTypeEndPToken {
    }
 }
 
-
 /**********************************************************************\
  parseDocTypeEnd() extracts ]> from the end of a DOCTYPE statement.
 
@@ -45,7 +44,11 @@ class DocTypeEndPToken {
       ('[' intSubset ']' S?)? '>'
 \**********************************************************************/
 
-function parseDocTypeEnd(source: STokenSource, docTypeStart: DocTypeStartPToken, deliverPToken: (result: DocTypeEndPToken) => void) {
+function parseDocTypeEnd(
+   source: STokenSource,
+   docTypeStart: DocTypeStartPToken,
+   deliverPToken: (result: DocTypeEndPToken) => void,
+) {
    const pToken: PreToken = {
       docTypeStartPToken: docTypeStart,
    };
@@ -59,10 +62,4 @@ function parseDocTypeEnd(source: STokenSource, docTypeStart: DocTypeStartPToken,
    });
 }
 
-export {
-   DOCTYPE_END_PTOKEN,
-
-   DocTypeEndPToken,
-
-   parseDocTypeEnd,
-};
+export { DOCTYPE_END_PTOKEN, DocTypeEndPToken, parseDocTypeEnd };

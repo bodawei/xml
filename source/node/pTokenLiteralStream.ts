@@ -2,7 +2,7 @@
 
 import { Readable } from 'stream';
 
-import { PTokenLiteralParser} from 'pToken';
+import { PTokenLiteralParser } from 'pToken';
 
 import { STokenSource } from 'basic';
 
@@ -27,10 +27,10 @@ class PTokenLiteralStream extends Readable {
    }
 
    _read() {
-      this.parser.parse(result => {
+      this.parser.parse((result) => {
          this.push(result || null);
       });
    }
 }
 
-export  {PTokenLiteralStream };
+export { PTokenLiteralStream };

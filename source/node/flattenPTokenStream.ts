@@ -5,18 +5,17 @@ import { ParseToken } from 'pToken';
 import { convertPTokenToSTokens } from 'flat';
 
 class FlattenPTokenStream extends Transform {
-
    constructor() {
       super({ objectMode: true });
    }
 
    _transform(token: ParseToken, encoding: string, done: () => void): void {
       const result = convertPTokenToSTokens(token);
-      
+
       for (const element of result) {
          this.push(element);
       }
-      
+
       done();
    }
 }

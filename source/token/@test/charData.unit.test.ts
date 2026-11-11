@@ -1,6 +1,5 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-
 import { makeSTokenMaker, MockSTokenSource } from 'pToken-test';
 
 import { CharDataPToken, parseCharData } from '../charData';
@@ -23,9 +22,7 @@ describe('charData', () => {
       });
 
       it('returns simple values', () => {
-         const mockSource = new MockSTokenSource([
-            [ 'test text', 'all', [ '<', '&', ']]>' ] ],
-         ]);
+         const mockSource = new MockSTokenSource([['test text', 'all', ['<', '&', ']]>']]]);
 
          parseCharData(mockSource, [], callback);
          mockSource.respondInAsyncTime();
@@ -34,26 +31,21 @@ describe('charData', () => {
       });
 
       it('responds to other terminators passed in', () => {
-         const mockSource = new MockSTokenSource([
-            [ 'test text', 'all', [ '<', '&', ']]>', '$' ] ],
-         ]);
+         const mockSource = new MockSTokenSource([['test text', 'all', ['<', '&', ']]>', '$']]]);
 
-         parseCharData(mockSource, [ '$' ], callback);
+         parseCharData(mockSource, ['$'], callback);
          mockSource.respondInAsyncTime();
 
          expect(callback).toContainPTokenProps(charDataPToken);
       });
 
       it('returns undefined if no text returned', () => {
-         const mockSource = new MockSTokenSource([
-            undefined,
-         ]);
+         const mockSource = new MockSTokenSource([undefined]);
 
          parseCharData(mockSource, [], callback);
          mockSource.respondInAsyncTime();
 
-         expect(callback.calls.argsFor(0)).toEqual([ undefined ]);
+         expect(callback.calls.argsFor(0)).toEqual([undefined]);
       });
    });
-
 });

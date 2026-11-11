@@ -2,11 +2,17 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
-import {   GENERAL_ENTITY_DECLARATION_PTOKEN, GENERAL_ENTITY_REFERENCE_PTOKEN,  PROCESSING_INSTRUCTION_PTOKEN,    NOTATION_DECLARATION_PTOKEN, PARAMETER_ENTITY_REFERENCE_PTOKEN, } from 'pToken';
+import {
+   GENERAL_ENTITY_DECLARATION_PTOKEN,
+   GENERAL_ENTITY_REFERENCE_PTOKEN,
+   PROCESSING_INSTRUCTION_PTOKEN,
+   NOTATION_DECLARATION_PTOKEN,
+   PARAMETER_ENTITY_REFERENCE_PTOKEN,
+} from 'pToken';
 import { STokenSource } from 'basic';
 import { ELEMENT_DECLARATION_PTOKEN } from 'pToken';
 
-import {PTokenStream} from '../pTokenStream';
+import { PTokenStream } from '../pTokenStream';
 
 import {
    CDATA_PTOKEN,
@@ -27,11 +33,15 @@ describe('pTokenStream (integration)', () => {
    let sTokenSource: STokenSource;
 
    beforeEach(() => {
-      sTokenSource= new STokenSource();
+      sTokenSource = new STokenSource();
       pTokenStream = new PTokenStream(sTokenSource);
    });
 
-   function gatherTokens(stream: PTokenStream, input: string | void, done: (tokens: TokenArray) => void) {
+   function gatherTokens(
+      stream: PTokenStream,
+      input: string | void,
+      done: (tokens: TokenArray) => void,
+   ) {
       const results: TokenArray = [];
 
       stream.on('data', (data: Token) => {
@@ -47,11 +57,15 @@ describe('pTokenStream (integration)', () => {
       }
    }
 
-   function expectInputToProduceTypes(input: string | void, types: Array<string> | string, done?: () => void) {
+   function expectInputToProduceTypes(
+      input: string | void,
+      types: Array<string> | string,
+      done?: () => void,
+   ) {
       gatherTokens(pTokenStream, input, (results) => {
          let expecteds: Array<string>;
          if (!Array.isArray(types)) {
-            expecteds = [ types ];
+            expecteds = [types];
          } else {
             expecteds = types;
          }
@@ -68,7 +82,6 @@ describe('pTokenStream (integration)', () => {
    }
 
    describe('construction', () => {
-
       it('uses the provided STokenSource', (done) => {
          const source = new STokenSource();
          pTokenStream = new PTokenStream(source);
@@ -78,11 +91,14 @@ describe('pTokenStream (integration)', () => {
 
          expectInputToProduceTypes(undefined, CHARDATA_PTOKEN, done);
       });
-
    });
 
    it('parses an ATTLIST', (done) => {
-      expectInputToProduceTypes('<!ATTLIST myEntity atOne CDATA #REQUIRED>', 'ATTLIST_DECLARATION_PTOKEN', done);
+      expectInputToProduceTypes(
+         '<!ATTLIST myEntity atOne CDATA #REQUIRED>',
+         'ATTLIST_DECLARATION_PTOKEN',
+         done,
+      );
    });
 
    it('parses character data up to a <', (done) => {
@@ -98,8 +114,11 @@ describe('pTokenStream (integration)', () => {
    });
 
    it('parse start and end without an internal subset', (done) => {
-      expectInputToProduceTypes('<!DOCTYPE goodName SYSTEM "sys.xml">',
-         [ DOCTYPE_START_PTOKEN, DOCTYPE_END_PTOKEN ], done);
+      expectInputToProduceTypes(
+         '<!DOCTYPE goodName SYSTEM "sys.xml">',
+         [DOCTYPE_START_PTOKEN, DOCTYPE_END_PTOKEN],
+         done,
+      );
    });
 
    it('parses an element start', (done) => {
@@ -115,7 +134,11 @@ describe('pTokenStream (integration)', () => {
    });
 
    it('parses an ENTITY', (done) => {
-      expectInputToProduceTypes('<!ENTITY myEntity PUBLIC "pub.xml" "sys.xml">', GENERAL_ENTITY_DECLARATION_PTOKEN, done);
+      expectInputToProduceTypes(
+         '<!ENTITY myEntity PUBLIC "pub.xml" "sys.xml">',
+         GENERAL_ENTITY_DECLARATION_PTOKEN,
+         done,
+      );
    });
 
    it('parses an ELEMENT', (done) => {
@@ -144,9 +167,16 @@ describe('pTokenStream (integration)', () => {
 
    it('parses no spaces in element content', (done) => {
       gatherTokens(pTokenStream, '  <one>   </one>   ', (results) => {
-         const types = results.map(r => r.type);
+         const types = results.map((r) => r.type);
          expect(types).toEqual([
-            CONFORMANCE_VERSION, ENTITY_ID, SPACE_PTOKEN, ELEMENT_START_PTOKEN, CHARDATA_PTOKEN, ELEMENT_END_PTOKEN, SPACE_PTOKEN]);
+            CONFORMANCE_VERSION,
+            ENTITY_ID,
+            SPACE_PTOKEN,
+            ELEMENT_START_PTOKEN,
+            CHARDATA_PTOKEN,
+            ELEMENT_END_PTOKEN,
+            SPACE_PTOKEN,
+         ]);
          done?.();
       });
    });
@@ -166,5 +196,4 @@ describe('pTokenStream (integration)', () => {
    it('parses a simple XML Declaration', (done) => {
       expectInputToProduceTypes('<?xml version="1.0"?>', 'XMLDECL_PTOKEN', done);
    });
-
 });

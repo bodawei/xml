@@ -1,6 +1,11 @@
 /* Copyright ® 2016-2018 by 柏大衛. All rights reserved. */
 
-import { CharRefPToken, GeneralEntityReferencePToken, ParameterEntityReferencePToken, TextPToken } from 'pToken';
+import {
+   CharRefPToken,
+   GeneralEntityReferencePToken,
+   ParameterEntityReferencePToken,
+   TextPToken,
+} from 'pToken';
 import { SToken, STokenSource } from 'basic';
 
 import literal, { LiteralPToken } from './literal';
@@ -12,10 +17,14 @@ import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';
 type ParseOptions = {
    geRef?: boolean;
    terminators?: Array<string>;
-}
+};
 
 type AttrValue = Array<
-   GeneralEntityStartPToken | GeneralEntityEndPToken | GeneralEntityReferencePToken | TextPToken | CharRefPToken
+   | GeneralEntityStartPToken
+   | GeneralEntityEndPToken
+   | GeneralEntityReferencePToken
+   | TextPToken
+   | CharRefPToken
 >;
 
 interface AttributePToken extends LiteralPToken {
@@ -24,14 +33,21 @@ interface AttributePToken extends LiteralPToken {
    equal?: SToken;
    postEqualSpace?: SToken;
    trailingSpace?: SToken;
-};
+}
 
-type AttributeValueElement = TextPToken|CharRefPToken|GeneralEntityReferencePToken|GeneralEntityStartPToken|GeneralEntityEndPToken|ParameterEntityReferencePToken|ParameterEntityStartPToken|ParameterEntityEndPToken;
+type AttributeValueElement =
+   | TextPToken
+   | CharRefPToken
+   | GeneralEntityReferencePToken
+   | GeneralEntityStartPToken
+   | GeneralEntityEndPToken
+   | ParameterEntityReferencePToken
+   | ParameterEntityStartPToken
+   | ParameterEntityEndPToken;
 type AttributeValuePToken = Array<AttributeValueElement>;
 
 type AttributesPToken = Array<AttributePToken>;
 type DeliverPToken = (result?: AttributesPToken) => void;
-
 
 /**********************************************************************\
  The attribute namespace contains the usual tools for processing
@@ -64,15 +80,24 @@ type DeliverPToken = (result?: AttributesPToken) => void;
     [81] EncName      ::= [A-Za-z] ([A-Za-z0-9._] | '-')*
 \**********************************************************************/
 
-function parse(source: STokenSource, options: ParseOptions = {}, deliverPToken: DeliverPToken): void {
+function parse(
+   source: STokenSource,
+   options: ParseOptions = {},
+   deliverPToken: DeliverPToken,
+): void {
    const newOptions = {
       geRef: options.geRef,
-      terminators: [ '=' ].concat(options.terminators || []),
+      terminators: ['='].concat(options.terminators || []),
    };
    getNextAttribute(source, newOptions, [], deliverPToken);
 }
 
-function getNextAttribute(source: STokenSource, options: ParseOptions, attrs: Array<AttributePToken>, deliverPToken: DeliverPToken) {
+function getNextAttribute(
+   source: STokenSource,
+   options: ParseOptions,
+   attrs: Array<AttributePToken>,
+   deliverPToken: DeliverPToken,
+) {
    source.extract('word', options.terminators, (sToken) => {
       if (!sToken) {
          deliverPToken(attrs);
@@ -82,28 +107,37 @@ function getNextAttribute(source: STokenSource, options: ParseOptions, attrs: Ar
    });
 }
 
-function addAttribute(source: STokenSource, attrs: Array<AttributePToken>, options: ParseOptions, name: SToken, deliverPToken: DeliverPToken) {
+function addAttribute(
+   source: STokenSource,
+   attrs: Array<AttributePToken>,
+   options: ParseOptions,
+   name: SToken,
+   deliverPToken: DeliverPToken,
+) {
    const attr: AttributePToken = {
       name,
-      value: []
+      value: [],
    };
    attrs.push(attr);
 
    source.extractToObject('space', attr, 'postNameSpace');
    source.extractToObject('match', '=', attr, 'equal');
    source.extractToObject('space', attr, 'postEqualSpace');
-   literal.parse(source, {
-      pToken: attr,
-      geRef: options.geRef || false,
-   }, (modifiedPToken) => {
-      if (modifiedPToken) {
-         source.extractToObject('space', attr, 'trailingSpace');
-      }
+   literal.parse(
+      source,
+      {
+         pToken: attr,
+         geRef: options.geRef || false,
+      },
+      (modifiedPToken) => {
+         if (modifiedPToken) {
+            source.extractToObject('space', attr, 'trailingSpace');
+         }
 
-      getNextAttribute(source, options, attrs, deliverPToken);
-   });
+         getNextAttribute(source, options, attrs, deliverPToken);
+      },
+   );
 }
-
 
 const parseAttribute = parse;
 

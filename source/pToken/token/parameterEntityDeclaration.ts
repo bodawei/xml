@@ -55,7 +55,8 @@ function isNotDeclarationStart(
 }
 
 class ParameterEntityDeclarationPToken {
-   public readonly type: typeof PARAMETER_ENTITY_DECLARATION_PTOKEN = PARAMETER_ENTITY_DECLARATION_PTOKEN;
+   public readonly type: typeof PARAMETER_ENTITY_DECLARATION_PTOKEN =
+      PARAMETER_ENTITY_DECLARATION_PTOKEN;
 
    public readonly open: SToken;
 

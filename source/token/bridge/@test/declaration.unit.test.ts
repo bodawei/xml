@@ -21,13 +21,12 @@ describe('declaration (unit)', () => {
       });
 
       describe('ENTITY', () => {
-
          it('seeks to parse an entity when the decl type is ENTITY', () => {
             const parse = spyOn(pToken, 'parseEntityDeclaration');
             const mockSource = new MockSTokenSource([
-               [ undefined, 'space' ],
-               [ 'ENTITY', 'word', [ '>', '%' ] ],
-               [ ' ', 'space' ],
+               [undefined, 'space'],
+               ['ENTITY', 'word', ['>', '%']],
+               [' ', 'space'],
             ]);
 
             parseDeclaration(mockSource, open, callback);
@@ -47,9 +46,9 @@ describe('declaration (unit)', () => {
          it('seeks to parse an entity when the decl type is Entity (wrong case)', () => {
             const parse = spyOn(pToken, 'parseEntityDeclaration');
             const mockSource = new MockSTokenSource([
-               [ ' ', 'space' ],
-               [ 'eNtiTy', 'word', [ '>', '%' ] ],
-               [ ' ', 'space' ],
+               [' ', 'space'],
+               ['eNtiTy', 'word', ['>', '%']],
+               [' ', 'space'],
             ]);
 
             parseDeclaration(mockSource, open, callback);
@@ -65,9 +64,6 @@ describe('declaration (unit)', () => {
             });
             expect(typeof args[2]).toEqual('function');
          });
-
       });
-
    });
-
 });

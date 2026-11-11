@@ -4,7 +4,7 @@ import { STokenSource, SToken } from 'basic';
 
 const ELEMENT_END_PTOKEN = 'ELEMENT_END_PTOKEN';
 
-type PreToken = { open: SToken; [ other: string ]: any };
+type PreToken = { open: SToken; [other: string]: any };
 
 class ElementEndPToken {
    public readonly type: typeof ELEMENT_END_PTOKEN = ELEMENT_END_PTOKEN;
@@ -21,7 +21,6 @@ class ElementEndPToken {
    }
 }
 
-
 /**********************************************************************\
  parseElementEnd() extracts the pieces of an element end tag.
 
@@ -37,13 +36,17 @@ class ElementEndPToken {
    [42] ETag ::= '</' Name S? '>'
 \**********************************************************************/
 
-function parseElementEnd(source: STokenSource, open: SToken, deliverPToken: (result: ElementEndPToken) => void) {
+function parseElementEnd(
+   source: STokenSource,
+   open: SToken,
+   deliverPToken: (result: ElementEndPToken) => void,
+) {
    const pToken: PreToken = {
       open,
    };
 
    source.extractToObject('space', pToken, 'openSpace');
-   source.extractToObject('word', [ '>' ], pToken, 'name');
+   source.extractToObject('word', ['>'], pToken, 'name');
    source.extractToObject('space', pToken, 'nameSpace');
 
    source.extract('match', '>', (sToken) => {
@@ -52,9 +55,4 @@ function parseElementEnd(source: STokenSource, open: SToken, deliverPToken: (res
    });
 }
 
-export {
-   ELEMENT_END_PTOKEN,
-   ElementEndPToken,
-
-   parseElementEnd,
-};
+export { ELEMENT_END_PTOKEN, ElementEndPToken, parseElementEnd };

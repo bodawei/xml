@@ -1,6 +1,6 @@
 /* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { EntityId, CONFORMANCE_VERSION, ENTITY_ID, ConformanceVersion,  } from 'basic';
+import { EntityId, CONFORMANCE_VERSION, ENTITY_ID, ConformanceVersion } from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
    CHARREF_PTOKEN,
@@ -47,7 +47,7 @@ describe('EntityExpanderStream (integration)', () => {
       pTokenStream = new PTokenStream(sTokenSource, {
          parseType: ParseType.DOCUMENT,
          confVer: new ConformanceVersion(1.0),
-         entityId: new EntityId(__filename)
+         entityId: new EntityId(__filename),
       });
       entityExpander = new EntityExpanderStream(true);
 
@@ -486,13 +486,12 @@ describe('EntityExpanderStream (integration)', () => {
                   CHARDATA_PTOKEN,
                   GENERAL_ENTITY_END_PTOKEN,
                   CHARDATA_PTOKEN,
-                  ELEMENT_END_PTOKEN
+                  ELEMENT_END_PTOKEN,
                ]);
             },
             done,
          );
       });
-
    });
 
    // it('replaces a parameter entity reference with an entity start and end token', (done) => {

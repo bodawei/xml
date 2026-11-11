@@ -1,6 +1,6 @@
 /* Copyright ® 2016-2020 by 柏大衛. All rights reserved. */
 
-import {  SToken, STokenSource } from 'basic';
+import { SToken, STokenSource } from 'basic';
 
 import { ExternalIdP, parseExternalId } from '../pToken/common/externalId';
 import { DeclarationPToken } from './bridge/baseDeclaration';
@@ -24,7 +24,7 @@ const DOCTYPE_START_PTOKEN = 'DOCTYPE_START_PTOKEN';
  be in the case that there is no internal subset.
 \**********************************************************************/
 
-type PreToken = { open: SToken; [ other: string ]: any };
+type PreToken = { open: SToken; [other: string]: any };
 
 class DocTypeStartPToken {
    public readonly type: typeof DOCTYPE_START_PTOKEN = DOCTYPE_START_PTOKEN;
@@ -38,7 +38,7 @@ class DocTypeStartPToken {
    public readonly externalIdSpace?: SToken;
    public readonly openSubset?: SToken;
 
-   constructor(basePToken: DocTypeStartPToken|PreToken) {
+   constructor(basePToken: DocTypeStartPToken | PreToken) {
       Object.assign(this, basePToken);
 
       this.type = DOCTYPE_START_PTOKEN;
@@ -63,13 +63,17 @@ class DocTypeStartPToken {
       ('[' intSubset ']' S?)? '>'
 \**********************************************************************/
 
-function parseDocTypeStart(source: STokenSource, declarationPToken: DeclarationPToken, deliverPToken: (result: DocTypeStartPToken) => void) {
+function parseDocTypeStart(
+   source: STokenSource,
+   declarationPToken: DeclarationPToken,
+   deliverPToken: (result: DocTypeStartPToken) => void,
+) {
    const pToken: PreToken = Object.assign({}, declarationPToken) as any; // typeHack
 
-   source.extractToObject('word', [ '[', '>' ], pToken, 'name'); // look for quotes?
+   source.extractToObject('word', ['[', '>'], pToken, 'name'); // look for quotes?
    source.extractToObject('space', undefined, pToken, 'nameSpace');
 
-   parseExternalId(source, [ '[', '>' ], (parseResult) => {
+   parseExternalId(source, ['[', '>'], (parseResult) => {
       pToken.externalId = parseResult?.externalId;
 
       source.extractToObject('space', undefined, pToken, 'externalIdSpace');
@@ -81,9 +85,4 @@ function parseDocTypeStart(source: STokenSource, declarationPToken: DeclarationP
    });
 }
 
-export {
-   DOCTYPE_START_PTOKEN,
-   DocTypeStartPToken,
-
-   parseDocTypeStart,
-};
+export { DOCTYPE_START_PTOKEN, DocTypeStartPToken, parseDocTypeStart };

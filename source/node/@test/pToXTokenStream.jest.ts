@@ -11,10 +11,12 @@ jest.mock('xToken');
 
 describe('PToXTokenStream (unit)', () => {
    let pToXTokenStream: PToXTokenStream;
-    let convertPTokenToXTokenMock: jest.MockedFunction<typeof convertPTokenToXToken>;
+   let convertPTokenToXTokenMock: jest.MockedFunction<typeof convertPTokenToXToken>;
 
    beforeEach(() => {
-      convertPTokenToXTokenMock = convertPTokenToXToken as jest.MockedFunction<typeof convertPTokenToXToken>;
+      convertPTokenToXTokenMock = convertPTokenToXToken as jest.MockedFunction<
+         typeof convertPTokenToXToken
+      >;
 
       pToXTokenStream = new PToXTokenStream({});
    });

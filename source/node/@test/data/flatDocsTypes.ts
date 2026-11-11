@@ -5,5 +5,4 @@ interface TestDoc {
    doc: string;
 }
 
-
 export { TestDoc };

@@ -25,24 +25,28 @@ describe('AttFixerStream (integration)', () => {
       sTokenSource.endText();
 
       gatherStreamResults<ParseToken>(fixer, (results) => {
-         const result = results.find(r => r.type === XMLDECL_PTOKEN);
+         const result = results.find((r) => r.type === XMLDECL_PTOKEN);
 
-         expect(result).toEqualRangeless(new XmlDeclarationPToken({
-            open: toSToken('<?'),
-            target: toSToken('xml'),
-            targetSpace: toSToken(' '),
-            fields: [{
-               name: toSToken('version'),
-               nameSpace: undefined,
-               equal: toSToken('='),
-               equalSpace: undefined,
-               openQuote: toSToken('"'),
-               value: toSToken('1.0'),
-               valueSpace: undefined,
-               closeQuote: toSToken('"'),
-            }],
-            close: toSToken('?>'),
-         }));
+         expect(result).toEqualRangeless(
+            new XmlDeclarationPToken({
+               open: toSToken('<?'),
+               target: toSToken('xml'),
+               targetSpace: toSToken(' '),
+               fields: [
+                  {
+                     name: toSToken('version'),
+                     nameSpace: undefined,
+                     equal: toSToken('='),
+                     equalSpace: undefined,
+                     openQuote: toSToken('"'),
+                     value: toSToken('1.0'),
+                     valueSpace: undefined,
+                     closeQuote: toSToken('"'),
+                  },
+               ],
+               close: toSToken('?>'),
+            }),
+         );
          done();
       });
    });
@@ -58,7 +62,8 @@ describe('AttFixerStream (integration)', () => {
       sTokenSource.endText();
 
       gatherStreamResults<ParseToken>(fixer, (results) => {
-         expect((results[12] as ElementStartPToken).attributes).toEqualRangeless([{
+         expect((results[12] as ElementStartPToken).attributes).toEqualRangeless([
+            {
                name: toSToken('nmtok'),
                value: [new TextPToken({ text: new SToken('3 4', '  3   4  ', []) })],
                postNameSpace: undefined,
@@ -69,10 +74,9 @@ describe('AttFixerStream (integration)', () => {
                trailingSpace: undefined,
                normalized: true,
                dtdChangedNormalization: true,
-            }],
-         );
+            },
+         ]);
          done();
       });
    });
-
 });
