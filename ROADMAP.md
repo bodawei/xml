@@ -259,6 +259,31 @@ should get from a `lint` command.
        could merge the Lint and Type check CI jobs. Not done: `npm run check:types` is the
        documented command and `tsc` is already 0.8 s.
 
+
+## P10: Replace jest with with vitest
+
+### Goal
+Explor the possibility of replacing jest with vitest.
+
+### Background
+Jest was innovative in its time, but last I saw it had a tiny team working on it (effectively 1 person). Meanwhile, the view ecosystem has been building excellent tooling.  One of their tools is vitest ( https://vitest.dev ).
+
+### Done
+1. we have gather timing for running the whole jest suite now
+2. Replace jest with vitest, including moving configuration and updating any test files as needed to match vitest's style
+3. Measure vitest's performance
+4. Report performance changes along with code changes needed to get vitest into into the repo
+5. Human decides whether to proceed.
+6. If proceed, we create a final PR (basically the same as #4) with vitest added to the system, and if not proceed, we revert to where we were before starting P10
+
+### Current state
+Unstarted
+
+### Next actions
+
+-  [ ] See the done list
+
+
 ## P14: Make `xToken` lint-perfect on close-to-stock oxlint settings
 
 ### Goal
