@@ -1,9 +1,8 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { PROBLEM } from 'basic';
-
-import { ParseToken, TEXT_PTOKEN } from 'pToken';
 import { STokenSource, strOrBlank } from 'basic';
+import { ParseToken, TEXT_PTOKEN } from 'pToken';
 import { CONDITIONAL_START_PTOKEN } from 'token';
 type PTokenExpanded = () => void;
 type DeliverPToken = (token: ParseToken | undefined, expanded: PTokenExpanded) => void;

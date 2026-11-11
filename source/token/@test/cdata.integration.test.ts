@@ -4,8 +4,8 @@ import { ConformanceVersion, Range, EntityId } from 'basic';
 import { SToken, STokenSource } from 'basic';
 import { makeSTokenMaker } from 'pToken-test';
 
-import { parseCdata, CdataPToken } from '../cdata';
 import { SectionStart } from '../bridge/section';
+import { parseCdata, CdataPToken } from '../cdata';
 
 describe('cdata (integration)', () => {
    let source: STokenSource;

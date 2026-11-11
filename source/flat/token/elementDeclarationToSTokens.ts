@@ -1,11 +1,11 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
-import { ElementDeclarationPToken } from 'pToken';
 import { SToken } from 'basic';
-import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
+import { ElementDeclarationPToken } from 'pToken';
 
 import { contentModelToSTokens } from '../common/contentModelToSTokens';
 import { unexpandedToSTokens } from '../common/unexpandedToSTokens';
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function elementDeclarationToSTokens(token: ElementDeclarationPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();

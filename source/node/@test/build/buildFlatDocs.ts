@@ -1,6 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
 import { readFileSync, writeFileSync } from 'fs';
+
 import { TestCases, TestSuite } from '../../../conformance/@test/helper/types';
 import { TestDoc } from '../data/flatDocsTypes';
 

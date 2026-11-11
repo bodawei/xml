@@ -5,7 +5,6 @@ import { toSToken, STokenSource } from 'basic';
 import { parseLiteral, LiteralPToken } from 'token';
 
 import { WellFormedError, wellFormedErrorCodes } from '../../error/wellFormedError';
-
 import { literalCheck } from '../literalCheck';
 
 const WFEID = wellFormedErrorCodes.id;

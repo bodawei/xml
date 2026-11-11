@@ -4,7 +4,6 @@ import { strOrBlank } from 'basic';
 import { ElementDeclarationPToken, isContentModelP } from 'pToken';
 
 import { makeCmGraph } from '../contentModel/makeCmGraph';
-
 import { ElDeclType, ValidityState, ContentDetails } from './validityState';
 
 function elementDeclarationPreprocess(

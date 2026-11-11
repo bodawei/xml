@@ -1,4 +1,5 @@
 import { CharRefPToken, ParameterEntityReferencePToken, TextPToken } from 'pToken';
+
 import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from './marker/parameterEntityStart';
 

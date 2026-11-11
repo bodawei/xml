@@ -1,6 +1,8 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { Problem, PROBLEM } from 'basic';
+import { toSToken, STokenSource } from 'basic';
+import { EntityId } from 'basic';
 import {
    ParseToken,
    NOTATION_DECLARATION_PTOKEN,
@@ -14,8 +16,6 @@ import {
    ParameterEntityReferencePToken,
    TextPToken,
 } from 'pToken';
-import { toSToken, STokenSource } from 'basic';
-import { WellFormedError, wellFormedErrorCodes } from 'wellformedness';
 import {
    CONDITIONAL_START_PTOKEN,
    DOCTYPE_END_PTOKEN,
@@ -26,20 +26,20 @@ import {
    ElementStartPToken,
    ElementEmptyPToken,
 } from 'token';
+import { WellFormedError, wellFormedErrorCodes } from 'wellformedness';
 
+import * as entityDeclaration from '../../pToken/bridge/entityDeclaration';
 import * as attListDecl from '../../pToken/token/attListDeclaration';
 import * as elementDeclaration from '../../pToken/token/elementDeclaration';
-import * as entityDeclaration from '../../pToken/bridge/entityDeclaration';
 import * as notationDeclaration from '../../pToken/token/notationDeclaration';
-import * as expandAttributes from '../utils/expandAttributes';
-import * as expandEntityValueModule from '../utils/expandEntityValue';
-import { EXTERNAL_DTD_PSEUDO_TOKEN } from '../utils/ExternalDtdSubsetPseudoToken';
-import * as streamParsedReplacementText from '../utils/streamParsedReplacementText';
-import * as expandMarkupUnexpanded from '../utils/expandMarkupUnexpanded';
 import { EntityExpander } from '../EntityExpander';
 import { AttributeValueResults, ExpandParams, RetrieveResults } from '../types';
 import { EntityContextStack } from '../utils/EntityContextStack';
-import { EntityId } from 'basic';
+import * as expandAttributes from '../utils/expandAttributes';
+import * as expandEntityValueModule from '../utils/expandEntityValue';
+import * as expandMarkupUnexpanded from '../utils/expandMarkupUnexpanded';
+import { EXTERNAL_DTD_PSEUDO_TOKEN } from '../utils/ExternalDtdSubsetPseudoToken';
+import * as streamParsedReplacementText from '../utils/streamParsedReplacementText';
 
 const WFEID = wellFormedErrorCodes.id;
 

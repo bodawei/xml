@@ -8,6 +8,7 @@ import {
    PROBLEM,
    Problem,
 } from 'basic';
+import { STokenSource, strOrBlank } from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
    ELEMENT_DECLARATION_PTOKEN,
@@ -34,7 +35,6 @@ import {
    parseText,
    ParseType,
 } from 'pToken';
-import { STokenSource, strOrBlank } from 'basic';
 import {
    DOCTYPE_END_PTOKEN,
    DOCTYPE_START_PTOKEN,
@@ -50,16 +50,16 @@ import {
    CONDITIONAL_END_PTOKEN,
 } from 'token';
 
-import { EntityDetails } from './utils/EntityDetails';
-import { expandAttributes } from './utils/expandAttributes';
-import { expandEntityValue } from './utils/expandEntityValue';
-import { streamParsedReplacementText } from './utils/streamParsedReplacementText';
 import { EntityProcessors, ExpandParams } from './types';
-import { EntityContextStack } from './utils/EntityContextStack';
-import { expandMarkupUnexpanded } from './utils/expandMarkupUnexpanded';
-import { entityValueToSTokenSource } from './utils/entityValueToSTokenSource';
 import { ConditionalBodyProcessor } from './utils/ConditionalBodyProcessor';
 import { ConditionalStartExpander } from './utils/ConditionalStartExpander';
+import { EntityContextStack } from './utils/EntityContextStack';
+import { EntityDetails } from './utils/EntityDetails';
+import { entityValueToSTokenSource } from './utils/entityValueToSTokenSource';
+import { expandAttributes } from './utils/expandAttributes';
+import { expandEntityValue } from './utils/expandEntityValue';
+import { expandMarkupUnexpanded } from './utils/expandMarkupUnexpanded';
+import { streamParsedReplacementText } from './utils/streamParsedReplacementText';
 
 type DeclToken =
    | AttListDeclarationPToken

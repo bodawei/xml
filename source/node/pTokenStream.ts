@@ -1,8 +1,9 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { Readable } from 'stream';
-import { PTokenOptions, ParseType, PTokenParser } from 'pToken';
+
 import { STokenSource } from 'basic';
+import { PTokenOptions, ParseType, PTokenParser } from 'pToken';
 
 class PTokenStream extends Readable {
    private parser: PTokenParser;

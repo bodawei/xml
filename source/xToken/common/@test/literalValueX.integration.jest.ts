@@ -19,7 +19,6 @@ import { CharRefXToken } from '../../token/charRefXToken';
 import { GeneralEntityReferenceXToken } from '../../token/generalEntityReferenceXToken';
 import { ParameterEntityReferenceXToken } from '../../token/parameterEntityReferenceXToken';
 import { TextXToken } from '../../token/textXToken';
-
 import { makeLiteralValueX } from '../literalValueX';
 
 describe('literalValue (integration)', () => {

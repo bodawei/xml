@@ -2,6 +2,7 @@
 
 import { SToken } from 'basic';
 import { WordListPToken } from 'token';
+
 import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function wordListToSTokens(pToken: WordListPToken): Array<SToken> {

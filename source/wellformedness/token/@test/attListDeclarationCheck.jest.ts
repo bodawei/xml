@@ -1,20 +1,18 @@
 /* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { ConformanceVersion, Range, EntityId } from 'basic';
+import { SToken, toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { AttListDeclarationPToken } from 'pToken';
-import { SToken, toSToken } from 'basic';
 import { WordListPToken, WordListType } from 'token';
 
 import { literalCheck } from '../../common/literalCheck';
 import { nameCheck } from '../../common/nameCheck';
 import { nameXmlCheck } from '../../common/nameXmlCheck';
 import { wordListCheck } from '../../common/wordlistCheck';
-import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { warningCodes } from '../../error/warningCodes';
-
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { attListDeclarationCheck } from '../attListDeclarationCheck';
 
 jest.mock('../../common/literalCheck');

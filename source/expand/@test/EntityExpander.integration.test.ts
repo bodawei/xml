@@ -1,6 +1,8 @@
 /* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
 import { Token, Range, EntityId, ENTITY_ID, Problem } from 'basic';
+import { toSToken, SToken, STokenSource } from 'basic';
+import { PTokenStream, PTokenLiteralStream } from 'node';
 import {
    ParseType,
    GeneralEntityDeclarationPToken,
@@ -10,8 +12,6 @@ import {
    TextPToken,
    PARAMETER_ENTITY_DECLARATION_PTOKEN,
 } from 'pToken';
-import { PTokenStream, PTokenLiteralStream } from 'node';
-import { toSToken, SToken, STokenSource } from 'basic';
 import {
    AttributeValuePToken,
    ElementStartPToken,
@@ -25,7 +25,6 @@ import {
 } from 'token';
 
 import { EntityExpander } from '../EntityExpander';
-
 import { AttributeValueResults, ExpandToken, OpaqueEntityLoc, RetrieveResults } from '../types';
 
 describe('EntityExpander (integration)', () => {

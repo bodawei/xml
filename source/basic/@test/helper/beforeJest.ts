@@ -4,7 +4,6 @@
 import { expect } from '@jest/globals';
 
 import { ProblemCollector } from '../../util/problemCollector';
-
 import { ParamCollector } from './paramCollector';
 
 function toHaveProblem(collector: ProblemCollector, expectedId: string) {

@@ -1,12 +1,11 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ParamCollector } from 'basic-test';
 import { toSToken } from 'basic';
+import { ParamCollector } from 'basic-test';
 import { DeclarationStart } from 'token';
 import { makeCharRef } from 'token-test';
 
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
-
 import { checkDeclarationStart } from '../checkDeclarationStart';
 
 const WFEID = wellFormedErrorCodes.id;

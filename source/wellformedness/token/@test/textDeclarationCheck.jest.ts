@@ -1,18 +1,16 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { ConformanceVersion } from 'basic';
+import { SToken, toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { TextDeclarationPToken, InstructionStart } from 'pToken';
-import { SToken, toSToken } from 'basic';
 
 import { charCheck } from '../../common/charCheck';
-import { wellFormedErrorCodes } from '../../error/wellFormedError';
-
-import { textDeclarationCheck } from '../textDeclarationCheck';
-import { fatalErrorCodes } from '../../error/fatalErrorCodes';
 import { errorCodes } from '../../error/errorCodes';
+import { fatalErrorCodes } from '../../error/fatalErrorCodes';
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
+import { textDeclarationCheck } from '../textDeclarationCheck';
 
 jest.mock('../../common/charCheck');
 

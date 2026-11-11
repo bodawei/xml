@@ -1,13 +1,12 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
+import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { TextPToken } from 'pToken';
-import { toSToken } from 'basic';
 import { LiteralValuePToken } from 'token';
 
 import { charCheck } from '../../common/charCheck';
-
 import { literalValueCheck } from '../literalValueCheck';
 
 jest.mock('../../common/charCheck');

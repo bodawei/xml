@@ -1,14 +1,13 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { Range, EntityId } from 'basic';
-import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { SToken } from 'basic';
+import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { makeSTokenMaker, MockSTokenSource } from 'pToken-test';
 
-import * as parameterEntityReference from '../../../pToken/token/parameterEntityReference';
 import * as charRef from '../../../pToken/token/charRef';
 import * as generalEntityReference from '../../../pToken/token/generalEntityReference';
-
+import * as parameterEntityReference from '../../../pToken/token/parameterEntityReference';
 import literalValue, { LiteralValuePToken } from '../literalValue';
 
 describe('literalValue (unit)', () => {

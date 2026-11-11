@@ -1,13 +1,12 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
+import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { TextPToken } from 'pToken';
-import { toSToken } from 'basic';
 import { LiteralPToken } from 'token';
 
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
-
 import { literalCheck } from '../literalCheck';
 import { literalValueCheck } from '../literalValueCheck';
 

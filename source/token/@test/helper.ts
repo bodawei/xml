@@ -1,6 +1,7 @@
 /* Copyright ® 2018-220 by 柏大衛. All rights reserved. */
 
 import { EntityId, Range } from 'basic';
+import { SToken, toSToken } from 'basic';
 import {
    AttListDeclarationPToken,
    CharRefPToken,
@@ -17,7 +18,6 @@ import {
    ContentModelP,
    TEXT_PTOKEN,
 } from 'pToken';
-import { SToken, toSToken } from 'basic';
 import {
    CdataPToken,
    CommentPToken,
@@ -37,6 +37,7 @@ import {
    CharDataPToken,
    DeclarationPToken,
 } from 'token';
+
 import { AttrValue } from '../../token/common/attribute';
 import { ConditionalEndPToken } from '../conditionalEnd';
 

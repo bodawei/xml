@@ -60,10 +60,13 @@ Do not treat these as regressions, and do not fix them as part of unrelated work
    modules under the `import` rules and typescript-eslint's recommended-type-checked
    set in `.oxlintrc.jsonc`; use them for foundational patterns that `xToken` does not
    cover.
--  Match: the copyright header, camelCase filenames, 3-space indentation, import
-   grouping (external, then internal aliases such as `basic` / `pToken` / `token`,
-   then relative), declarations before logic with a blank line after, and a `@test/`
-   directory containing `*.jest.ts` files.
+-  Match: the copyright header, camelCase filenames, 3-space indentation, declarations
+   before logic with a blank line after, and a `@test/` directory containing `*.jest.ts`
+   files.
+-  Import grouping is no longer yours to get right: oxfmt's `sortImports` owns it. It puts
+   Node builtins first, then externals together with the `basic` / `pToken` / `token` style
+   tsconfig aliases, then relative imports, with a blank line between groups and each group
+   sorted by path. Write imports in any order and let `npx oxfmt <files>` place them.
 -  Copyright header years: every source file starts with a comment of the form
    `/* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */` (or a single year,
    `2021`). Whenever you touch a file, set the last year to the current year, keeping

@@ -1,16 +1,16 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { ElementDeclarationPToken } from '../../../pToken/token/elementDeclaration';
 import { toSToken } from 'basic';
+import { ContentModelP } from 'pToken';
 
+import { ElementDeclarationPToken } from '../../../pToken/token/elementDeclaration';
+import { CpRepeat, CpType } from '../../common/contentModelX';
 import {
    ELEMENT_DECLARATION_XTOKEN,
    ContentSpecType,
    ElementDeclarationXToken,
 } from '../elementDeclarationXToken';
-import { CpRepeat, CpType } from '../../common/contentModelX';
-import { ContentModelP } from 'pToken';
 
 describe('ElementDeclarationXToken', () => {
    it('returns an element declaration token built from a PToken', () => {

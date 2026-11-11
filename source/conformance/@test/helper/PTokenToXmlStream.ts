@@ -1,6 +1,8 @@
 /* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
 import { Transform } from 'stream';
+
+import { strOrBlank } from 'basic';
 import {
    CHARREF_PTOKEN,
    ExternalIdP,
@@ -11,7 +13,6 @@ import {
    TEXT_PTOKEN,
    XMLDECL_PTOKEN,
 } from 'pToken';
-import { strOrBlank } from 'basic';
 import {
    CDATA_PTOKEN,
    CHARDATA_PTOKEN,

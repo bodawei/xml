@@ -1,5 +1,6 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
+import { SToken } from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
    CHARREF_PTOKEN,
@@ -15,7 +16,6 @@ import {
    XMLDECL_PTOKEN,
    ParseToken,
 } from 'pToken';
-import { SToken } from 'basic';
 import {
    CDATA_PTOKEN,
    CHARDATA_PTOKEN,
@@ -32,18 +32,20 @@ import {
 } from 'token';
 
 import { attListDeclarationToSTokens } from './token/attListDeclarationToSTokens';
+import { cdataToSTokens } from './token/cdataToSTokens';
+import { charDataToSTokens } from './token/charDataToSTokens';
 import { charRefToSTokens } from './token/charRefToSTokens';
-import { generalEntityReferenceToSTokens } from './token/generalEntityReferenceToSTokens';
-import { notationDeclarationToSTokens } from './token/notationDeclarationToSTokens';
+import { commentToSTokens } from './token/commentToSTokens';
 import { conditionalEndToSTokens } from './token/conditionalEndToSTokens';
 import { conditionalStartToSTokens } from './token/conditionalStartToSTokens';
-import { commentToSTokens } from './token/commentToSTokens';
 import { docTypeEndToSTokens } from './token/docTypeEndToSTokens';
 import { docTypeStartToSTokens } from './token/docTypeStartToSTokens';
+import { elementDeclarationToSTokens } from './token/elementDeclarationToSTokens';
 import { elementEndToSTokens } from './token/elementEndToSTokens';
 import { elementStartToSTokens } from './token/elementStartToSTokens';
-import { elementDeclarationToSTokens } from './token/elementDeclarationToSTokens';
 import { generalEntityDeclarationToSTokens } from './token/generalEntityDeclarationToSTokens';
+import { generalEntityReferenceToSTokens } from './token/generalEntityReferenceToSTokens';
+import { notationDeclarationToSTokens } from './token/notationDeclarationToSTokens';
 import { parameterEntityDeclarationToSTokens } from './token/parameterEntityDeclarationToSTokens';
 import { parameterEntityReferenceToSTokens } from './token/parameterEntityReferenceToSTokens';
 import { processingInstructionToSTokens } from './token/processingInstructionToSTokens';
@@ -52,8 +54,6 @@ import { textDeclarationToSTokens } from './token/textDeclarationToSTokens';
 import { textToSTokens } from './token/textToSTokens';
 import { unknownDeclarationToSTokens } from './token/unknownDeclarationToSTokens';
 import { xmlDeclarationToSTokens } from './token/xmlDeclarationToSTokens';
-import { cdataToSTokens } from './token/cdataToSTokens';
-import { charDataToSTokens } from './token/charDataToSTokens';
 
 function convertPTokenToSTokens(pToken: ParseToken): Array<SToken> {
    switch (pToken.type) {

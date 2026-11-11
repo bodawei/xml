@@ -3,8 +3,8 @@
 import { STokenSource, toSToken } from 'basic';
 import { ELEMENT_START_PTOKEN, parseElementStart } from 'token';
 
-import { TextXToken } from '../textXToken';
 import { ElementStartXToken } from '../elementStartXToken';
+import { TextXToken } from '../textXToken';
 
 describe('ElementStartXToken (integration)', () => {
    let source: STokenSource;

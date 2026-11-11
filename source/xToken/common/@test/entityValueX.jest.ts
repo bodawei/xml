@@ -5,7 +5,6 @@ import { ParameterEntityStartXToken } from '../../marker/parameterEntityStartXTo
 import { CharRefXToken } from '../../token/charRefXToken';
 import { ParameterEntityReferenceXToken } from '../../token/parameterEntityReferenceXToken';
 import { TextXToken } from '../../token/textXToken';
-
 import { makeEntityValueX, cloneEntityValueX } from '../entityValueX';
 
 describe('literalValueX (unit)', () => {

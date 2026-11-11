@@ -1,6 +1,7 @@
 /* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
 import { EntityId, CONFORMANCE_VERSION, ENTITY_ID, ConformanceVersion } from 'basic';
+import { STokenSource, toSToken } from 'basic';
 import {
    ATTLIST_DECLARATION_PTOKEN,
    CHARREF_PTOKEN,
@@ -14,7 +15,6 @@ import {
    ParseType,
    ParseToken,
 } from 'pToken';
-import { STokenSource, toSToken } from 'basic';
 import {
    DOCTYPE_START_PTOKEN,
    DOCTYPE_END_PTOKEN,
@@ -33,6 +33,7 @@ import {
    CONDITIONAL_START_PTOKEN,
    CONDITIONAL_END_PTOKEN,
 } from 'token';
+
 import { EntityExpanderStream } from '../EntityExpanderStream';
 import { PTokenStream } from '../pTokenStream';
 import { gatherStream } from './helpers';

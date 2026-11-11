@@ -1,21 +1,22 @@
 /* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
-import { describe, expect, it } from '@jest/globals';
 import { Transform } from 'stream';
+
+import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, XmlEdition, XmlVersion } from 'basic';
+import { STokenSource } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { AttFixerStream, CheckWellFormed, PTokenStream } from 'node';
 import { ParseType, ParseToken } from 'pToken';
-import { STokenSource } from 'basic';
 
+import CheckValidityStream from '../../node/CheckValidityStream';
 import metadata from './data/xmlconf.json';
-import { TestDetails, prepareTestDetails } from './helper/prepareTestDetails';
 import { installMatchers } from './helper/customMatchers';
 import { makeAllDone } from './helper/makeAllDone';
-import { TestSuite } from './helper/types';
-import { TestExpanderStream } from './helper/TestExpanderStream';
+import { TestDetails, prepareTestDetails } from './helper/prepareTestDetails';
 import { PTokenToXmlStream } from './helper/PTokenToXmlStream';
-import CheckValidityStream from '../../node/CheckValidityStream';
+import { TestExpanderStream } from './helper/TestExpanderStream';
+import { TestSuite } from './helper/types';
 
 installMatchers();
 

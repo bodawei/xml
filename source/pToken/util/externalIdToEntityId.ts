@@ -3,10 +3,9 @@
 import { EntityId } from 'basic';
 import { CHARREF_PTOKEN, TEXT_PTOKEN } from 'pToken';
 
-import { ExternalIdP } from '../common/externalId';
-
 //ick
 import { LiteralValuePToken } from '../../token/common/literal';
+import { ExternalIdP } from '../common/externalId';
 
 function valueToString(value: LiteralValuePToken = []): string {
    const pieces = [];

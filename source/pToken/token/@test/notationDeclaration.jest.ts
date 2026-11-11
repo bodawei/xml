@@ -1,13 +1,11 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { toSToken } from 'basic';
 import { MockSTokenSource } from 'pToken-test';
 
-import * as parseUnexpanded from '../../common/parseUnexpanded';
 import * as externalId from '../../common/externalId';
-
+import * as parseUnexpanded from '../../common/parseUnexpanded';
 import {
    NotationDeclarationPToken,
    parseNotationDeclaration,

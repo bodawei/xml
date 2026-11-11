@@ -1,5 +1,6 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
+import { strOrBlank, SToken, STokenSource } from 'basic';
 import {
    ParseToken,
    parseAttListDeclaration,
@@ -12,8 +13,8 @@ import {
    AttListDeclarationPToken,
    NotationDeclarationPToken,
 } from 'pToken';
-import { strOrBlank, SToken, STokenSource } from 'basic';
 import { parseDocTypeEnd, parseDocTypeStart, DocTypeEndPToken, DocTypeStartPToken } from 'token';
+
 import { DeclarationPToken, UNKNOWNDECL_PTOKEN } from './baseDeclaration';
 
 type DeclarationStart = {

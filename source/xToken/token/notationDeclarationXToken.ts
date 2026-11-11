@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { NotationDeclarationPToken } from 'pToken';
 import { strOrBlank } from 'basic';
+import { NotationDeclarationPToken } from 'pToken';
 
 import { ExternalIdX, cloneExternalIdX } from '../common/externalIdX';
 

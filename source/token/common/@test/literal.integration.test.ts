@@ -2,8 +2,8 @@
 
 import { ConformanceVersion } from 'basic';
 import { STokenSource } from 'basic';
-import { makeSTokenMaker } from 'pToken-test';
 import { GeneralEntityReferencePToken, ParameterEntityReferencePToken, TextPToken } from 'pToken';
+import { makeSTokenMaker } from 'pToken-test';
 
 import literal, { LiteralPToken } from '../literal';
 

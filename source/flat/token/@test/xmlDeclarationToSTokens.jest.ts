@@ -1,9 +1,8 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { XmlDeclarationPToken } from 'pToken';
 import { toSToken } from 'basic';
+import { XmlDeclarationPToken } from 'pToken';
 
 import { fieldedInstructionToSTokens } from '../../common/fieldedInstructionToSTokens';
 import { xmlDeclarationToSTokens } from '../xmlDeclarationToSTokens';

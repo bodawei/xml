@@ -4,9 +4,8 @@ import { ConformanceVersion, ProblemCollector } from 'basic';
 import { toSToken, STokenSource } from 'basic';
 import { parseLiteralValue } from 'token';
 
-import { literalValueCheck } from '../literalValueCheck';
-
 import { WellFormedError, wellFormedErrorCodes } from '../../error/wellFormedError';
+import { literalValueCheck } from '../literalValueCheck';
 
 const WFEID = wellFormedErrorCodes.id;
 

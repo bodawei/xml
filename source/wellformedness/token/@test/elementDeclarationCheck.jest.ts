@@ -1,16 +1,15 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
+import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { ContentModelP, ElementDeclarationPToken } from 'pToken';
-import { toSToken } from 'basic';
 
 import { contentModelCheck } from '../../common/contentModelCheck';
 import { nameCheck } from '../../common/nameCheck';
 import { nameXmlCheck } from '../../common/nameXmlCheck';
-import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { warningCodes } from '../../error/warningCodes';
-
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { elementDeclarationCheck } from '../elementDeclarationCheck';
 
 jest.mock('../../common/contentModelCheck');

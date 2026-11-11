@@ -1,9 +1,8 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { parseAttListDeclaration } from 'pToken';
 import { STokenSource, toSToken } from 'basic';
-
+import { parseAttListDeclaration } from 'pToken';
 import { DeclarationStart } from 'token';
 
 import { AttListDeclarationXToken, ATTLIST_DECLARATION_XTOKEN } from '../attListDeclarationXToken';

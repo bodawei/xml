@@ -1,9 +1,10 @@
 /* Copyright ® 2017-2018 by 柏大衛. All rights reserved. */
 
+import { STokenSource } from 'basic';
 import { PTokenStream } from 'node';
+
 import { PToXTokenStream } from '../node';
 import SimpleObjStream from './so';
-import { STokenSource } from 'basic';
 
 describe('SimpleObjStream (integration)', () => {
    let sTokenSource: STokenSource;

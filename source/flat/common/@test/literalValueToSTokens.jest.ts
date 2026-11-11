@@ -1,20 +1,19 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
+import { toSToken } from 'basic';
 import {
    CharRefPToken,
    GeneralEntityReferencePToken,
    ParameterEntityReferencePToken,
    TextPToken,
 } from 'pToken';
-import { toSToken } from 'basic';
+import { GeneralEntityStartPToken } from 'token';
 
+import { charRefToSTokens } from '../../token/charRefToSTokens';
 import { generalEntityReferenceToSTokens } from '../../token/generalEntityReferenceToSTokens';
 import { parameterEntityReferenceToSTokens } from '../../token/parameterEntityReferenceToSTokens';
 import { textToSTokens } from '../../token/textToSTokens';
-import { charRefToSTokens } from '../../token/charRefToSTokens';
-
 import { literalValueToSTokens } from '../literalValueToSTokens';
-import { GeneralEntityStartPToken } from 'token';
 
 jest.mock('../../token/generalEntityReferenceToSTokens');
 jest.mock('../../token/parameterEntityReferenceToSTokens');

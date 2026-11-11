@@ -1,8 +1,11 @@
 /* Copyright ® 2017-2019 by 柏大衛. All rights reserved. */
 
 import { Problem } from 'basic';
-import declaration, { DeclarationPToken } from './bridge/baseDeclaration';
 
+import declaration, { DeclarationPToken } from './bridge/baseDeclaration';
+import { CdataPToken } from './cdata';
+import { CharDataPToken } from './charData';
+import { CommentPToken } from './comment';
 import {
    AttributePToken,
    AttributesPToken,
@@ -20,23 +23,20 @@ import {
    NOTATION_PTOKEN,
    ENUMERATION_PTOKEN,
 } from './common/wordList';
-import { ExternalSubsetStartToken } from './marker/externalSubsetStart';
-import { ExternalSubsetEndToken } from './marker/externalSubsetEnd';
-import { DocTypeEndPToken } from './docTypeEnd';
-import { CdataPToken } from './cdata';
-import { CharDataPToken } from './charData';
-import { CommentPToken } from './comment';
-import { ConditionalStartPToken } from './conditionalStart';
 import { ConditionalEndPToken } from './conditionalEnd';
+import { ConditionalStartPToken } from './conditionalStart';
+import { DocTypeEndPToken } from './docTypeEnd';
+import { DocTypeStartPToken } from './docTypeStart';
+import { ElementEndPToken } from './elementEnd';
+import { ElementStartPToken, ElementEmptyPToken } from './elementStart';
 import { ElidedEntityDeclarationPToken } from './ElidedEntityDeclarationPToken';
-import { GeneralEntityStartPToken } from './marker/generalEntityStart';
+import { ExternalSubsetEndToken } from './marker/externalSubsetEnd';
+import { ExternalSubsetStartToken } from './marker/externalSubsetStart';
 import { GeneralEntityEndPToken } from './marker/generalEntityEnd';
+import { GeneralEntityStartPToken } from './marker/generalEntityStart';
+import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
 import { ParameterEntityStartPToken } from './marker/parameterEntityStart';
 import { SpacePToken } from './space';
-import { DocTypeStartPToken } from './docTypeStart';
-import { ElementStartPToken, ElementEmptyPToken } from './elementStart';
-import { ElementEndPToken } from './elementEnd';
-import { ParameterEntityEndPToken } from './marker/parameterEntityEnd';
 export { EntityValueElement, EntityValuePToken } from './EntityValuePToken';
 
 export * from './bridge/declaration';

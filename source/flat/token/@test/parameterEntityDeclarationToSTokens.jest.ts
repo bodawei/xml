@@ -1,14 +1,12 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { ParameterEntityDeclarationPToken, TextPToken } from 'pToken';
 import { toSToken } from 'basic';
+import { ParameterEntityDeclarationPToken, TextPToken } from 'pToken';
 
 import { externalIdToSTokens } from '../../common/externalIdToSTokens';
-import { unexpandedToSTokens } from '../../common/unexpandedToSTokens';
 import { literalToSTokens } from '../../common/literalToSTokens';
-
+import { unexpandedToSTokens } from '../../common/unexpandedToSTokens';
 import { parameterEntityDeclarationToSTokens } from '../parameterEntityDeclarationToSTokens';
 
 jest.mock('../../common/externalIdToSTokens');

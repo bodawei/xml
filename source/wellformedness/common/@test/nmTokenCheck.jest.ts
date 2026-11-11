@@ -2,11 +2,10 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
-import { ParamCollector } from 'basic-test';
 import { toSToken } from 'basic';
+import { ParamCollector } from 'basic-test';
 
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
-
 import { nmTokenCheck } from '../nmTokenCheck';
 
 jest.mock('basic', () => {

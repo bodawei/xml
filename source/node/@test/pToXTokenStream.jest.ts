@@ -1,7 +1,6 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { makeTextPToken } from 'token-test';
 import { convertPTokenToXToken, TextXToken } from 'xToken';
 

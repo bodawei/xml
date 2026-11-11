@@ -1,13 +1,12 @@
 /* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, Collector } from 'basic';
-import { ExternalIdP, pTokenArrayToString, TextPToken } from 'pToken';
 import { strOrBlank } from 'basic';
+import { ExternalIdP, pTokenArrayToString, TextPToken } from 'pToken';
 
-import { wellFormedErrorCodes } from '../error/wellFormedError';
-import { errorCodes } from '../error/errorCodes';
 import { Error } from '../error/error';
-
+import { errorCodes } from '../error/errorCodes';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
 import { literalCheck } from './literalCheck';
 
 /**********************************************************************\

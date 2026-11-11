@@ -3,6 +3,7 @@
 
 import { EntityId, Range } from 'basic';
 import { SToken, toSToken } from 'basic';
+
 import { toContainPTokenProps, toEqualRangeless } from './beforeJasmine';
 
 describe('token custom matchers', () => {

@@ -17,10 +17,10 @@ import { GeneralEntityEndXToken } from '../marker/generalEntityEndXToken';
 import { GeneralEntityStartXToken } from '../marker/generalEntityStartXToken';
 import { ParameterEntityEndXToken } from '../marker/parameterEntityEndXToken';
 import { ParameterEntityStartXToken } from '../marker/parameterEntityStartXToken';
-import { TextXToken } from '../token/textXToken';
 import { CharRefXToken } from '../token/charRefXToken';
-import { ParameterEntityReferenceXToken } from '../token/parameterEntityReferenceXToken';
 import { GeneralEntityReferenceXToken } from '../token/generalEntityReferenceXToken';
+import { ParameterEntityReferenceXToken } from '../token/parameterEntityReferenceXToken';
+import { TextXToken } from '../token/textXToken';
 
 type LiteralValueX = Array<
    | TextXToken

@@ -1,13 +1,11 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { NotationDeclarationPToken, TextPToken } from 'pToken';
 import { toSToken } from 'basic';
+import { NotationDeclarationPToken, TextPToken } from 'pToken';
 
 import { externalIdToSTokens } from '../../common/externalIdToSTokens';
 import { unexpandedToSTokens } from '../../common/unexpandedToSTokens';
-
 import { notationDeclarationToSTokens } from '../notationDeclarationToSTokens';
 
 jest.mock('../../common/externalIdToSTokens');

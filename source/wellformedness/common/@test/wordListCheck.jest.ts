@@ -1,12 +1,11 @@
 /* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
-import { ParamCollector } from 'basic-test';
 import { toSToken } from 'basic';
+import { ParamCollector } from 'basic-test';
 import { WordListPToken, WordListType } from 'token';
 
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
-
 import { nameCheck } from '../nameCheck';
 import { nmTokenCheck } from '../nmTokenCheck';
 import { wordListCheck } from '../wordlistCheck';

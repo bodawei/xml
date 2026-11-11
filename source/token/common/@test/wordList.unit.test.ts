@@ -2,6 +2,7 @@
 
 import { toSToken } from 'basic';
 import { MockSTokenSource } from 'pToken-test';
+
 import { parseWordList, WordListPToken, WordListType } from '../wordList';
 
 describe('wordList (unit)', () => {

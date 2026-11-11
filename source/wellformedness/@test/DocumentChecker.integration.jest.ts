@@ -1,17 +1,16 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { ConformanceVersion, Problem } from 'basic';
-import { gatherStreamResults } from 'basic-test';
-import { ParseType, ParseToken } from 'pToken';
 import { STokenSource } from 'basic';
+import { gatherStreamResults } from 'basic-test';
 import { AttFixerStream, EntityExpanderStream, PTokenStream } from 'node';
+import { ParseType, ParseToken } from 'pToken';
 
-import { DocumentChecker } from '../DocumentChecker';
 import { ContentChecker } from '../ContentChecker';
-import { MarkupDeclChecker } from '../MarkupDeclChecker';
+import { DocumentChecker } from '../DocumentChecker';
 import { warningCodes } from '../error/warningCodes';
+import { MarkupDeclChecker } from '../MarkupDeclChecker';
 
 const WID = warningCodes.id;
 

@@ -5,9 +5,8 @@ import { ConformanceVersion, ProblemCollector } from 'basic';
 import { STokenSource, toSToken } from 'basic';
 import { ElementStartPToken, parseElementStart } from 'token';
 
-import { wellFormedErrorCodes, WellFormedError } from '../../error/wellFormedError';
 import { warningCodes } from '../../error/warningCodes';
-
+import { wellFormedErrorCodes, WellFormedError } from '../../error/wellFormedError';
 import { elementStartCheck } from '../elementStartCheck';
 
 const WFEID = wellFormedErrorCodes.id;

@@ -1,12 +1,12 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { gatherStreamResults } from 'basic-test';
 import { toSToken, SToken, STokenSource } from 'basic';
+import { gatherStreamResults } from 'basic-test';
 import { XmlDeclarationPToken, XMLDECL_PTOKEN, TextPToken, ParseToken } from 'pToken';
 import { ElementStartPToken } from 'token';
 
-import { PTokenStream } from '../pTokenStream';
 import { AttFixerStream } from '../AttFixerStream';
+import { PTokenStream } from '../pTokenStream';
 
 describe('AttFixerStream (integration)', () => {
    let sTokenSource: STokenSource;

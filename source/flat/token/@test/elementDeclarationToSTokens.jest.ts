@@ -1,9 +1,8 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
-import { ContentModelP, ElementDeclarationPToken } from 'pToken';
 import { toSToken } from 'basic';
+import { ContentModelP, ElementDeclarationPToken } from 'pToken';
 
 import { contentModelToSTokens } from '../../common/contentModelToSTokens';
 import { unexpandedToSTokens } from '../../common/unexpandedToSTokens';

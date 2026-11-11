@@ -1,5 +1,6 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
+import { SToken, STokenSource } from 'basic';
 import {
    CharRefPToken,
    parseCharRef,
@@ -7,9 +8,8 @@ import {
    parseGeneralEntityReference,
    GENERAL_ENTITY_REFERENCE_PTOKEN,
 } from 'pToken';
-import { SToken, STokenSource } from 'basic';
-
 import { ParameterEntityReferencePToken, TextPToken, parseParameterEntityReference } from 'pToken';
+
 import { GeneralEntityEndPToken } from '../marker/generalEntityEnd';
 import { GeneralEntityStartPToken } from '../marker/generalEntityStart';
 import { ParameterEntityEndPToken } from '../marker/parameterEntityEnd';

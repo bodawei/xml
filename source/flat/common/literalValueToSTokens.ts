@@ -1,19 +1,19 @@
 /* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
+import { SToken } from 'basic';
 import {
    GENERAL_ENTITY_REFERENCE_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    TEXT_PTOKEN,
    CHARREF_PTOKEN,
 } from 'pToken';
-import { SToken } from 'basic';
 import { LiteralValuePToken } from 'token';
-import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
+import { charRefToSTokens } from '../token/charRefToSTokens';
 import { generalEntityReferenceToSTokens } from '../token/generalEntityReferenceToSTokens';
 import { parameterEntityReferenceToSTokens } from '../token/parameterEntityReferenceToSTokens';
 import { textToSTokens } from '../token/textToSTokens';
-import { charRefToSTokens } from '../token/charRefToSTokens';
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function literalValueToSTokens(pToken: LiteralValuePToken): Array<SToken> {
    const builder = new STokenArrayBuilder();

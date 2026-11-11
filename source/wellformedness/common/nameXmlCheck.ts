@@ -2,6 +2,7 @@
 
 import { ConformanceVersion, Collector } from 'basic';
 import { SToken } from 'basic';
+
 import { Warning } from '../error/warning';
 
 /**********************************************************************\

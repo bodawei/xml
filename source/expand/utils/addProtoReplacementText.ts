@@ -2,13 +2,12 @@
 
 import { Problem } from 'basic';
 import { GeneralEntityReferencePToken, ParameterEntityReferencePToken } from 'pToken';
-
+import { PARAMETER_ENTITY_DECLARATION_PTOKEN, externalIdToEntityId } from 'pToken';
 import { ElidedEntityDeclarationPToken, EntityValuePToken } from 'token';
 
-import { expandEntityValue } from './expandEntityValue';
 import { ExpandParams } from '../types';
 import { EntityContextStack } from './EntityContextStack';
-import { PARAMETER_ENTITY_DECLARATION_PTOKEN, externalIdToEntityId } from 'pToken';
+import { expandEntityValue } from './expandEntityValue';
 
 interface AddProtoReplacementTextResult {
    byproducts: Array<Problem | ElidedEntityDeclarationPToken>;

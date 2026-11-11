@@ -1,6 +1,7 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { GeneralEntityReferencePToken } from 'pToken';
+
 import { EntityValuePToken } from '../EntityValuePToken';
 
 /**********************************************************************\

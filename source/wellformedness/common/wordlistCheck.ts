@@ -4,9 +4,8 @@ import { ConformanceVersion, Collector } from 'basic';
 import { WordListPToken } from 'token';
 
 import { wellFormedErrorCodes } from '../error/wellFormedError';
-
-import { nmTokenCheck } from './nmTokenCheck';
 import { nameCheck } from './nameCheck';
+import { nmTokenCheck } from './nmTokenCheck';
 
 const ENUMERATION_PTOKEN = 'ENUMERATION_PTOKEN';
 const WFEID = wellFormedErrorCodes.id;

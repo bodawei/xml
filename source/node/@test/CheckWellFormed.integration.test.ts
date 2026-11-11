@@ -5,8 +5,8 @@ import { STokenSource } from 'basic';
 import { ELEMENT_START_PTOKEN } from 'token';
 import { WellFormedError, wellFormedErrorCodes } from 'wellformedness';
 
-import { PTokenStream } from '../pTokenStream';
 import CheckWellFormed from '../CheckWellFormed';
+import { PTokenStream } from '../pTokenStream';
 import { expectError } from './utils';
 
 const WFEID = wellFormedErrorCodes.id;

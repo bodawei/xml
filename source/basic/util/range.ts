@@ -1,7 +1,6 @@
 /* Copyright ® 2016-2022 by 柏大衛. All rights reserved. */
 
 import { EntityId } from '../token/entityId';
-
 import { Offset } from './offset';
 
 function isRange(item: Range | Offset | EntityId): item is Range {

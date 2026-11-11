@@ -1,12 +1,12 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
-import { ParameterEntityDeclarationPToken } from 'pToken';
 import { SToken } from 'basic';
-import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
+import { ParameterEntityDeclarationPToken } from 'pToken';
 
 import { externalIdToSTokens } from '../common/externalIdToSTokens';
-import { unexpandedToSTokens } from '../common/unexpandedToSTokens';
 import { literalToSTokens } from '../common/literalToSTokens';
+import { unexpandedToSTokens } from '../common/unexpandedToSTokens';
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function parameterEntityDeclarationToSTokens(
    pToken: ParameterEntityDeclarationPToken,

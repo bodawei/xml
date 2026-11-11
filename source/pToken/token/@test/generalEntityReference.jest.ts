@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
-import { MockSTokenSource } from 'pToken-test';
 import { toSToken } from 'basic';
+import { MockSTokenSource } from 'pToken-test';
 
 import {
    GeneralEntityReferencePToken,

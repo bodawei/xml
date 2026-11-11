@@ -5,7 +5,6 @@ import { AttDefinitionP } from 'pToken';
 
 import { Error } from '../error/error';
 import { errorCodes } from '../error/errorCodes';
-
 import { ValidityState } from './validityState';
 
 const EID = errorCodes.id;

@@ -1,8 +1,8 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, Collector } from 'basic';
-import { GeneralEntityReferencePToken } from 'pToken';
 import { strOrBlank } from 'basic';
+import { GeneralEntityReferencePToken } from 'pToken';
 
 import { nameCheck } from '../common/nameCheck';
 import { wellFormedErrorCodes } from '../error/wellFormedError';

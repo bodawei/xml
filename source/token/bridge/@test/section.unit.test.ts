@@ -1,13 +1,12 @@
 /* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { ParameterEntityReferencePToken } from 'pToken';
 import { toSToken } from 'basic';
+import { ParameterEntityReferencePToken } from 'pToken';
 import { MockSTokenSource } from 'pToken-test';
 
+import * as peReference from '../../../pToken/token/parameterEntityReference';
 import * as cdata from '../../cdata';
 import * as conditional from '../../conditionalStart';
-import * as peReference from '../../../pToken/token/parameterEntityReference';
-
 import { SectionStart, parseSection } from '../section';
 
 describe('section (unit)', () => {

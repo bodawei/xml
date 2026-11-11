@@ -1,12 +1,12 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
-import { AttListDeclarationPToken } from 'pToken';
 import { SToken } from 'basic';
-import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
+import { AttListDeclarationPToken } from 'pToken';
 
 import { literalToSTokens } from '../common/literalToSTokens';
 import { unexpandedToSTokens } from '../common/unexpandedToSTokens';
 import { wordListToSTokens } from '../common/wordListToSTokens';
+import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function attListDeclarationToSTokens(pToken: AttListDeclarationPToken): Array<SToken> {
    const builder = new STokenArrayBuilder();

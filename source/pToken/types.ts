@@ -1,10 +1,7 @@
 import { Problem, EntityId, ConformanceVersion } from 'basic';
-
 import { PToken as PTokenClassic } from 'token';
 import { ParameterEntityEndPToken, ParameterEntityStartPToken } from 'token';
 
-import { TextPToken } from './token/text';
-import { ParameterEntityReferencePToken } from './token/parameterEntityReference';
 import { AttListDeclarationPToken } from './token/attListDeclaration';
 import { CharRefPToken } from './token/charRef';
 import { ElementDeclarationPToken } from './token/elementDeclaration';
@@ -12,7 +9,9 @@ import { GeneralEntityDeclarationPToken } from './token/generalEntityDeclaration
 import { GeneralEntityReferencePToken } from './token/generalEntityReference';
 import { NotationDeclarationPToken } from './token/notationDeclaration';
 import { ParameterEntityDeclarationPToken } from './token/parameterEntityDeclaration';
+import { ParameterEntityReferencePToken } from './token/parameterEntityReference';
 import { ProcessingInstructionPToken } from './token/processingInstruction';
+import { TextPToken } from './token/text';
 import { TextDeclarationPToken } from './token/textDeclaration';
 import { XmlDeclarationPToken } from './token/xmlDeclaration';
 

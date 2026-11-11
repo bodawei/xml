@@ -1,18 +1,16 @@
 /* Copyright ® 2016-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { Range, EntityId } from 'basic';
-import { TextPToken } from 'pToken';
 import { SToken } from 'basic';
+import { TextPToken } from 'pToken';
 import { MockSTokenSource } from 'pToken-test';
 
-import { PTokenLiteralParser } from '../pTokenLiteralParser';
-
 import { parseInstruction } from '../bridge/instruction';
+import { PTokenLiteralParser } from '../pTokenLiteralParser';
+import { parseCharRef } from '../token/charRef';
 import { parseGeneralEntityReference } from '../token/generalEntityReference';
 import { parseParameterEntityReference } from '../token/parameterEntityReference';
-import { parseCharRef } from '../token/charRef';
 import { parseText } from '../token/text';
 
 jest.mock('../bridge/instruction');

@@ -3,8 +3,8 @@
 import { STokenSource, toSToken } from 'basic';
 import { MockSTokenSource } from 'pToken-test';
 
-import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
 import * as externalId from '../../pToken/common/externalId';
+import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
 
 describe('docTypeStart (unit)', () => {
    let docTypeStartPToken: DocTypeStartPToken;

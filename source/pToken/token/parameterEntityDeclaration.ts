@@ -1,12 +1,11 @@
 /* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
 import { SToken } from 'basic';
-
-import { ExternalIdP } from '../common/externalId';
-import { UnexpandedMarkupDetails } from '../types';
+import { EntityValuePToken } from 'token';
 
 import { DeclarationStart } from '../../token/bridge/declaration';
-import { EntityValuePToken } from 'token';
+import { ExternalIdP } from '../common/externalId';
+import { UnexpandedMarkupDetails } from '../types';
 
 const PARAMETER_ENTITY_DECLARATION_PTOKEN = 'PARAMETER_ENTITY_DECLARATION_PTOKEN';
 

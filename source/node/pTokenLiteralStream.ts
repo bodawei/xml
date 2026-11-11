@@ -2,9 +2,8 @@
 
 import { Readable } from 'stream';
 
-import { PTokenLiteralParser } from 'pToken';
-
 import { STokenSource } from 'basic';
+import { PTokenLiteralParser } from 'pToken';
 
 type Options = {
    peRef?: boolean;

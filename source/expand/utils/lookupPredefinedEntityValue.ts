@@ -1,7 +1,7 @@
 /* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
-import { CharRefPToken, TextPToken } from 'pToken';
 import { toSToken } from 'basic';
+import { CharRefPToken, TextPToken } from 'pToken';
 import { EntityValuePToken } from 'token';
 
 type NameToEntityValue = Record<string, EntityValuePToken>;

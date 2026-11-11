@@ -3,8 +3,8 @@
 import { STokenSource, toSToken } from 'basic';
 import { makeSTokenMaker } from 'pToken-test';
 
-import { DocTypeStartPToken } from '../docTypeStart';
 import { DocTypeEndPToken, parseDocTypeEnd } from '../docTypeEnd';
+import { DocTypeStartPToken } from '../docTypeStart';
 
 describe('docTypeEnd (integration)', () => {
    let docTypeEndPToken: DocTypeEndPToken;

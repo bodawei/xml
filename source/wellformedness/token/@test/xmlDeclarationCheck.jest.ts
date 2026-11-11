@@ -2,16 +2,15 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion } from 'basic';
+import { SToken, toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { XmlDeclarationPToken, InstructionStart } from 'pToken';
-import { SToken, toSToken } from 'basic';
 
 import { charCheck } from '../../common/charCheck';
-import { wellFormedErrorCodes } from '../../error/wellFormedError';
+import { errorCodes } from '../../error/errorCodes';
 import { fatalErrorCodes } from '../../error/fatalErrorCodes';
 import { warningCodes } from '../../error/warningCodes';
-import { errorCodes } from '../../error/errorCodes';
-
+import { wellFormedErrorCodes } from '../../error/wellFormedError';
 import { xmlDeclarationCheck } from '../xmlDeclarationCheck';
 
 jest.mock('../../common/charCheck');

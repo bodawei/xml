@@ -1,12 +1,10 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { toSToken } from 'basic';
 import { ElementStartPToken, ElementEmptyPToken } from 'token';
 
 import { attributeToSTokens } from '../../common/attributeToSTokens';
-
 import { elementStartToSTokens } from '../elementStartToSTokens';
 
 jest.mock('../../common/attributeToSTokens');

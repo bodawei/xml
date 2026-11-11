@@ -1,7 +1,8 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
-import { offsetsAreEqual } from 'basic';
 import { Readable } from 'stream';
+
+import { offsetsAreEqual } from 'basic';
 import { PToken } from 'token';
 
 function gatherStream(

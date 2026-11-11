@@ -1,7 +1,8 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
-import { ParameterEntityReferencePToken } from 'pToken';
 import { SToken } from 'basic';
+import { ParameterEntityReferencePToken } from 'pToken';
+
 import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function parameterEntityReferenceToSTokens(pToken: ParameterEntityReferencePToken): Array<SToken> {

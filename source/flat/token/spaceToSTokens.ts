@@ -2,6 +2,7 @@
 
 import { SToken } from 'basic';
 import { SpacePToken } from 'token';
+
 import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function spaceToSTokens(pToken: SpacePToken): Array<SToken> {

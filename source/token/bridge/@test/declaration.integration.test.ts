@@ -1,8 +1,8 @@
 /* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
-import { GeneralEntityDeclarationPToken, TextPToken } from 'pToken';
 import { STokenSource, SToken, toSToken } from 'basic';
+import { GeneralEntityDeclarationPToken, TextPToken } from 'pToken';
 
 import { parseDeclaration } from '../declaration';
 

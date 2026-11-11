@@ -1,7 +1,7 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { TextPToken } from 'pToken';
 import { STokenSource, toSToken } from 'basic';
+import { TextPToken } from 'pToken';
 
 import { DocTypeStartPToken, parseDocTypeStart } from '../docTypeStart';
 

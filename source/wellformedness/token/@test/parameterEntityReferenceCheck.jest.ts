@@ -1,13 +1,12 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
+import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { ParameterEntityReferencePToken } from 'pToken';
-import { toSToken } from 'basic';
 
 import * as util from '../../common/nameCheck';
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
-
 import { parameterEntityReferenceCheck } from '../parameterEntityReferenceCheck';
 
 const WFEID = wellFormedErrorCodes.id;

@@ -1,8 +1,8 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion } from 'basic';
-import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { STokenSource } from 'basic';
+import { GeneralEntityReferencePToken, TextPToken } from 'pToken';
 import { makeSTokenMaker } from 'pToken-test';
 
 import { ElementStartPToken, parseElementStart } from '../elementStart';

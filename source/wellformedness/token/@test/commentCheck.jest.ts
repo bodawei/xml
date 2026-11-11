@@ -2,13 +2,12 @@
 
 import { describe, expect, it } from '@jest/globals';
 import { ConformanceVersion, EntityId, Offset, Range } from 'basic';
-import { ParamCollector } from 'basic-test';
 import { toSToken, SToken } from 'basic';
+import { ParamCollector } from 'basic-test';
 import { CommentPToken } from 'token';
 
 import { charCheck } from '../../common/charCheck';
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
-
 import { commentCheck } from '../commentCheck';
 
 jest.mock('../../common/charCheck');

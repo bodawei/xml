@@ -1,8 +1,8 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-import { TextPToken, NotationDeclarationPToken } from 'pToken';
 import { toSToken } from 'basic';
+import { TextPToken, NotationDeclarationPToken } from 'pToken';
 
 import { ExternalIdX } from '../../common/externalIdX';
 import {

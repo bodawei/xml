@@ -1,17 +1,17 @@
 /* Copyright ® 2020-2026 by 柏大衛. All rights reserved. */
 
-import { ParameterEntityReferencePToken } from 'pToken';
 import { toSToken } from 'basic';
+import { ParameterEntityReferencePToken } from 'pToken';
 import { MockSTokenSource } from 'pToken-test';
 import { makeParameterEntityReference } from 'token-test';
 
+import * as pToken from '../../pToken/token/parameterEntityReference';
 import { SectionStart } from '../bridge/section';
 import {
    ConditionalStartPToken,
    parseConditional,
    resumeParseConditional,
 } from '../conditionalStart';
-import * as pToken from '../../pToken/token/parameterEntityReference';
 
 describe('conditional (unit)', () => {
    let sectionStart: SectionStart;

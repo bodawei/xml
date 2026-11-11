@@ -1,10 +1,10 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
+import { toSToken } from 'basic';
 import { makeSTokenMaker, MockSTokenSource } from 'pToken-test';
 
 import attribute from '../common/attribute';
 import { ElementEmptyPToken, ElementStartPToken, parseElementStart } from '../elementStart';
-import { toSToken } from 'basic';
 
 describe('elementStart (unit)', () => {
    let elementStartPToken: ElementStartPToken;

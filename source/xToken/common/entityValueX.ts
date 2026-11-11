@@ -5,9 +5,9 @@ import { PARAMETER_ENTITY_START_PTOKEN, EntityValuePToken } from 'token';
 
 import { ParameterEntityEndXToken } from '../marker/parameterEntityEndXToken';
 import { ParameterEntityStartXToken } from '../marker/parameterEntityStartXToken';
-import { TextXToken } from '../token/textXToken';
 import { CharRefXToken } from '../token/charRefXToken';
 import { ParameterEntityReferenceXToken } from '../token/parameterEntityReferenceXToken';
+import { TextXToken } from '../token/textXToken';
 
 type MutableExntityValueX = Array<
    | TextXToken

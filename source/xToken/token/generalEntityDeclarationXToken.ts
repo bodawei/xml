@@ -3,8 +3,8 @@
 import { strOrBlank } from 'basic';
 import { GeneralEntityDeclarationPToken } from 'pToken';
 
-import { ExternalIdX, cloneExternalIdX } from '../common/externalIdX';
 import { ExntityValueX, makeEntityValueX, cloneEntityValueX } from '../common/entityValueX';
+import { ExternalIdX, cloneExternalIdX } from '../common/externalIdX';
 
 const GENERAL_ENTITY_DECLARATION_XTOKEN = 'GENERAL_ENTITY_DECLARATION_XTOKEN';
 

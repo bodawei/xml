@@ -1,19 +1,18 @@
 /* Copyright ® 2021-2026 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { ConformanceVersion, EntityId, Problem } from 'basic';
-import { ParameterEntityReferencePToken, TextPToken } from 'pToken';
-import { ExpandParams, RetrieveResults } from '../../types';
 import { STokenSource, toSToken } from 'basic';
+import { ParameterEntityReferencePToken, TextPToken } from 'pToken';
 import { ConditionalStartPToken, resumeParseConditional } from 'token';
 import { makeParameterEntityDeclaration, makeParameterEntityReference } from 'token-test';
-import { addProtoReplacementText } from '../addProtoReplacementText';
-import { entityValueToSTokenSource } from '../entityValueToSTokenSource';
 
+import { ExpandParams, RetrieveResults } from '../../types';
+import { addProtoReplacementText } from '../addProtoReplacementText';
 import { ConditionalStartExpander } from '../ConditionalStartExpander';
 import { EntityContextStack } from '../EntityContextStack';
 import { EntityDetails } from '../EntityDetails';
+import { entityValueToSTokenSource } from '../entityValueToSTokenSource';
 
 jest.mock('../../../token/conditionalStart', () => {
    const realConditional: Record<string, unknown> = jest.requireActual(

@@ -1,15 +1,13 @@
 /* Copyright ® 2017-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { ConformanceVersion, ProblemCollector } from 'basic';
-import { parseNotationDeclaration } from 'pToken';
 import { toSToken, STokenSource } from 'basic';
+import { parseNotationDeclaration } from 'pToken';
 import { DeclarationStart } from 'token';
 
-import { WellFormedError, wellFormedErrorCodes } from '../../error/wellFormedError';
 import { warningCodes } from '../../error/warningCodes';
-
+import { WellFormedError, wellFormedErrorCodes } from '../../error/wellFormedError';
 import { notationDeclarationCheck } from '../notationDeclarationCheck';
 
 const WFEID = wellFormedErrorCodes.id;

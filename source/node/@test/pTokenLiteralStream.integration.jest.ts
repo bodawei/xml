@@ -1,13 +1,13 @@
 /* Copyright ® 2017-2021 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
+import { STokenSource } from 'basic';
 import {
    CHARREF_PTOKEN,
    PARAMETER_ENTITY_REFERENCE_PTOKEN,
    TEXTDECL_PTOKEN,
    TEXT_PTOKEN,
 } from 'pToken';
-import { STokenSource } from 'basic';
 
 import { PTokenLiteralStream } from '../pTokenLiteralStream';
 

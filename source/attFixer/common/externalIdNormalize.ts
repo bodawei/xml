@@ -1,7 +1,7 @@
 /* Copyright ® 2020 by 柏大衛. All rights reserved. */
 
-import { ExternalIdP, TextPToken } from 'pToken';
 import { SToken, strOrBlank } from 'basic';
+import { ExternalIdP, TextPToken } from 'pToken';
 
 const WHITESPACE_RUN = /[ \n]+/g;
 const LEADING_SPACE = /^[ \n]+/;

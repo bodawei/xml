@@ -1,8 +1,9 @@
 /* Copyright ® 2021 by 柏大衛. All rights reserved. */
 
 import { Transform } from 'stream';
-import { ParseToken } from 'pToken';
+
 import { convertPTokenToSTokens } from 'flat';
+import { ParseToken } from 'pToken';
 
 class FlattenPTokenStream extends Transform {
    constructor() {

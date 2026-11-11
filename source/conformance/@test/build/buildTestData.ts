@@ -5,10 +5,10 @@ import { dirname, extname, relative, resolve, join } from 'path';
 import { Transform } from 'stream';
 
 import { EntityId, ConformanceVersion } from 'basic';
-import { EntityExpanderStream, PTokenStream, PToXTokenStream } from 'node';
-import SimpleObj from '../../../simpleobj/so';
 import { STokenSource } from 'basic';
+import { EntityExpanderStream, PTokenStream, PToXTokenStream } from 'node';
 
+import SimpleObj from '../../../simpleobj/so';
 import { convertToStringWithSurrogateHalves } from './surrogateUtils';
 
 type ContentData = string | SimpleObjData;

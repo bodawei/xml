@@ -2,6 +2,7 @@
 
 import { SToken } from 'basic';
 import { ElementEndPToken } from 'token';
+
 import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function elementEndToSTokens(pToken: ElementEndPToken): Array<SToken> {

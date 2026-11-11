@@ -2,12 +2,12 @@
 
 import { strOrBlank, SToken, STokenSource } from 'basic';
 
-import { XmlDeclarationPToken, parseXmlDeclaration } from '../token/xmlDeclaration';
-import { TextDeclarationPToken, parseTextDeclaration } from '../token/textDeclaration';
 import {
    ProcessingInstructionPToken,
    parseProcessingInstruction,
 } from '../token/processingInstruction';
+import { TextDeclarationPToken, parseTextDeclaration } from '../token/textDeclaration';
+import { XmlDeclarationPToken, parseXmlDeclaration } from '../token/xmlDeclaration';
 
 /**********************************************************************\
  instruction bridges input far enough to decide whether to do an

@@ -136,7 +136,8 @@ to 2795, exactly the 454 `prettier/prettier` findings that no longer exist.
 
 -  [x] Measure prettier performance, then try out oxfmt.
 -  [x] oxfmt caused no concerns, so it replaces prettier.
--  [ ] Optional: reformat the 91 non-conforming files in a separate, format-only commit.
+-  [x] Reformatted the 91 non-conforming files in their own format-only commit (done with P9,
+       because enabling oxfmt import sorting rewrites the whole tree anyway).
 
 ## P9: Try swapping oxlint
 
@@ -219,6 +220,25 @@ Two things were deliberately **not** done, to keep the cutover mechanical:
    (`respectEslintDisableDirectives` defaults to true); rewriting them to `oxlint-disable` would
    touch ~40 files for no behaviour change.
 
+**Import ordering (done 2026-11-10, after the cutover).** `.oxfmtrc.json` now sets
+`sortImports: true`, which is oxc's own answer to the `import-x/order` gap: the default `groups`
+are `builtin`, `external`, `internal`/`subpath`, then `parent`/`sibling`/`index`, with newlines
+between and an ascending case-insensitive sort inside each group, which is what `import-x/order`
+was configured to do. The bare tsconfig aliases (`basic`, `pToken`, `token`, ...) classify as
+`external`, so they share one alphabetised block with real packages, exactly as the ordered
+modules already wrote them.
+
+Evidence that the default matches the existing convention: `import-x/order` was only ever on for
+`basic` and `valid`, and under `sortImports: true` those two change in 14 of 188 files (7%), all
+of them a stray blank line inside a group or one import out of place. The rest of the tree, which
+was never import-ordered, changes in 380 of 461 files (82%). Nothing in `source/` uses a
+side-effect import, and `sortSideEffects` defaults to false anyway.
+
+Rejected alternative: `{ partitionByNewline: true, newlinesBetween: false }` (317 files). It only
+sorts within whatever blank-line blocks already exist, so it would not enforce the group order at
+all. Note that `partitionByNewline: true` and `newlinesBetween: true` are rejected together, and
+there is no zero-diff setting.
+
 One script change that is not a straight translation: `lint` and `lint:all` no longer pass
 `--fix`, and the fixing form moved to a new `lint:fix`. oxlint has fixers for rules ESLint only
 had suggestions for, so `oxlint --fix source` rewrites 140 files (1785 findings down to 712):
@@ -233,14 +253,7 @@ should get from a `lint` command.
 -  [x] Explore the options (full cutover / stay / hybrid) and pick one: full cutover.
 -  [ ] Optional: decide whether to turn on `correctness`, `unicorn` and `oxc`, and triage what
        they report.
--  [ ] Optional: replace `import-x/order` with oxfmt's `sortImports` (off by default; it takes
-       `groups`, `customGroups`, `internalPattern`, `newlinesBetween` and `partitionByNewline`,
-       and uses the `eslint-plugin-perfectionist/sort-imports` algorithm). It enforces the same
-       thing but as a format, so it rewrites rather than reports: `sortImports: true` changes
-       394 of 649 files, and `{ partitionByNewline: true, newlinesBetween: false }`, which keeps
-       the blank-line groups the code already has, changes 317. Note `partitionByNewline: true`
-       and `newlinesBetween: true` are rejected together. There is no zero-diff setting, so this
-       wants its own format-only commit, like the 91 files left over from P8.
+-  [x] Replaced `import-x/order` with oxfmt's `sortImports`, on its own branch. See below.
 -  [ ] Optional: `oxlint --type-check` can also report TypeScript compiler diagnostics, which
        could merge the Lint and Type check CI jobs. Not done: `npm run check:types` is the
        documented command and `tsc` is already 0.8 s.

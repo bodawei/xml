@@ -1,14 +1,14 @@
 /* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
 import { ConformanceVersion, Collector } from 'basic';
-import { ProcessingInstructionPToken } from 'pToken';
 import { strOrBlank } from 'basic';
+import { ProcessingInstructionPToken } from 'pToken';
 
 import { charCheck } from '../common/charCheck';
-import { nameXmlCheck } from '../common/nameXmlCheck';
 import { nameCheck } from '../common/nameCheck';
-import { wellFormedErrorCodes } from '../error/wellFormedError';
+import { nameXmlCheck } from '../common/nameXmlCheck';
 import { warningCodes } from '../error/warningCodes';
+import { wellFormedErrorCodes } from '../error/wellFormedError';
 
 const WFEID = wellFormedErrorCodes.id;
 const WID = warningCodes.id;

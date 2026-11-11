@@ -1,10 +1,10 @@
 /* Copyright ® 2016-2026 by 柏大衛. All rights reserved. */
 
 import { CONFORMANCE_VERSION, ENTITY_ID } from 'basic';
+import { STokenSource } from 'basic';
 import { gatherStreamResults } from 'basic-test';
 import { PTokenStream } from 'node';
 import { XMLDECL_PTOKEN, ParseToken } from 'pToken';
-import { STokenSource } from 'basic';
 import { COMMENT_PTOKEN, ELEMENT_END_PTOKEN, CHARDATA_PTOKEN, ELEMENT_START_PTOKEN } from 'token';
 
 import { CommentExpanderStream } from '../CommentExpanderStream';

@@ -1,7 +1,8 @@
 /* Copyright ® 2018-2021 by 柏大衛. All rights reserved. */
 
-import { ContentModelP, isContentModelP } from 'pToken';
 import { SToken } from 'basic';
+import { ContentModelP, isContentModelP } from 'pToken';
+
 import { STokenArrayBuilder } from '../util/STokenArrayBuilder';
 
 function contentModelToSTokens(contentSpec: ContentModelP): Array<SToken> {

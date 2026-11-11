@@ -1,14 +1,12 @@
 /* Copyright ® 2018-2020 by 柏大衛. All rights reserved. */
 
 import { describe, expect, it } from '@jest/globals';
-
 import { ConformanceVersion } from 'basic';
+import { toSToken } from 'basic';
 import { ParamCollector } from 'basic-test';
 import { ContentModelP, ContentNameP } from 'pToken';
-import { toSToken } from 'basic';
 
 import { wellFormedErrorCodes } from '../../error/wellFormedError';
-
 import { contentModelCheck } from '../contentModelCheck';
 import { nameCheck } from '../nameCheck';
 

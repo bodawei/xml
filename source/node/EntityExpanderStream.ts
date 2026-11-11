@@ -3,11 +3,11 @@
 import fs from 'fs';
 import { resolve } from 'path';
 import { Transform } from 'stream';
+
 import { EntityId, Problem } from 'basic';
-import { PTokenLiteralStream } from './pTokenLiteralStream';
-import { PTokenStream } from './pTokenStream';
-import { EntityExpander, resolveEntityId as defaultResolveEntityId } from 'expand';
 import { STokenSource } from 'basic';
+import { EntityExpander, resolveEntityId as defaultResolveEntityId } from 'expand';
+import { ParseType } from 'pToken';
 import { AttributeValuePToken, EntityValuePToken, PToken } from 'token';
 
 import {
@@ -16,7 +16,8 @@ import {
    OpaqueEntityLoc,
    RetrieveResults,
 } from '../expand/types';
-import { ParseType } from 'pToken';
+import { PTokenLiteralStream } from './pTokenLiteralStream';
+import { PTokenStream } from './pTokenStream';
 
 function parseBody(sTokenSource: STokenSource, context: ParseType, expandToken: ExpandToken): void {
    const pTokenStream = new PTokenStream(sTokenSource, { parseType: context });

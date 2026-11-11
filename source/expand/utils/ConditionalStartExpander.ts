@@ -3,10 +3,11 @@
 import { STokenSource, strOrBlank } from 'basic';
 import { ParameterEntityReferencePToken, TextPToken } from 'pToken';
 import { ConditionalStartPToken, resumeParseConditional } from 'token';
-import { addProtoReplacementText } from './addProtoReplacementText';
-import { entityValueToSTokenSource } from './entityValueToSTokenSource';
+
 import { ExpandParams } from '../types';
+import { addProtoReplacementText } from './addProtoReplacementText';
 import { EntityContextStack } from './EntityContextStack';
+import { entityValueToSTokenSource } from './entityValueToSTokenSource';
 
 type ProcessingResult =
    | { done: false; hack: ConditionalStartExpander }

@@ -1,21 +1,19 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
-import { TextPToken } from 'pToken';
 import { toSToken } from 'basic';
+import { TextPToken } from 'pToken';
 import { MockSTokenSource } from 'pToken-test';
+import { DeclarationStart } from 'token';
 
-import * as unexpanded from '../../common/parseUnexpanded';
-import { UnexpandedMarkupDetails } from '../../common/parseUnexpanded';
+import literal, { LiteralPToken } from '../../../token/common/literal';
 import * as externalId from '../../common/externalId';
 import { ParsedExternalId } from '../../common/externalId';
+import * as unexpanded from '../../common/parseUnexpanded';
+import { UnexpandedMarkupDetails } from '../../common/parseUnexpanded';
 import { GeneralEntityDeclarationPToken } from '../../token/generalEntityDeclaration';
 import { ParameterEntityDeclarationPToken } from '../../token/parameterEntityDeclaration';
 import { ParameterEntityReferencePToken } from '../../token/parameterEntityReference';
-
 import { parseEntityDeclaration, resumeParseEntityDeclaration } from '../entityDeclaration';
-
-import { DeclarationStart } from 'token';
-import literal, { LiteralPToken } from '../../../token/common/literal';
 
 jest.mock('../../common/externalId');
 jest.mock('../../common/parseUnexpanded');

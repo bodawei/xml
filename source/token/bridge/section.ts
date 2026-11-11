@@ -1,7 +1,7 @@
 /* Copyright ® 2018-2026 by 柏大衛. All rights reserved. */
 
-import { parseParameterEntityReference, ParameterEntityReferencePToken } from 'pToken';
 import { STokenSource, SToken } from 'basic';
+import { parseParameterEntityReference, ParameterEntityReferencePToken } from 'pToken';
 
 import { parseCdata, CdataPToken } from '../cdata';
 import { parseConditional, ConditionalStartPToken } from '../conditionalStart';

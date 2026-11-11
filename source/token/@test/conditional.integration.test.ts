@@ -1,14 +1,14 @@
 /* Copyright ® 2017-2026 by 柏大衛. All rights reserved. */
 
 import { STokenSource, SToken, toSToken } from 'basic';
+import { ParameterEntityReferencePToken } from 'pToken';
 
+import { SectionStart } from '../bridge/section';
 import {
    ConditionalStartPToken,
    parseConditional,
    resumeParseConditional,
 } from '../conditionalStart';
-import { SectionStart } from '../bridge/section';
-import { ParameterEntityReferencePToken } from 'pToken';
 
 describe('conditional (integration)', () => {
    let source: STokenSource;

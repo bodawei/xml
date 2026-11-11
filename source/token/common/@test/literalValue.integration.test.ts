@@ -1,15 +1,15 @@
 /* Copyright ® 2018 by 柏大衛. All rights reserved. */
 
+import { STokenSource, toSToken } from 'basic';
 import {
    CharRefPToken,
    GeneralEntityReferencePToken,
    ParameterEntityReferencePToken,
    TextPToken,
 } from 'pToken';
-import { SToken } from '../../../basic/sToken/sToken';
-import { STokenSource, toSToken } from 'basic';
 import { makeSTokenMaker } from 'pToken-test';
 
+import { SToken } from '../../../basic/sToken/sToken';
 import literalValue from '../literalValue';
 
 describe('literalValue (integration)', () => {
